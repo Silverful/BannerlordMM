@@ -7,7 +7,7 @@
         public string Clan { get; protected set; }
         public PlayerClass MainClass { get; protected set; }
         public PlayerClass SecondaryClass { get; protected set; }
-        public int DicsordId { get; protected set; }
+        public int DiscordId { get; protected set; }
         public virtual PlayerMMR PlayerMMR { get; protected set; }
     }
 }

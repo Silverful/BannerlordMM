@@ -10,7 +10,6 @@ namespace BL.API.Core.Domain.Match
         public virtual Player.Player Player { get; protected set; }
         public Guid MatchId { get; protected set; }
         public virtual Match Match { get; protected set; }
-        public int RoundsPlayed { get; protected set; }
         public Faction Faction { get; protected set; }
         public int Kills { get; protected set; }
         public int Assists { get; protected set; }

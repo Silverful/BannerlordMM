@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BL.API.DataAccess.Data
 {
+    //dotnet ef migrations add InitialCreate -s..\BL.API.WebHost\BL.API.WebHost.csproj
+    //dotnet ef database update -s..\BL.API.WebHost\BL.API.WebHost.csproj
     public class EFContext : DbContext
     {
         public EFContext(DbContextOptions<EFContext> options) : base(options) { }

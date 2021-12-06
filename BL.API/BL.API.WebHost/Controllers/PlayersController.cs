@@ -19,6 +19,7 @@ namespace BL.API.WebHost.Controllers
         public PlayersController(ILogger<PlayersController> logger, IMediator mediator)
         {
             _logger = logger;
+            _mediator = mediator;
         }
 
         [HttpGet]
@@ -27,8 +28,8 @@ namespace BL.API.WebHost.Controllers
             return Ok(await _mediator.Send(new GetAllPlayersQuery.Query()));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string playerId)
+        [HttpGet("{playerId}")]
+        public async Task<IActionResult> GetById([FromQuery] string playerId)
         {
             if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
 

@@ -1,5 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Model;
 using BL.API.Core.Abstractions.Repositories;
+using BL.API.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace BL.API.DataAccess.Repositories
     public class EFRepository<T> : IRepository<T>
         where T : class, IBaseEntity
     {
-        private DbContext _dbContext;
+        private EFContext _dbContext;
 
-        public EFRepository(DbContext context)
+        public EFRepository(EFContext context) : base()
         {
             _dbContext = context;
         }

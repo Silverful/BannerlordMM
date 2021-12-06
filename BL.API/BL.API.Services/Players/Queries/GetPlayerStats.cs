@@ -1,11 +1,9 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Match;
-using BL.API.Core.Domain.Player;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

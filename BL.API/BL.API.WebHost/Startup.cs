@@ -1,6 +1,7 @@
 using BL.API.Core.Abstractions.Repositories;
 using BL.API.DataAccess.Data;
 using BL.API.DataAccess.Repositories;
+using BL.API.Services.Players.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,15 +32,16 @@ namespace BL.API.WebHost
                 option.UseLazyLoadingProxies();
             });
 
+            services.AddControllers();
+
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
 
-            services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BL.API.WebHost", Version = "v1" });
             });
 
-            services.AddMediatR(typeof(Startup).Assembly);
+            services.AddMediatR(typeof(AddPlayerCommand.AddPlayerCommandHandler).Assembly);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -38,6 +38,23 @@ namespace BL.API.WebHost.Controllers
             return player == null ? NotFound() : Ok(player);
         }
 
+        [HttpGet("{playerId}/stats")]
+        public async Task<IActionResult> GetPlayerStats([FromQuery] string playerId)
+        {
+            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
+
+            var player = await _mediator.Send(new GetPlayerStats.Query(id));
+
+            return player == null ? NotFound() : Ok(player);
+        }
+
+
+        [HttpGet("/stats")]
+        public async Task<IActionResult> GetPlayersStats()
+        {
+            return Ok(await _mediator.Send(new GetPlayersStats.Query()));
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Player player)
         {

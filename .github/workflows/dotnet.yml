@@ -18,7 +18,7 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Change directory
-      run: cd ../../BL.API
+      run: cd ./BL.API
     - name: Restore dependencies
       run: dotnet restore
     - name: Build

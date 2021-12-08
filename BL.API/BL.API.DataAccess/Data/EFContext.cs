@@ -1,4 +1,5 @@
-﻿using BL.API.Core.Domain.Match;
+﻿using BL.API.Core.Domain.Logs;
+using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,5 +14,12 @@ namespace BL.API.DataAccess.Data
         public virtual DbSet<Player> Players { get; protected set; }
         public virtual DbSet<Match> Matches { get; protected set; }
         public virtual DbSet<PlayerMatchRecord> PlayerMatchRecords { get; protected set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<NLog>()
+                .Property(l => l.ID)
+                .UseIdentityColumn(1, 1);
+        }
     }
 }

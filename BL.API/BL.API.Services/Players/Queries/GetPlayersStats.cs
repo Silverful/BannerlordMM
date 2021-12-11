@@ -36,7 +36,7 @@ namespace BL.API.Services.Players.Queries
                         MainClass = g.First().Player.MainClass.ToString(),
                         SecondaryClass = g.First().Player?.SecondaryClass.ToString(),
                         DiscordId = g.First().Player?.DiscordId,
-                        MMR = g.First().Player?.PlayerMMR?.MMR,
+                        MMR = g.First().Player?.PlayerMMR,
                         MatchesPlayed = g.Count(),
                         MatchesWon = g.Where(x => x.Faction == x.Match.FactionWon).Count(),
                         WR = g.Where(x => x.Faction == x.Match.FactionWon).Count() == 0 ? 0 : g.Count() / g.Where(x => x.Faction == x.Match.FactionWon).Count(), //TODO make default view with premade params

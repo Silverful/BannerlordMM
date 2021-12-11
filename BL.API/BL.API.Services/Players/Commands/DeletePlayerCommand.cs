@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BL.API.Services.Players.Commands
 {
-    public static class DeletePlayerCommand
+    public class DeletePlayerCommand
     {
         public record Command(Guid PlayerId) : IRequest<Task>;
 
@@ -22,7 +22,6 @@ namespace BL.API.Services.Players.Commands
 
             public async Task<Task> Handle(Command request, CancellationToken cancellationToken)
             {
-                //TODO add checkid logic
                 await _repository.DeleteAsync(request.PlayerId);
                 return Task.CompletedTask;
             }

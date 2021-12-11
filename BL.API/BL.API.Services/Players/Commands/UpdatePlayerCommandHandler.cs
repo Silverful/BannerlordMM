@@ -2,19 +2,39 @@
 using BL.API.Core.Domain.Player;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BL.API.Services.Players.Commands
 {
-    public static class UpdatePlayerCommand
+    public class UpdatePlayerCommand : IRequest<Task>
     {
-        public record Command(Player Player) : IRequest<Task>;
+        public string Nickname { get; set; }
+        public string Country { get; set; }
+        public string Clan { get; set; }
+        public string MainClass { get; set; }
+        public string SecondaryClass { get; set; }
+        public int DiscordId { get; set; }
+        public int PlayerMMR { get; set; }
 
-        public class UpdatePlayerCommandHandler : IRequestHandler<Command, Task>
+        public Player ToPlayer()
+        {
+            var mainClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.MainClass);
+            var secondaryClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.SecondaryClass);
+
+            return new Player()
+            {
+                Nickname = this.Nickname,
+                Country = this.Country,
+                Clan = this.Clan,
+                MainClass = mainClass,
+                SecondaryClass = secondaryClass,
+                DiscordId = this.DiscordId,
+                PlayerMMR = this.PlayerMMR
+            };
+        }
+
+        public class UpdatePlayerCommandHandler : IRequestHandler<UpdatePlayerCommand, Task>
         {
             private readonly IRepository<Player> _repository;
 
@@ -23,10 +43,11 @@ namespace BL.API.Services.Players.Commands
                 _repository = repository;
             }
 
-            public async Task<Task> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Task> Handle(UpdatePlayerCommand request, CancellationToken cancellationToken)
             {
-                //TODO add check id logic
-                await _repository.UpdateAsync(request.Player);
+                var player = request.ToPlayer();
+
+                await _repository.UpdateAsync(player);
                 return Task.CompletedTask;
             }
         }

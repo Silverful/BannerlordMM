@@ -33,7 +33,9 @@ namespace BL.API.WebHost
                 option.UseLazyLoadingProxies();
             });
 
-            services.AddControllers();
+            services
+                .AddControllers()
+                .AddNewtonsoftJson();
 
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
 

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace BL.API.WebHost.Controllers
 {
@@ -103,6 +104,36 @@ namespace BL.API.WebHost.Controllers
                 return NotFound();
 
             return Ok(await _mediator.Send(new DeletePlayerCommand.Command(id)));
+        }
+
+        [HttpPatch]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<Player> request, string playerId)
+        {
+            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
+
+            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
+
+            if (player == null)
+                return NotFound();
+
+            request.ApplyTo(player, ModelState);
+
+            var updateCmd = new UpdatePlayerCommand
+            {
+                Id = player.Id,
+                Nickname = player.Nickname,
+                Country = player.Country,
+                Clan = player.Clan,
+                MainClass = player.MainClass.ToString(),
+                SecondaryClass = player.SecondaryClass.ToString(),
+                DiscordId = player.DiscordId,
+                PlayerMMR = player.PlayerMMR
+            };
+
+            return Ok(await _mediator.Send(updateCmd));
         }
     }
 }

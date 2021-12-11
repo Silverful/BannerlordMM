@@ -33,8 +33,9 @@ namespace BL.API.Services.Players.Commands
             var mainClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.MainClass);
             var secondaryClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.SecondaryClass);
 
-            return new Player()
+            return new Player
             {
+                Id = this.Id,
                 Nickname = this.Nickname,
                 Country = this.Country,
                 Clan = this.Clan,

@@ -65,10 +65,10 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Post([FromBody] Player player)
+        public async Task<IActionResult> Post([FromBody] AddPlayerCommand request)
         {
-            var pl = await _mediator.Send(new AddPlayerCommand.Command(player));
-            return CreatedAtAction(nameof(AddPlayerCommand), new { id = pl }, player);
+            var player = await _mediator.Send(request);
+            return CreatedAtAction(nameof(AddPlayerCommand), new { id = player }, player);
         }
 
         [HttpPut]
@@ -76,16 +76,16 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Put([FromBody] Player player, string playerId)
+        public async Task<IActionResult> Put([FromBody] UpdatePlayerCommand request, string playerId)
         {
             if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
 
             var dbPlayer = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
 
-            if (player == null)
+            if (dbPlayer == null)
                 return NotFound();
 
-            return Ok(await _mediator.Send(new UpdatePlayerCommand.Command(player)));
+            return Ok(await _mediator.Send(request));
         }
 
         [HttpDelete]

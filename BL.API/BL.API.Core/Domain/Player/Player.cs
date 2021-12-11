@@ -1,29 +1,24 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BL.API.Core.Domain.Player
 {
     public class Player : BaseEntity
     {
         [MaxLength(64)]
-        public string Nickname { get; protected set; }
+        public string Nickname { get; set; }
 
         [MaxLength(32)]
-        public string Country { get; protected set; }
+        public string Country { get; set; }
 
         [MaxLength(32)]
-        public string Clan { get; protected set; }
+        public string Clan { get; set; }
 
-        public PlayerClass MainClass { get; protected set; }
+        public PlayerClass MainClass { get; set; }
 
-        public PlayerClass SecondaryClass { get; protected set; }
+        public PlayerClass SecondaryClass { get; set; }
 
-        public int DiscordId { get; protected set; }
+        public int DiscordId { get; set; }
 
-        public Guid PlayerMMRId { get; protected set; }
-
-        [ForeignKey("PlayerMMRId")]
-        public virtual PlayerMMR PlayerMMR { get; protected set; }
+        public int PlayerMMR { get; set; }
     }
 }

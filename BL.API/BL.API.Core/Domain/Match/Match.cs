@@ -4,9 +4,9 @@ namespace BL.API.Core.Domain.Match
 {
     public class Match : BaseEntity
     {
-        public string ScreenshotLink { get; protected set; }
-        public Faction FactionWon { get; protected set; }
-        public int RoundsPlayed { get; protected set; }
-        public virtual ICollection<PlayerMatchRecord> PlayerRecords { get; protected set; }
+        public string ScreenshotLink { get; set; }
+        public Faction FactionWon { get; set; }
+        public int RoundsPlayed { get; set; }
+        public virtual ICollection<PlayerMatchRecord> PlayerRecords { get; set; }
     }
 }

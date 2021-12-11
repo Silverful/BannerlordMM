@@ -11,6 +11,8 @@ namespace BL.API.Services.Players.Commands
     public class UpdatePlayerCommand : IRequest<Task>
     {
         [Required]
+        public Guid Id { get; set; }
+        [Required]
         [StringLength(64)]
         public string Nickname { get; set; }
         [StringLength(32)]

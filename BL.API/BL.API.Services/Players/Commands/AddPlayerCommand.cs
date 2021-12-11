@@ -2,6 +2,7 @@
 using BL.API.Core.Domain.Player;
 using MediatR;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,11 +10,18 @@ namespace BL.API.Services.Players.Commands
 {
     public class AddPlayerCommand : IRequest<Guid>
     {
+        [Required]
+        [StringLength(64)]
         public string Nickname { get; set; }
+        [StringLength(32)]
         public string Country { get; set; }
+        [StringLength(32)]
         public string Clan { get; set; }
+        [StringLength(8)]
         public string MainClass { get; set; }
+        [StringLength(8)]
         public string SecondaryClass { get; set; }
+        [Required]
         public int DiscordId { get; set; }
 
         public Player ToPlayer()

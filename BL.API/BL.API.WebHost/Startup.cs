@@ -2,6 +2,7 @@ using BL.API.Core.Abstractions.Repositories;
 using BL.API.DataAccess.Data;
 using BL.API.DataAccess.Repositories;
 using BL.API.Services.Players.Commands;
+using BL.API.WebHost.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +55,8 @@ namespace BL.API.WebHost
             }
 
             app.UseHttpsRedirection();
+
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
 

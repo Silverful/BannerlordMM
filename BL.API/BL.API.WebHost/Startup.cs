@@ -58,7 +58,7 @@ namespace BL.API.WebHost
 
             app.UseHttpsRedirection();
 
-            app.UseMiddleware<ExceptionMiddleware>();
+            //app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
 

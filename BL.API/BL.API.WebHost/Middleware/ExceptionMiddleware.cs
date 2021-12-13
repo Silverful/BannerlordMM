@@ -11,13 +11,15 @@ namespace BL.API.WebHost.Middleware
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
-        public async Task Invoke(HttpContext httpContext, ILogger logger)
+        public async Task Invoke(HttpContext httpContext)
         {
             try
             {
@@ -25,7 +27,7 @@ namespace BL.API.WebHost.Middleware
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, ex.Message);
 
                 var response = httpContext.Response;
                 response.ContentType = "application/json";

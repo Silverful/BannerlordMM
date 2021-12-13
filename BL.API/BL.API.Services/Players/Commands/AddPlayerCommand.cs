@@ -53,7 +53,7 @@ namespace BL.API.Services.Players.Commands
 
             public async Task<Guid> Handle(AddPlayerCommand request, CancellationToken cancellationToken)
             {
-                if (_repository.GetFirstWhereAsync(p => p.DiscordId == request.DiscordId) != null) throw new AlreadyExistsException();
+                if (await _repository.GetFirstWhereAsync(p => p.DiscordId == request.DiscordId) != null) throw new AlreadyExistsException();
 
                 var player = request.ToPlayer();
 

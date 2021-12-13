@@ -64,8 +64,8 @@ namespace BL.API.WebHost.Controllers
         [ProducesDefaultResponseType]
         public async Task<IActionResult> Post([FromBody] AddPlayerCommand request)
         {
-            var player = await _mediator.Send(request);
-            return CreatedAtAction(nameof(AddPlayerCommand), new { id = player }, player);
+            var playerId = await _mediator.Send(request);
+            return CreatedAtAction(nameof(AddPlayerCommand), new { id = playerId }, playerId);
         }
 
         [HttpPut("{playerId}")]

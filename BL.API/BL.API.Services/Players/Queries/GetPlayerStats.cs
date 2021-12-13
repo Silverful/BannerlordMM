@@ -50,8 +50,8 @@ namespace BL.API.Services.Players.Queries
                         DiscordId =  g.First().Player?.DiscordId,
                         MMR =  g.First().Player?.PlayerMMR,
                         MatchesPlayed =  g.Count(),
-                        MatchesWon =  g.Where(x => x.Faction == x.Match.FactionWon).Count(),
-                        WR =  g.Where(x => x.Faction == x.Match.FactionWon).Count() == 0 ? 0 : g.Count() / g.Where(x => x.Faction == x.Match.FactionWon).Count(), //TODO make default view with premade params
+                        MatchesWon =  g.Where(x => x.TeamIndex == x.Match.TeamWon).Count(),
+                        WR =  g.Where(x => x.TeamIndex == x.Match.TeamWon).Count() == 0 ? 0 : g.Count() / g.Where(x => x.TeamIndex == x.Match.TeamWon).Count(), //TODO make default view with premade params
                         RoundsPlayed =  g.Sum(x => x.Match.RoundsPlayed),
                         KR =  g.Sum(x => x.Kills) / g.Sum(x => x.Match.RoundsPlayed),
                         Assists =  g.Sum(x => x.Assists),

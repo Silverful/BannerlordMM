@@ -1,5 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Exceptions;
 using MediatR;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -52,6 +53,8 @@ namespace BL.API.Services.Players.Commands
 
             public async Task<Guid> Handle(AddPlayerCommand request, CancellationToken cancellationToken)
             {
+                if (_repository.GetFirstWhereAsync(p => p.DiscordId == request.DiscordId) != null) throw new AlreadyExistsException();
+
                 var player = request.ToPlayer();
 
                 await _repository.CreateAsync(player);

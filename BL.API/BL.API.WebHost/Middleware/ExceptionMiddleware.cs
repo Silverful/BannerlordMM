@@ -34,8 +34,10 @@ namespace BL.API.WebHost.Middleware
 
                 switch (ex)
                 {
+                    case AlreadyExistsException:
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        break;
                     case GuidCantBeParsedException:
-                        // custom application error
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     case NotFoundException:

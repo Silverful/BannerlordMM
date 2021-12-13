@@ -15,12 +15,10 @@ namespace BL.API.WebHost.Controllers
     [Route("[controller]")]
     public class PlayersController : ControllerBase
     {
-        private readonly ILogger<PlayersController> _logger;
         private readonly IMediator _mediator;
 
-        public PlayersController(ILogger<PlayersController> logger, IMediator mediator)
+        public PlayersController(IMediator mediator)
         {
-            _logger = logger;
             _mediator = mediator;
         }
 

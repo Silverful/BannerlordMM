@@ -58,6 +58,12 @@ namespace BL.API.WebHost.Controllers
             return Ok(await _mediator.Send(new GetPlayersStats.Query()));
         }
 
+        [HttpGet("/nicknames")]
+        public async Task<IActionResult> GetNicknames()
+        {
+            return Ok(await _mediator.Send(new GetNicknamesQuery.Query()));
+        }
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]

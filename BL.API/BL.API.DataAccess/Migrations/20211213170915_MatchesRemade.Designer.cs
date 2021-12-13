@@ -4,14 +4,16 @@ using BL.API.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BL.API.DataAccess.Migrations
 {
     [DbContext(typeof(EFContext))]
-    partial class EFContextModelSnapshot : ModelSnapshot
+    [Migration("20211213170915_MatchesRemade")]
+    partial class MatchesRemade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,13 +72,13 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 13, 19, 54, 46, 367, DateTimeKind.Utc).AddTicks(6878));
+                        .HasDefaultValue(new DateTime(2021, 12, 13, 17, 9, 14, 665, DateTimeKind.Utc).AddTicks(7223));
 
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<byte>("RoundsPlayed")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("RoundsPlayed")
+                        .HasColumnType("int");
 
                     b.Property<string>("ScreenshotLink")
                         .HasColumnType("nvarchar(max)");
@@ -95,28 +97,28 @@ namespace BL.API.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte?>("Assists")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("Assists")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 13, 19, 54, 46, 373, DateTimeKind.Utc).AddTicks(436));
+                        .HasDefaultValue(new DateTime(2021, 12, 13, 17, 9, 14, 674, DateTimeKind.Utc).AddTicks(2556));
 
-                    b.Property<byte?>("Deaths")
-                        .HasColumnType("tinyint");
+                    b.Property<int?>("Deaths")
+                        .HasColumnType("int");
 
                     b.Property<int>("Faction")
                         .HasColumnType("int");
 
-                    b.Property<byte?>("Kills")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("Kills")
+                        .HasColumnType("int");
 
                     b.Property<int>("MMRChange")
                         .HasColumnType("int");
 
-                    b.Property<byte?>("MVPs")
-                        .HasColumnType("tinyint");
+                    b.Property<int>("MVPs")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("MatchId")
                         .HasColumnType("uniqueidentifier");
@@ -127,7 +129,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<byte>("RoundsWon")
                         .HasColumnType("tinyint");
 
-                    b.Property<int?>("Score")
+                    b.Property<int>("Score")
                         .HasColumnType("int");
 
                     b.Property<byte>("TeamIndex")
@@ -159,7 +161,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 13, 19, 54, 46, 372, DateTimeKind.Utc).AddTicks(9325));
+                        .HasDefaultValue(new DateTime(2021, 12, 13, 17, 9, 14, 674, DateTimeKind.Utc).AddTicks(999));
 
                     b.Property<int>("DiscordId")
                         .HasColumnType("int");

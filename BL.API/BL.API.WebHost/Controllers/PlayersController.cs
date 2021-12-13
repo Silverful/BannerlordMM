@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.JsonPatch;
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PlayersController : ControllerBase
     {
         private readonly ILogger<PlayersController> _logger;

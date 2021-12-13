@@ -44,27 +44,41 @@ namespace BL.API.DataAccess.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await _dbContext.Set<T>()
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<T> GetByIdAsync(Guid id)
         {
-            return await _dbContext.Set<T>().Where(x => x.Id == id).FirstOrDefaultAsync();
+            return await _dbContext.Set<T>()
+                .Where(x => x.Id == id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
         }
 
         public async Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbContext.Set<T>().Where(predicate).FirstOrDefaultAsync();
+            return await _dbContext.Set<T>()
+                .Where(predicate)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids)
         {
-            return await _dbContext.Set<T>().Where(x => ids.Contains(x.Id)).ToListAsync();
+            return await _dbContext.Set<T>()
+                .Where(x => ids.Contains(x.Id))
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
+            return await _dbContext.Set<T>()
+                .Where(predicate)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task SaveAsync()

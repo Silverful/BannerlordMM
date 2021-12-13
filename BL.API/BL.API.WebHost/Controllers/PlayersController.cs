@@ -36,7 +36,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById([FromQuery] string playerId)
+        public async Task<IActionResult> GetById(string playerId)
         {
             var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
 
@@ -47,7 +47,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetPlayerStats([FromQuery] string playerId)
+        public async Task<IActionResult> GetPlayerStats(string playerId)
         {
             var player = await _mediator.Send(new GetPlayerStats.Query(playerId));
 
@@ -70,12 +70,12 @@ namespace BL.API.WebHost.Controllers
             return CreatedAtAction(nameof(AddPlayerCommand), new { id = player }, player);
         }
 
-        [HttpPut]
+        [HttpPut("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Put([FromBody] UpdatePlayerCommand request, string playerId)
+        public async Task<IActionResult> Put(string playerId, [FromBody] UpdatePlayerCommand request)
         {
             if (request.Id != playerId)
             {
@@ -85,26 +85,29 @@ namespace BL.API.WebHost.Controllers
             return Ok(await _mediator.Send(request));
         }
 
-        [HttpDelete]
+        [HttpDelete("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Delete([FromQuery] string playerId)
+        public async Task<IActionResult> Delete(string playerId)
         {
             return Ok(await _mediator.Send(new DeletePlayerCommand.Command(playerId)));
         }
 
-        [HttpPatch]
+        /// <summary>
+        /// Partial update method. Body request example "[{"value": "Archer", "path": "/mainClass", "op": "replace"}]
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPatch("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<Player> request, string playerId)
+        public async Task<IActionResult> Patch(string playerId, [FromBody] JsonPatchDocument<Player> request)
         {
             var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
-
-            if (player == null)
-                return NotFound();
 
             request.ApplyTo(player, ModelState);
 

@@ -1,5 +1,7 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Match;
+using BL.API.Core.Domain.Player;
+using BL.API.Core.Exceptions;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -11,20 +13,29 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayerStats
     {
-        public record Query(Guid PlayerId) : IRequest<IEnumerable<PlayerStatItemResponse>>;
+        public record Query(string PlayerId) : IRequest<IEnumerable<PlayerStatItemResponse>>;
 
         public class GetPlayerStatsHandler : IRequestHandler<Query, IEnumerable<PlayerStatItemResponse>>
         {
             private readonly IRepository<PlayerMatchRecord> _matchRecords;
+            private readonly IRepository<Player> _players;
 
-            public GetPlayerStatsHandler(IRepository<PlayerMatchRecord> matchRecords)
+
+            public GetPlayerStatsHandler(IRepository<Player> players, IRepository<PlayerMatchRecord> matchRecords)
             {
                 _matchRecords = matchRecords;
+                _players = players;
             }
 
             public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == request.PlayerId);
+                if (!Guid.TryParse(request.PlayerId, out Guid id)) throw new GuidCantBeParsedException();
+
+                var player = await _players.GetByIdAsync(id);
+
+                if (player == null) throw new NotFoundException();
+
+                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id);
 
                 var stats =
                     from record in matchRecords

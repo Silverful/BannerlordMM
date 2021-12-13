@@ -1,5 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Exceptions;
 using MediatR;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -11,7 +12,7 @@ namespace BL.API.Services.Players.Commands
     public class UpdatePlayerCommand : IRequest<Task>
     {
         [Required]
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         [Required]
         [StringLength(64)]
         public string Nickname { get; set; }
@@ -28,14 +29,14 @@ namespace BL.API.Services.Players.Commands
         [Required]
         public int PlayerMMR { get; set; }
 
-        public Player ToPlayer()
+        public Player ToPlayer(Guid id)
         {
             var mainClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.MainClass);
             var secondaryClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.SecondaryClass);
 
             return new Player
             {
-                Id = this.Id,
+                Id = id,
                 Nickname = this.Nickname,
                 Country = this.Country,
                 Clan = this.Clan,
@@ -57,7 +58,13 @@ namespace BL.API.Services.Players.Commands
 
             public async Task<Task> Handle(UpdatePlayerCommand request, CancellationToken cancellationToken)
             {
-                var player = request.ToPlayer();
+                if (!Guid.TryParse(request.Id, out Guid id)) throw new GuidCantBeParsedException();
+
+                var player = request.ToPlayer(id);
+
+                var currentPlayer = await _repository.GetByIdAsync(id);
+
+                if (currentPlayer == null) throw new NotFoundException();
 
                 await _repository.UpdateAsync(player);
                 return Task.CompletedTask;

@@ -34,26 +34,24 @@ namespace BL.API.WebHost.Controllers
 
         [HttpGet("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetById([FromQuery] string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
+            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
 
-            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            return player == null ? NotFound() : Ok(player);
+            return Ok(player);
         }
 
         [HttpGet("{playerId}/stats")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPlayerStats([FromQuery] string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
+            var player = await _mediator.Send(new GetPlayerStats.Query(playerId));
 
-            var player = await _mediator.Send(new GetPlayerStats.Query(id));
-
-            return player == null ? NotFound() : Ok(player);
+            return Ok(player);
         }
 
         [HttpGet("/stats")]
@@ -79,12 +77,10 @@ namespace BL.API.WebHost.Controllers
         [ProducesDefaultResponseType]
         public async Task<IActionResult> Put([FromBody] UpdatePlayerCommand request, string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
-
-            var dbPlayer = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            if (dbPlayer == null)
-                return NotFound();
+            if (request.Id != playerId)
+            {
+                return BadRequest();
+            }
 
             return Ok(await _mediator.Send(request));
         }
@@ -96,14 +92,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesDefaultResponseType]
         public async Task<IActionResult> Delete([FromQuery] string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
-
-            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            if (player == null)
-                return NotFound();
-
-            return Ok(await _mediator.Send(new DeletePlayerCommand.Command(id)));
+            return Ok(await _mediator.Send(new DeletePlayerCommand.Command(playerId)));
         }
 
         [HttpPatch]
@@ -112,9 +101,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<Player> request, string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
-
-            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
+            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
 
             if (player == null)
                 return NotFound();
@@ -123,7 +110,7 @@ namespace BL.API.WebHost.Controllers
 
             var updateCmd = new UpdatePlayerCommand
             {
-                Id = player.Id,
+                Id = playerId,
                 Nickname = player.Nickname,
                 Country = player.Country,
                 Clan = player.Clan,

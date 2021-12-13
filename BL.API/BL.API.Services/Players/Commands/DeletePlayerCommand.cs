@@ -1,5 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Exceptions;
 using MediatR;
 using System;
 using System.Threading;
@@ -9,7 +10,7 @@ namespace BL.API.Services.Players.Commands
 {
     public class DeletePlayerCommand
     {
-        public record Command(Guid PlayerId) : IRequest<Task>;
+        public record Command(string PlayerId) : IRequest<Task>;
 
         public class DeletePlayerCommandHandler : IRequestHandler<Command, Task>
         {
@@ -22,7 +23,13 @@ namespace BL.API.Services.Players.Commands
 
             public async Task<Task> Handle(Command request, CancellationToken cancellationToken)
             {
-                await _repository.DeleteAsync(request.PlayerId);
+                if (!Guid.TryParse(request.PlayerId, out Guid id)) throw new GuidCantBeParsedException();
+
+                var player = await _repository.GetByIdAsync(id);
+
+                if (player == null) throw new NotFoundException();
+
+                await _repository.DeleteAsync(id);
                 return Task.CompletedTask;
             }
         }

@@ -4,6 +4,8 @@ namespace BL.API.Core.Domain.Player
 {
     public class Player : BaseEntity
     {
+        public Player() : base() { }
+
         [MaxLength(64)]
         public string Nickname { get; set; }
 

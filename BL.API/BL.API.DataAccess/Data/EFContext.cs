@@ -2,6 +2,7 @@
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace BL.API.DataAccess.Data
 {
@@ -20,6 +21,18 @@ namespace BL.API.DataAccess.Data
             modelBuilder.Entity<NLog>()
                 .Property(l => l.ID)
                 .UseIdentityColumn(1, 1);
+
+            modelBuilder.Entity<Match>()
+                .Property(p => p.Created)
+                .HasDefaultValue(DateTime.UtcNow);
+
+            modelBuilder.Entity<Player>()
+                .Property(p => p.Created)
+                .HasDefaultValue(DateTime.UtcNow);
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Property(p => p.Created)
+                .HasDefaultValue(DateTime.UtcNow);
         }
     }
 }

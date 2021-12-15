@@ -1,6 +1,8 @@
 using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.DataAccess.Data;
 using BL.API.DataAccess.Repositories;
+using BL.API.Services.MMR;
 using BL.API.Services.Players.Commands;
 using BL.API.WebHost.Middleware;
 using MediatR;
@@ -27,6 +29,8 @@ namespace BL.API.WebHost
         {
             var sqlConnectionString = Configuration.GetConnectionString("DefaultConnectionString");
 
+            services.Configure<BasicMMRCalculationProperties>(options => Configuration.GetSection("MMRProps").Bind(options));
+
             services.AddDbContext<EFContext>(option =>
             {
                 option.UseSqlServer(sqlConnectionString);
@@ -38,6 +42,7 @@ namespace BL.API.WebHost
                 .AddNewtonsoftJson();
 
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
+            services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
 
             services.AddSwaggerGen(c =>
             {
@@ -60,7 +65,7 @@ namespace BL.API.WebHost
             //global error handler
             app.UseMiddleware<ExceptionMiddleware>();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

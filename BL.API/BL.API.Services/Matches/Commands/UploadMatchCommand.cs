@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Exceptions;
 using MediatR;
@@ -55,16 +56,20 @@ namespace BL.API.Services.Matches.Commands
 
         public class UploadMatchCommandHandler: IRequestHandler<UploadMatchCommand, Guid>
         {
-            private readonly IRepository<Match> _repository;
+            private readonly IRepository<Match> _matchRepository;
+            private readonly IRepository<PlayerMatchRecord> _playerRecords;
+            private readonly IMMRCalculationService _mmrCalculation;
 
-            public UploadMatchCommandHandler(IRepository<Match> repository)
+            public UploadMatchCommandHandler(IRepository<Match> matchRepository, IRepository<PlayerMatchRecord> playerRecords, IMMRCalculationService mmrCalculation)
             {
-                _repository = repository;
+                _matchRepository = matchRepository;
+                _playerRecords = playerRecords;
+                _mmrCalculation = mmrCalculation;
             }
 
             public async Task<Guid> Handle(UploadMatchCommand request, CancellationToken cancellationToken)
             {
-                if (await _repository.GetFirstWhereAsync(m => m.ScreenshotLink == request.ScreenshotLink) != null) throw new AlreadyExistsException();
+                if (await _matchRepository.GetFirstWhereAsync(m => m.ScreenshotLink == request.ScreenshotLink) != null) throw new AlreadyExistsException();
 
                 var match = new Match()
                 {
@@ -81,10 +86,13 @@ namespace BL.API.Services.Matches.Commands
 
                 foreach (var record in match.PlayerRecords)
                 {
-                    record.MMRChange = 0;
+                    var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
+
+                    record.CalibrationIndex = (byte)(playerMatchRecordCount >= 10 ? 0 : 10 - playerMatchRecordCount);
+                    record.MMRChange = _mmrCalculation.CalculateMMRChange(record);
                 }
 
-                await _repository.CreateAsync(match);
+                await _matchRepository.CreateAsync(match);
                 return match.Id;
             }
         }

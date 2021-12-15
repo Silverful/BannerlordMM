@@ -33,6 +33,10 @@ namespace BL.API.DataAccess.Data
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Property(p => p.Created)
                 .HasDefaultValue(DateTime.UtcNow);
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Property(p => p.CalibrationIndex)
+                .HasDefaultValue(0);
         }
     }
 }

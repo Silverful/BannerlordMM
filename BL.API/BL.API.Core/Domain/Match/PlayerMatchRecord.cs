@@ -20,5 +20,6 @@ namespace BL.API.Core.Domain.Match
         public int? Score { get; set; }
         public byte? MVPs { get; set; }
         public int MMRChange { get; set; }
+        public byte CalibrationIndex { get; set; }
     }
 }

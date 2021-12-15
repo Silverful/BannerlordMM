@@ -13,6 +13,9 @@ namespace BL.API.Services.MMR
         {
             _mmrProps = settings.Value;
         }
+         
+        private int DefaultChange { get => _mmrProps.DefaultChange; }
+        private int AdditionalBank { get => _mmrProps.AdditionalBank; }
 
         public int CalculateMMRChange(PlayerMatchRecord record)
         {
@@ -20,7 +23,7 @@ namespace BL.API.Services.MMR
 
             if (isWon == 0 && record.CalibrationIndex > 0)
             {
-                return 0; //MMR do decrease on calibration
+                return 0; //MMR does not decrease on calibration
             }
 
             var calibrationIndexAdjust = record.CalibrationIndex + 1 == 1 ? 1 : (isWon == 0 ? 0 : 4);
@@ -28,13 +31,13 @@ namespace BL.API.Services.MMR
 
             var mmrChange =
                 isWon * -1 + 1 //loss mmr constant increase
-                + (isWon - 1) * _mmrProps.AdditionalBank * 2 / 6 //loss punishment
-                + 2 * _mmrProps.DefaultChange * isWon - _mmrProps.DefaultChange //regular mmr change
-                + _mmrProps.AdditionalBank * record.Score / totalTeamScore; //% from additional bank
+                + (isWon - 1) * AdditionalBank * 2 / 6 //loss punishment
+                + 2 * DefaultChange * isWon - DefaultChange //regular mmr change
+                + AdditionalBank * record.Score / totalTeamScore; //% from additional bank
 
             if (!mmrChange.HasValue || mmrChange == 0)
             {
-                mmrChange = _mmrProps.DefaultChange * isWon == 1 ? 1 : -1;
+                mmrChange = DefaultChange * isWon == 1 ? 1 : -1;
             }
 
             mmrChange *= calibrationIndexAdjust;

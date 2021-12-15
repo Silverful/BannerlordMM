@@ -32,8 +32,8 @@ namespace BL.API.Services.Matches.Commands
             public Guid PlayerId { get; set; }
             public byte RoundsWon { get; set; }
             public string Faction { get; set; }
-            public byte? Kills { get; set; }
-            public byte? Assists { get; set; }
+            public sbyte? Kills { get; set; }
+            public sbyte? Assists { get; set; }
             public byte? Score { get; set; }
             public byte? MVPs { get; set; }
 

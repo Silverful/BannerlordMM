@@ -53,8 +53,8 @@ namespace BL.API.Services.Matches.Queries
             public byte? Played { get; set; }
             public byte? Wins { get; set; }
             public byte? Rounds { get; set; }
-            public byte? Kills { get; set; }
-            public byte? Assists { get; set; }
+            public sbyte? Kills { get; set; }
+            public sbyte? Assists { get; set; }
             public int? Score { get; set; }
             public string ScreenshotLink { get; set; }
             public byte CalibrationIndex { get; set; }

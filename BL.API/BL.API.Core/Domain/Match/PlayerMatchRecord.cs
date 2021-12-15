@@ -14,8 +14,8 @@ namespace BL.API.Core.Domain.Match
         public byte TeamIndex { get; set; }
         public byte RoundsWon { get; set; }
         public Faction Faction { get; set; }
-        public byte? Kills { get; set; }
-        public byte? Assists { get; set; }
+        public sbyte? Kills { get; set; }
+        public sbyte? Assists { get; set; }
         public byte? Deaths { get; set; }
         public int? Score { get; set; }
         public byte? MVPs { get; set; }

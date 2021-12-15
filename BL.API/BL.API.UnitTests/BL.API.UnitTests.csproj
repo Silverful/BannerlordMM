@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="WebHost\Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BL.API.Core\BL.API.Core.csproj" />
     <ProjectReference Include="..\BL.API.DataAccess\BL.API.DataAccess.csproj" />
     <ProjectReference Include="..\BL.API.Services\BL.API.Services.csproj" />

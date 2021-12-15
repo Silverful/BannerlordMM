@@ -34,7 +34,7 @@ namespace BL.API.Services.Matches.Commands
             public string Faction { get; set; }
             public sbyte? Kills { get; set; }
             public sbyte? Assists { get; set; }
-            public byte? Score { get; set; }
+            public int? Score { get; set; }
             public byte? MVPs { get; set; }
 
             public PlayerMatchRecord ToPlayerMatchRecord(byte teamIndex)
@@ -70,7 +70,7 @@ namespace BL.API.Services.Matches.Commands
 
             public async Task<Guid> Handle(UploadMatchCommand request, CancellationToken cancellationToken)
             {
-                if (await _matchRepository.GetFirstWhereAsync(m => m.ScreenshotLink == request.ScreenshotLink) != null) throw new AlreadyExistsException();
+                if ((await _matchRepository.GetFirstWhereAsync(m => m.ScreenshotLink == request.ScreenshotLink)) != null) throw new AlreadyExistsException();
 
                 var match = new Match()
                 {
@@ -87,6 +87,7 @@ namespace BL.API.Services.Matches.Commands
 
                 foreach (var record in match.PlayerRecords)
                 {
+                    record.Match = match;
                     var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
 
                     record.CalibrationIndex = (byte)(playerMatchRecordCount >= 10 ? 0 : 10 - playerMatchRecordCount);

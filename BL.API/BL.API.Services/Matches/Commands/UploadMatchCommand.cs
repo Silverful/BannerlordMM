@@ -43,6 +43,7 @@ namespace BL.API.Services.Matches.Commands
 
                 return new PlayerMatchRecord
                 {
+                    PlayerId = this.PlayerId,
                     TeamIndex = teamIndex,
                     RoundsWon = this.RoundsWon,
                     Faction = faction,

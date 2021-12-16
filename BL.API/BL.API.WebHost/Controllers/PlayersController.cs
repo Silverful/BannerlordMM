@@ -52,13 +52,13 @@ namespace BL.API.WebHost.Controllers
             return Ok(player);
         }
 
-        [HttpGet("/stats")]
+        [HttpGet("stats")]
         public async Task<IActionResult> GetPlayersStats()
         {
             return Ok(await _mediator.Send(new GetPlayersStats.Query()));
         }
 
-        [HttpGet("/nicknames")]
+        [HttpGet("nicknames")]
         public async Task<IActionResult> GetNicknames()
         {
             return Ok(await _mediator.Send(new GetNicknamesQuery.Query()));
@@ -71,7 +71,7 @@ namespace BL.API.WebHost.Controllers
         public async Task<IActionResult> Post([FromBody] AddPlayerCommand request)
         {
             var playerId = await _mediator.Send(request);
-            return CreatedAtAction(nameof(AddPlayerCommand), new { id = playerId }, playerId);
+            return CreatedAtAction("Post", new { id = playerId }, playerId);
         }
 
         [HttpPut("{playerId}")]

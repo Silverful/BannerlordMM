@@ -35,7 +35,7 @@ namespace BL.API.WebHost.Controllers
         public async Task<IActionResult> Post([FromBody] UploadMatchCommand request)
         {
             var matchId = await _mediator.Send(request);
-            return CreatedAtAction(nameof(UploadMatchCommand), new { id = matchId }, matchId);
+            return CreatedAtAction("Post", new { id = matchId }, matchId);
         }
     }
 }

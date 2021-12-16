@@ -2,6 +2,7 @@
 {
     public class PlayerStatItemResponse
     {
+        public string PlayerId { get; set; }
         public string Nickname { get; set; }
         public string Country { get; set; }
         public string Clan { get; set; }

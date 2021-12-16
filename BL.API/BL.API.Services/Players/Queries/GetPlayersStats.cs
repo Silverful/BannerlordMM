@@ -30,6 +30,7 @@ namespace BL.API.Services.Players.Queries
                     group record by record.PlayerId into g
                     select new PlayerStatItemResponse()
                     {
+                        PlayerId = g.First().Player?.Id.ToString(),
                         Nickname = g.First().Player?.Nickname,
                         Country = g.First().Player?.Country,
                         Clan = g.First().Player?.Clan,

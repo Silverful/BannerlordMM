@@ -44,6 +44,16 @@ namespace BL.API.WebHost
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AnyOrigin", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod();
+                });
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BL.API.WebHost", Version = "v1" });
@@ -59,6 +69,8 @@ namespace BL.API.WebHost
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BL.API.WebHost v1"));
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AnyOrigin");
 
             app.UseRouting();
 

@@ -24,15 +24,15 @@ namespace BL.API.DataAccess.Data
 
             modelBuilder.Entity<Match>()
                 .Property(p => p.Created)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<Player>()
                 .Property(p => p.Created)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Property(p => p.Created)
-                .HasDefaultValue(DateTime.UtcNow);
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Property(p => p.CalibrationIndex)

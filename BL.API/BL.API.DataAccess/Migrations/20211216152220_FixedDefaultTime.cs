@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BL.API.DataAccess.Migrations
 {
-    public partial class CalibrationIndex : Migration
+    public partial class FixedDefaultTime : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,74 +12,63 @@ namespace BL.API.DataAccess.Migrations
                 table: "Players",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(2021, 12, 15, 10, 51, 50, 619, DateTimeKind.Utc).AddTicks(5145),
+                defaultValueSql: "getdate()",
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2",
-                oldDefaultValue: new DateTime(2021, 12, 13, 19, 54, 46, 372, DateTimeKind.Utc).AddTicks(9325));
+                oldDefaultValue: new DateTime(2021, 12, 16, 12, 58, 1, 13, DateTimeKind.Utc).AddTicks(887));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "Created",
                 table: "PlayerMatchRecords",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(2021, 12, 15, 10, 51, 50, 619, DateTimeKind.Utc).AddTicks(6122),
+                defaultValueSql: "getdate()",
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2",
-                oldDefaultValue: new DateTime(2021, 12, 13, 19, 54, 46, 373, DateTimeKind.Utc).AddTicks(436));
-
-            migrationBuilder.AddColumn<byte>(
-                name: "CalibrationIndex",
-                table: "PlayerMatchRecords",
-                type: "tinyint",
-                nullable: false,
-                defaultValue: (byte)0);
+                oldDefaultValue: new DateTime(2021, 12, 16, 12, 58, 1, 13, DateTimeKind.Utc).AddTicks(1977));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "Created",
                 table: "Matches",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(2021, 12, 15, 10, 51, 50, 613, DateTimeKind.Utc).AddTicks(7142),
+                defaultValueSql: "getdate()",
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2",
-                oldDefaultValue: new DateTime(2021, 12, 13, 19, 54, 46, 367, DateTimeKind.Utc).AddTicks(6878));
+                oldDefaultValue: new DateTime(2021, 12, 16, 12, 58, 1, 7, DateTimeKind.Utc).AddTicks(9353));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CalibrationIndex",
-                table: "PlayerMatchRecords");
-
             migrationBuilder.AlterColumn<DateTime>(
                 name: "Created",
                 table: "Players",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(2021, 12, 13, 19, 54, 46, 372, DateTimeKind.Utc).AddTicks(9325),
+                defaultValue: new DateTime(2021, 12, 16, 12, 58, 1, 13, DateTimeKind.Utc).AddTicks(887),
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2",
-                oldDefaultValue: new DateTime(2021, 12, 15, 10, 51, 50, 619, DateTimeKind.Utc).AddTicks(5145));
+                oldDefaultValueSql: "getdate()");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "Created",
                 table: "PlayerMatchRecords",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(2021, 12, 13, 19, 54, 46, 373, DateTimeKind.Utc).AddTicks(436),
+                defaultValue: new DateTime(2021, 12, 16, 12, 58, 1, 13, DateTimeKind.Utc).AddTicks(1977),
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2",
-                oldDefaultValue: new DateTime(2021, 12, 15, 10, 51, 50, 619, DateTimeKind.Utc).AddTicks(6122));
+                oldDefaultValueSql: "getdate()");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "Created",
                 table: "Matches",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(2021, 12, 13, 19, 54, 46, 367, DateTimeKind.Utc).AddTicks(6878),
+                defaultValue: new DateTime(2021, 12, 16, 12, 58, 1, 7, DateTimeKind.Utc).AddTicks(9353),
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2",
-                oldDefaultValue: new DateTime(2021, 12, 15, 10, 51, 50, 613, DateTimeKind.Utc).AddTicks(7142));
+                oldDefaultValueSql: "getdate()");
         }
     }
 }

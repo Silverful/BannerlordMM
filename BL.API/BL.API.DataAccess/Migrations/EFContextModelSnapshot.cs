@@ -70,7 +70,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 15, 11, 4, 0, 85, DateTimeKind.Utc).AddTicks(7328));
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime2");
@@ -106,7 +106,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 15, 11, 4, 0, 91, DateTimeKind.Utc).AddTicks(9527));
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<byte?>("Deaths")
                         .HasColumnType("tinyint");
@@ -164,7 +164,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 15, 11, 4, 0, 91, DateTimeKind.Utc).AddTicks(8346));
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<int>("DiscordId")
                         .HasColumnType("int");

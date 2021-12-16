@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BL.API.DataAccess.Migrations
 {
     [DbContext(typeof(EFContext))]
-    [Migration("20211206163300_PlayerMatchRecordFix")]
-    partial class PlayerMatchRecordFix
+    [Migration("20211216125801_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,6 +21,48 @@ namespace BL.API.DataAccess.Migrations
                 .HasAnnotation("ProductVersion", "5.0.12")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("BL.API.Core.Domain.Logs.NLog", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:IdentityIncrement", 1)
+                        .HasAnnotation("SqlServer:IdentitySeed", 1)
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Callsite")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Exception")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Level")
+                        .HasMaxLength(5)
+                        .HasColumnType("nvarchar(5)");
+
+                    b.Property<DateTime>("Logged")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Logger")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("MachineName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("NLog");
+                });
+
             modelBuilder.Entity("BL.API.Core.Domain.Match.Match", b =>
                 {
                     b.Property<Guid>("Id")
@@ -28,16 +70,21 @@ namespace BL.API.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2021, 12, 16, 12, 58, 1, 7, DateTimeKind.Utc).AddTicks(9353));
+
+                    b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("FactionWon")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoundsPlayed")
-                        .HasColumnType("int");
+                    b.Property<byte>("RoundsPlayed")
+                        .HasColumnType("tinyint");
 
                     b.Property<string>("ScreenshotLink")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("TeamWon")
+                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 
@@ -50,26 +97,33 @@ namespace BL.API.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Assists")
-                        .HasColumnType("int");
+                    b.Property<short?>("Assists")
+                        .HasColumnType("smallint");
+
+                    b.Property<byte>("CalibrationIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)0);
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2021, 12, 16, 12, 58, 1, 13, DateTimeKind.Utc).AddTicks(1977));
 
-                    b.Property<int?>("Deaths")
-                        .HasColumnType("int");
+                    b.Property<byte?>("Deaths")
+                        .HasColumnType("tinyint");
 
                     b.Property<int>("Faction")
                         .HasColumnType("int");
 
-                    b.Property<int>("Kills")
-                        .HasColumnType("int");
+                    b.Property<short?>("Kills")
+                        .HasColumnType("smallint");
 
                     b.Property<int>("MMRChange")
                         .HasColumnType("int");
 
-                    b.Property<int>("MVPs")
-                        .HasColumnType("int");
+                    b.Property<byte?>("MVPs")
+                        .HasColumnType("tinyint");
 
                     b.Property<Guid>("MatchId")
                         .HasColumnType("uniqueidentifier");
@@ -77,11 +131,14 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("RoundsPlayed")
+                    b.Property<byte>("RoundsWon")
+                        .HasColumnType("tinyint");
+
+                    b.Property<int?>("Score")
                         .HasColumnType("int");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                    b.Property<byte>("TeamIndex")
+                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 
@@ -107,7 +164,9 @@ namespace BL.API.DataAccess.Migrations
                         .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValue(new DateTime(2021, 12, 16, 12, 58, 1, 13, DateTimeKind.Utc).AddTicks(887));
 
                     b.Property<int>("DiscordId")
                         .HasColumnType("int");
@@ -119,34 +178,15 @@ namespace BL.API.DataAccess.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
-                    b.Property<Guid>("PlayerMMRId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("PlayerMMR")
+                        .HasColumnType("int");
 
                     b.Property<int>("SecondaryClass")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlayerMMRId");
-
                     b.ToTable("Players");
-                });
-
-            modelBuilder.Entity("BL.API.Core.Domain.Player.PlayerMMR", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("MMR")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PlayerMMR");
                 });
 
             modelBuilder.Entity("BL.API.Core.Domain.Match.PlayerMatchRecord", b =>
@@ -166,17 +206,6 @@ namespace BL.API.DataAccess.Migrations
                     b.Navigation("Match");
 
                     b.Navigation("Player");
-                });
-
-            modelBuilder.Entity("BL.API.Core.Domain.Player.Player", b =>
-                {
-                    b.HasOne("BL.API.Core.Domain.Player.PlayerMMR", "PlayerMMR")
-                        .WithMany()
-                        .HasForeignKey("PlayerMMRId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PlayerMMR");
                 });
 
             modelBuilder.Entity("BL.API.Core.Domain.Match.Match", b =>

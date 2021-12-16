@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BL.API.DataAccess.Migrations
 {
     [DbContext(typeof(EFContext))]
-    [Migration("20211213195446_MatchesUpdated")]
-    partial class MatchesUpdated
+    [Migration("20211216152220_FixedDefaultTime")]
+    partial class FixedDefaultTime
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -72,7 +72,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 13, 19, 54, 46, 367, DateTimeKind.Utc).AddTicks(6878));
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<DateTime>("MatchDate")
                         .HasColumnType("datetime2");
@@ -97,13 +97,18 @@ namespace BL.API.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte?>("Assists")
-                        .HasColumnType("tinyint");
+                    b.Property<short?>("Assists")
+                        .HasColumnType("smallint");
+
+                    b.Property<byte>("CalibrationIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)0);
 
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 13, 19, 54, 46, 373, DateTimeKind.Utc).AddTicks(436));
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<byte?>("Deaths")
                         .HasColumnType("tinyint");
@@ -111,8 +116,8 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<int>("Faction")
                         .HasColumnType("int");
 
-                    b.Property<byte?>("Kills")
-                        .HasColumnType("tinyint");
+                    b.Property<short?>("Kills")
+                        .HasColumnType("smallint");
 
                     b.Property<int>("MMRChange")
                         .HasColumnType("int");
@@ -161,7 +166,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<DateTime>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2021, 12, 13, 19, 54, 46, 372, DateTimeKind.Utc).AddTicks(9325));
+                        .HasDefaultValueSql("getdate()");
 
                     b.Property<int>("DiscordId")
                         .HasColumnType("int");

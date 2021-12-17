@@ -41,6 +41,18 @@ namespace BL.API.DataAccess.Data
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Property(p => p.CalibrationIndex)
                 .HasDefaultValue(0);
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Navigation(p => p.Player)
+                .AutoInclude();
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Navigation(p => p.Match)
+                .AutoInclude();
+
+            modelBuilder.Entity<Match>()
+                .Navigation(p => p.PlayerRecords)
+                .AutoInclude();
         }
     }
 }

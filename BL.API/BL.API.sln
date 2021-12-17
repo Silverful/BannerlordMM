@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.DataAccess", "BL.API
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.Services", "BL.API.Services\BL.API.Services.csproj", "{1938BF77-1D88-4207-8404-D3A1FF6D018C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BL.API.UnitTests", "BL.API.UnitTests\BL.API.UnitTests.csproj", "{DE922B59-0B9D-440A-93C4-2C6B223A51A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.UnitTests", "BL.API.UnitTests\BL.API.UnitTests.csproj", "{DE922B59-0B9D-440A-93C4-2C6B223A51A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BL.API.Migration", "BL.API.Migration\BL.API.Migration.csproj", "{C2AC732B-0DA3-4050-96FB-687A5002ADF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{DE922B59-0B9D-440A-93C4-2C6B223A51A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE922B59-0B9D-440A-93C4-2C6B223A51A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE922B59-0B9D-440A-93C4-2C6B223A51A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

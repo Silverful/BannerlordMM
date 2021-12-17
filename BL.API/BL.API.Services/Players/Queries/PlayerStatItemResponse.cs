@@ -1,4 +1,8 @@
-﻿namespace BL.API.Services.Players.Queries
+﻿using BL.API.Core.Domain.Match;
+using System;
+using System.Linq;
+
+namespace BL.API.Services.Players.Queries
 {
     public class PlayerStatItemResponse
     {
@@ -22,5 +26,33 @@
         public decimal? SR { get; set; }
         public int? MVP { get; set; }
         public decimal? MVPR { get; set; }
+
+        public static PlayerStatItemResponse FromMatchRecordGrouping(IGrouping<Guid, PlayerMatchRecord> record)
+        {
+            return new PlayerStatItemResponse 
+            {
+                PlayerId = record.First().Player?.Id.ToString(),
+                Nickname = record.First().Player?.Nickname,
+                Country = record.First().Player?.Country,
+                Clan = record.First().Player?.Clan,
+                MainClass = record.First().Player.MainClass.ToString(),
+                SecondaryClass = record.First().Player?.SecondaryClass.ToString(),
+                DiscordId = record.First().Player?.DiscordId,
+                MMR = record.First().Player?.PlayerMMR,
+                MatchesPlayed = record.Count(),
+                MatchesWon = record.Where(x => x.TeamIndex == x.Match.TeamWon).Count(),
+                WR = record.Where(x => x.TeamIndex == x.Match.TeamWon).Count() == 0 ? 0 : (decimal)record.Where(x => x.TeamIndex == x.Match.TeamWon).Count() / record.Count(), //TODO make default view with premade params
+                RoundsPlayed = record.Sum(x => x.Match.RoundsPlayed),
+                KR = (decimal)record.Sum(x => x.Kills) / record.Sum(x => x.Match.RoundsPlayed),
+                Assists = record.Sum(x => x.Assists),
+                AR = (decimal)record.Sum(x => x.Assists) / record.Sum(x => x.Match.RoundsPlayed),
+                KAR = (decimal)(record.Sum(x => x.Kills) + record.Sum(x => x.Assists)) / record.Sum(x => x.Match.RoundsPlayed),
+                TotalScore = record.Sum(x => x.Score),
+                SR = (decimal)record.Sum(x => x.Score) / record.Sum(x => x.Match.RoundsPlayed),
+                MVP = record.Sum(x => x.MVPs),
+                MVPR = (decimal)record.Sum(x => x.MVPs) / record.Sum(x => x.Match.RoundsPlayed)
+            };
+
+        }
     }
 }

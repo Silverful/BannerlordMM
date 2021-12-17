@@ -40,29 +40,7 @@ namespace BL.API.Services.Players.Queries
                 var stats =
                     from record in matchRecords
                     group record by record.PlayerId into g
-                    select new PlayerStatItemResponse()
-                    {
-                        PlayerId = g.First().Player?.Id.ToString(),
-                        Nickname = g.First().Player?.Nickname,
-                        Country =  g.First().Player?.Country,
-                        Clan =  g.First().Player?.Clan,
-                        MainClass =  g.First().Player.MainClass.ToString(),
-                        SecondaryClass =  g.First().Player?.SecondaryClass.ToString(),
-                        DiscordId =  g.First().Player?.DiscordId,
-                        MMR =  g.First().Player?.PlayerMMR,
-                        MatchesPlayed =  g.Count(),
-                        MatchesWon =  g.Where(x => x.TeamIndex == x.Match.TeamWon).Count(),
-                        WR =  g.Where(x => x.TeamIndex == x.Match.TeamWon).Count() == 0 ? 0 : g.Count() / g.Where(x => x.TeamIndex == x.Match.TeamWon).Count(), //TODO make default view with premade params
-                        RoundsPlayed =  g.Sum(x => x.Match.RoundsPlayed),
-                        KR =  g.Sum(x => x.Kills) / g.Sum(x => x.Match.RoundsPlayed),
-                        Assists =  g.Sum(x => x.Assists),
-                        AR =  g.Sum(x => x.Assists) / g.Sum(x => x.Match.RoundsPlayed),
-                        KAR =  (g.Sum(x => x.Kills) + g.Sum(x => x.Assists)) / g.Sum(x => x.Match.RoundsPlayed),
-                        TotalScore =  g.Sum(x => x.Score),
-                        SR =  g.Sum(x => x.Score) / g.Sum(x => x.Match.RoundsPlayed),
-                        MVP =  g.Sum(x => x.MVPs),
-                        MVPR =  g.Sum(x => x.MVPs) / g.Sum(x => x.Match.RoundsPlayed)
-                    };
+                    select PlayerStatItemResponse.FromMatchRecordGrouping(g);
 
                 return stats;
             }

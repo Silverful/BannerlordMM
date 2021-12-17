@@ -8,7 +8,7 @@
         public string Clan { get; set; }
         public string MainClass { get; set; }
         public string SecondaryClass { get; set; }
-        public int? DiscordId { get; set; }
+        public long? DiscordId { get; set; }
         public int? MMR { get; set; }
         public int? MatchesPlayed { get; set; }
         public int? MatchesWon { get; set; }

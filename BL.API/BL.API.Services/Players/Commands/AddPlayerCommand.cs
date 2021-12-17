@@ -23,7 +23,8 @@ namespace BL.API.Services.Players.Commands
         [StringLength(8)]
         public string SecondaryClass { get; set; }
         [Required]
-        public int DiscordId { get; set; }
+        public long DiscordId { get; set; }
+        public bool IGL { get; set; }
 
         public Player ToPlayer()
         {
@@ -35,6 +36,7 @@ namespace BL.API.Services.Players.Commands
                 Nickname = this.Nickname,
                 Country = this.Country,
                 Clan = this.Clan,
+                IsIGL = this.IGL,
                 MainClass = mainClass,
                 SecondaryClass = secondaryClass,
                 DiscordId = this.DiscordId,

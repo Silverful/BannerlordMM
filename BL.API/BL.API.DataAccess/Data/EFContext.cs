@@ -30,6 +30,10 @@ namespace BL.API.DataAccess.Data
                 .Property(p => p.Created)
                 .HasDefaultValueSql("getdate()");
 
+            modelBuilder.Entity<Player>()
+                .Property(p => p.IsIGL)
+                .HasDefaultValue(false);
+
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Property(p => p.Created)
                 .HasDefaultValueSql("getdate()");

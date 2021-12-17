@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace BL.API.Core.Domain.Player
 {
@@ -15,11 +16,13 @@ namespace BL.API.Core.Domain.Player
         [MaxLength(32)]
         public string Clan { get; set; }
 
+        public bool IsIGL { get; set; }
+
         public PlayerClass MainClass { get; set; }
 
         public PlayerClass SecondaryClass { get; set; }
 
-        public int DiscordId { get; set; }
+        public long DiscordId { get; set; }
 
         public int PlayerMMR { get; set; }
     }

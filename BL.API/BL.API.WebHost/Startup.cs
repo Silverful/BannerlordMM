@@ -34,7 +34,6 @@ namespace BL.API.WebHost
             services.AddDbContext<EFContext>(option =>
             {
                 option.UseSqlServer(sqlConnectionString);
-                option.UseLazyLoadingProxies();
             });
 
             services

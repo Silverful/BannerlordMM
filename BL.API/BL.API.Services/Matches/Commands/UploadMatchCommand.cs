@@ -1,13 +1,13 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
+using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,12 +59,17 @@ namespace BL.API.Services.Matches.Commands
         {
             private readonly IRepository<Match> _matchRepository;
             private readonly IRepository<PlayerMatchRecord> _playerRecords;
+            private readonly IRepository<Player> _players;
             private readonly IMMRCalculationService _mmrCalculation;
 
-            public UploadMatchCommandHandler(IRepository<Match> matchRepository, IRepository<PlayerMatchRecord> playerRecords, IMMRCalculationService mmrCalculation)
+            public UploadMatchCommandHandler(IRepository<Match> matchRepository, 
+                IRepository<PlayerMatchRecord> playerRecords,
+                IRepository<Player> players,
+                IMMRCalculationService mmrCalculation)
             {
                 _matchRepository = matchRepository;
                 _playerRecords = playerRecords;
+                _players = players;
                 _mmrCalculation = mmrCalculation;
             }
 
@@ -95,6 +100,16 @@ namespace BL.API.Services.Matches.Commands
                 }
 
                 await _matchRepository.CreateAsync(match);
+
+                //UNSAFE CHANGE TO TRANSACTION
+                foreach (var record in match.PlayerRecords)
+                {
+                    var player = await _players.GetByIdAsync(record.PlayerId);
+
+                    player.PlayerMMR += record.MMRChange;
+                    await _players.UpdateAsync(player);
+                }
+
                 return match.Id;
             }
         }

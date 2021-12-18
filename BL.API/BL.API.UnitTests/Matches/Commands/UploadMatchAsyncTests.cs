@@ -10,6 +10,7 @@ using Bogus;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using System;
@@ -128,7 +129,7 @@ namespace BL.API.UnitTests.WebHost.Matches.Commands
             _matchMoq.Setup(repo => repo.CreateAsync(It.IsAny<Core.Domain.Match.Match>()))
                 .ReturnsAsync(It.Is<Guid>(g => g != Guid.Empty));
 
-            var handler = new UploadMatchCommandHandler(_matchMoq.Object, _matchRecords.Object, _mmrCalcService);
+            var handler = new UploadMatchCommandHandler(_matchMoq.Object, _matchRecords.Object, _playersMoq.Object, _mmrCalcService, null);
 
             //Act
             var result = await handler.Handle(matchCommand, new System.Threading.CancellationToken());

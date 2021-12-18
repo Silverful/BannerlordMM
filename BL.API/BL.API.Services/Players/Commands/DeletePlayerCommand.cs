@@ -35,7 +35,7 @@ namespace BL.API.Services.Players.Commands
 
                 await _repository.DeleteAsync(id);
 
-                _logger.LogInformation($"Player deleted: {JsonSerializer.Serialize(player)}");
+                _logger?.LogInformation($"Player deleted: {JsonSerializer.Serialize(player)}");
 
                 return Task.CompletedTask;
             }

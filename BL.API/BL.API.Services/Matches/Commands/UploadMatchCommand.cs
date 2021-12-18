@@ -115,7 +115,7 @@ namespace BL.API.Services.Matches.Commands
                     await _players.UpdateAsync(player);
                 }
 
-                _logger.LogInformation($"Match created {JsonSerializer.Serialize(match)}");
+                _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { MaxDepth = 2 })}");
 
                 return match.Id;
             }

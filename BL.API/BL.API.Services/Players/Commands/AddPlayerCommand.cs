@@ -65,7 +65,7 @@ namespace BL.API.Services.Players.Commands
 
                 await _repository.CreateAsync(player);
 
-                _logger.LogInformation($"Player created {JsonSerializer.Serialize(player)}");
+                _logger?.LogInformation($"Player created {JsonSerializer.Serialize(player)}");
 
                 return player.Id;
             }

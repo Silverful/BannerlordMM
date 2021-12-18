@@ -74,7 +74,7 @@ namespace BL.API.Services.Players.Commands
 
                 await _repository.UpdateAsync(player);
 
-                _logger.LogInformation($"Player updated {JsonSerializer.Serialize(player)}");
+                _logger?.LogInformation($"Player updated {JsonSerializer.Serialize(player)}");
                 return Task.CompletedTask;
             }
         }

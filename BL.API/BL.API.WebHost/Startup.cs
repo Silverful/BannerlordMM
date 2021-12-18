@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 namespace BL.API.WebHost
 {
@@ -38,7 +39,8 @@ namespace BL.API.WebHost
 
             services
                 .AddControllers()
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson()
+                .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));

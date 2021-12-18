@@ -18,6 +18,8 @@ namespace BL.API.DataAccess.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema("dbo");
+
             modelBuilder.Entity<NLog>()
                 .Property(l => l.ID)
                 .UseIdentityColumn(1, 1);

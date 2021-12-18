@@ -4,10 +4,12 @@ using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -61,16 +63,19 @@ namespace BL.API.Services.Matches.Commands
             private readonly IRepository<PlayerMatchRecord> _playerRecords;
             private readonly IRepository<Player> _players;
             private readonly IMMRCalculationService _mmrCalculation;
+            private readonly ILogger<UploadMatchCommandHandler> _logger;
 
             public UploadMatchCommandHandler(IRepository<Match> matchRepository, 
                 IRepository<PlayerMatchRecord> playerRecords,
                 IRepository<Player> players,
-                IMMRCalculationService mmrCalculation)
+                IMMRCalculationService mmrCalculation,
+                ILogger<UploadMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
                 _playerRecords = playerRecords;
                 _players = players;
                 _mmrCalculation = mmrCalculation;
+                _logger = logger;
             }
 
             public async Task<Guid> Handle(UploadMatchCommand request, CancellationToken cancellationToken)
@@ -109,6 +114,8 @@ namespace BL.API.Services.Matches.Commands
                     player.PlayerMMR += record.MMRChange;
                     await _players.UpdateAsync(player);
                 }
+
+                _logger.LogInformation($"Match created {JsonSerializer.Serialize(match)}");
 
                 return match.Id;
             }

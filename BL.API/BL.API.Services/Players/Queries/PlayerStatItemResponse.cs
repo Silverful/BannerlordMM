@@ -55,7 +55,6 @@ namespace BL.API.Services.Players.Queries
                 MVP = record?.Sum(x => x.MVPs) ?? 0,
                 MVPR = record == null? 0 : (decimal)record?.Sum(x => x.MVPs) / record?.Sum(x => x.Match.RoundsPlayed)
             };
-
         }
     }
 }

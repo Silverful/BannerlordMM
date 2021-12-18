@@ -2,8 +2,10 @@
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,10 +49,12 @@ namespace BL.API.Services.Players.Commands
         public class AddPlayerCommandHandler : IRequestHandler<AddPlayerCommand, Guid>
         {
             private readonly IRepository<Player> _repository;
+            private readonly ILogger<AddPlayerCommandHandler> _logger;
 
-            public AddPlayerCommandHandler(IRepository<Player> repository)
+            public AddPlayerCommandHandler(IRepository<Player> repository, ILogger<AddPlayerCommandHandler> logger)
             {
                 _repository = repository;
+                _logger = logger;
             }
 
             public async Task<Guid> Handle(AddPlayerCommand request, CancellationToken cancellationToken)
@@ -60,6 +64,8 @@ namespace BL.API.Services.Players.Commands
                 var player = request.ToPlayer();
 
                 await _repository.CreateAsync(player);
+
+                _logger.LogInformation($"Player created {JsonSerializer.Serialize(player)}");
 
                 return player.Id;
             }

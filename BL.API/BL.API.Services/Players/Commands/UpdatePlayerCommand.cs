@@ -2,8 +2,10 @@
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,10 +54,12 @@ namespace BL.API.Services.Players.Commands
         public class UpdatePlayerCommandHandler : IRequestHandler<UpdatePlayerCommand, Task>
         {
             private readonly IRepository<Player> _repository;
+            private readonly ILogger<UpdatePlayerCommandHandler> _logger;
 
-            public UpdatePlayerCommandHandler(IRepository<Player> repository)
+            public UpdatePlayerCommandHandler(IRepository<Player> repository, ILogger<UpdatePlayerCommandHandler> logger)
             {
                 _repository = repository;
+                _logger = logger;
             }
 
             public async Task<Task> Handle(UpdatePlayerCommand request, CancellationToken cancellationToken)
@@ -69,6 +73,8 @@ namespace BL.API.Services.Players.Commands
                 if (currentPlayer == null) throw new NotFoundException();
 
                 await _repository.UpdateAsync(player);
+
+                _logger.LogInformation($"Player updated {JsonSerializer.Serialize(player)}");
                 return Task.CompletedTask;
             }
         }

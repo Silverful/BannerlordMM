@@ -18,6 +18,7 @@ namespace BL.API.Services.Players.Queries
         public int? MatchesWon { get; set; }
         public decimal? WR { get; set; }
         public int? RoundsPlayed { get; set; }
+        public int? Kills { get; set; }
         public decimal? KR { get; set; }
         public int? Assists { get; set; }
         public decimal? AR { get; set; }
@@ -43,6 +44,7 @@ namespace BL.API.Services.Players.Queries
                 MatchesWon = record.Where(x => x.TeamIndex == x.Match.TeamWon).Count(),
                 WR = record.Where(x => x.TeamIndex == x.Match.TeamWon).Count() == 0 ? 0 : (decimal)record.Where(x => x.TeamIndex == x.Match.TeamWon).Count() / record.Count(), //TODO make default view with premade params
                 RoundsPlayed = record.Sum(x => x.Match.RoundsPlayed),
+                Kills = record.Sum(x => x.Kills),
                 KR = (decimal)record.Sum(x => x.Kills) / record.Sum(x => x.Match.RoundsPlayed),
                 Assists = record.Sum(x => x.Assists),
                 AR = (decimal)record.Sum(x => x.Assists) / record.Sum(x => x.Match.RoundsPlayed),

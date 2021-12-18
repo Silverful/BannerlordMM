@@ -13,9 +13,9 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayerStats
     {
-        public record Query(string PlayerId) : IRequest<IEnumerable<PlayerStatItemResponse>>;
+        public record Query(string PlayerId) : IRequest<PlayerStatItemResponse>;
 
-        public class GetPlayerStatsHandler : IRequestHandler<Query, IEnumerable<PlayerStatItemResponse>>
+        public class GetPlayerStatsHandler : IRequestHandler<Query, PlayerStatItemResponse>
         {
             private readonly IRepository<PlayerMatchRecord> _matchRecords;
             private readonly IRepository<Player> _players;
@@ -27,7 +27,7 @@ namespace BL.API.Services.Players.Queries
                 _players = players;
             }
 
-            public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<PlayerStatItemResponse> Handle(Query request, CancellationToken cancellationToken)
             {
                 if (!Guid.TryParse(request.PlayerId, out Guid id)) throw new GuidCantBeParsedException();
 
@@ -37,10 +37,12 @@ namespace BL.API.Services.Players.Queries
 
                 var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id);
 
-                var stats =
+                var records =
                     from record in matchRecords
                     group record by record.PlayerId into g
-                    select PlayerStatItemResponse.FromMatchRecordGrouping(g);
+                    select g;
+
+                var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault());
 
                 return stats;
             }

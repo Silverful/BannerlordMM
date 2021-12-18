@@ -1,5 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Match;
+using BL.API.Core.Domain.Player;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,20 +16,26 @@ namespace BL.API.Services.Players.Queries
         public class GetPlayersStatsHandler : IRequestHandler<Query, IEnumerable<PlayerStatItemResponse>>
         {
             private readonly IRepository<PlayerMatchRecord> _matchRecords;
+            private readonly IRepository<Player> _players;
 
-            public GetPlayersStatsHandler(IRepository<PlayerMatchRecord> matchRecords)
+            public GetPlayersStatsHandler(IRepository<PlayerMatchRecord> matchRecords, IRepository<Player> players)
             {
                 _matchRecords = matchRecords;
+                _players = players;
             }
 
             public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
+                var players = await _players.GetAllAsync();
                 var matchRecords = await _matchRecords.GetAllAsync();
 
-                var stats =
-                    from record in matchRecords
-                    group record by record.PlayerId into g
-                    select PlayerStatItemResponse.FromMatchRecordGrouping(g);
+                var groupedMatchRecords = from record in matchRecords
+                                          group record by record.PlayerId into g
+                                          select g;
+
+                var stats = from p in players
+                           join gmr in groupedMatchRecords on p.Id equals gmr.Key
+                           select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr);
 
                 return stats.OrderByDescending(s => s.MMR);
             }

@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.IO;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -27,7 +29,12 @@ namespace BL.API.WebHost.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                httpContext.Request.Body.Seek(0, SeekOrigin.Begin);
+                using StreamReader reader = new StreamReader(httpContext.Request.Body, Encoding.UTF8);
+                var body = await reader.ReadToEndAsync();
+
+                var message = $"{httpContext.Request.Path.Value}/{body}";
+                _logger.LogError(ex, message);
 
                 var response = httpContext.Response;
                 response.ContentType = "application/json";

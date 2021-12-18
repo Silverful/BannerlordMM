@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -115,7 +116,7 @@ namespace BL.API.Services.Matches.Commands
                     await _players.UpdateAsync(player);
                 }
 
-                _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { MaxDepth = 2 })}");
+                _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
 
                 return match.Id;
             }

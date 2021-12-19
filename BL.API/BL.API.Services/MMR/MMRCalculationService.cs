@@ -1,6 +1,7 @@
 ﻿using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using Microsoft.Extensions.Options;
+using System;
 using System.Linq;
 
 namespace BL.API.Services.MMR
@@ -29,20 +30,30 @@ namespace BL.API.Services.MMR
             var calibrationIndexAdjust = record.CalibrationIndex + 1 == 1 ? 1 : (isWon == 0 ? 0 : 4);
             var totalTeamScore = record.Match.PlayerRecords.Where(pr => pr.TeamIndex == record.TeamIndex).Sum(r => r.Score) ?? 0;
 
-            var mmrChange =
+            int? mmrChange = null;
+            try
+            {
+                mmrChange =
                 isWon * -1 + 1 //loss mmr constant increase
                 + (isWon - 1) * AdditionalBank * 2 / 6 //loss punishment
                 + 2 * DefaultChange * isWon - DefaultChange //regular mmr change
                 + AdditionalBank * record.Score / totalTeamScore; //% from additional bank
+            }
+            catch(Exception) {}
 
             if (!mmrChange.HasValue || mmrChange == 0)
             {
-                mmrChange = DefaultChange * isWon == 1 ? 1 : -1;
+                mmrChange = CalculateWithDefaultFormula(isWon);
             }
 
             mmrChange *= calibrationIndexAdjust;
 
             return mmrChange.Value;
+        }
+
+        private int CalculateWithDefaultFormula(int isWon)
+        {
+            return DefaultChange* isWon == 1 ? 1 : -1;
         }
     }
 }

@@ -2,6 +2,8 @@
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
+using BL.API.Services.Stats.Model;
+using BL.API.Services.Stats.Utility;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -37,12 +39,7 @@ namespace BL.API.Services.Players.Queries
 
                 var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id);
 
-                var records =
-                    from record in matchRecords
-                    group record by record.PlayerId.Value into g
-                    select g;
-
-                var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault());
+                var stats = StatsQueryHelper.GetPlayerStats(player, matchRecords);
 
                 return stats;
             }

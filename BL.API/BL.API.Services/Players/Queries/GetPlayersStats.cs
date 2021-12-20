@@ -1,6 +1,8 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Services.Stats.Model;
+using BL.API.Services.Stats.Utility;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,14 +31,7 @@ namespace BL.API.Services.Players.Queries
                 var players = await _players.GetAllAsync();
                 var matchRecords = await _matchRecords.GetAllAsync();
 
-                var groupedMatchRecords = from record in matchRecords
-                                          where record.PlayerId.HasValue
-                                          group record by record.PlayerId.Value into g
-                                          select g;
-
-                var stats = from p in players
-                           join gmr in groupedMatchRecords on p.Id equals gmr.Key
-                           select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr);
+                var stats = StatsQueryHelper.GetPlayersStats(players, matchRecords);
 
                 return stats.OrderByDescending(s => s.MMR);
             }

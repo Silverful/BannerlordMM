@@ -3,7 +3,7 @@ using BL.API.Core.Domain.Player;
 using System;
 using System.Linq;
 
-namespace BL.API.Services.Players.Queries
+namespace BL.API.Services.Stats.Model
 {
     public class PlayerStatItemResponse
     {

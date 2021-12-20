@@ -30,7 +30,8 @@ namespace BL.API.Services.Players.Queries
                 var matchRecords = await _matchRecords.GetAllAsync();
 
                 var groupedMatchRecords = from record in matchRecords
-                                          group record by record.PlayerId into g
+                                          where record.PlayerId.HasValue
+                                          group record by record.PlayerId.Value into g
                                           select g;
 
                 var stats = from p in players

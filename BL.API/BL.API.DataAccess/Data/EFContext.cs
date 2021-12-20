@@ -41,10 +41,6 @@ namespace BL.API.DataAccess.Data
                 .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<PlayerMatchRecord>()
-                .Property(p => p.CalibrationIndex)
-                .HasDefaultValue(0);
-
-            modelBuilder.Entity<PlayerMatchRecord>()
                 .Navigation(p => p.Player)
                 .AutoInclude();
 

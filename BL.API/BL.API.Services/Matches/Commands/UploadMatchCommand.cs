@@ -22,27 +22,32 @@ namespace BL.API.Services.Matches.Commands
         public string ScreenshotLink { get; set; }
         [Required]
         public DateTime MatchDate { get; set; }
-        [Required]
+        [Required, Range(3, 5)]
         public byte RoundsPlayed { get; set; }
-        [Required]
-        public IEnumerable<MatchRecord> Team1Records { get; set; }
-        [Required]
-        public IEnumerable<MatchRecord> Team2Records { get; set; }
+        [Required, MaxLength(6)]
+        public List<MatchRecord> Team1Records { get; set; }
+        [Required, MaxLength(6)]
+        public List<MatchRecord> Team2Records { get; set; }
 
         public class MatchRecord
         {
-            [Required]
-            public Guid PlayerId { get; set; }
+            public Guid? PlayerId { get; set; }
             public byte RoundsWon { get; set; }
             public string Faction { get; set; }
             public sbyte? Kills { get; set; }
             public sbyte? Assists { get; set; }
             public int? Score { get; set; }
+            [Range(0, 5)]
             public byte? MVPs { get; set; }
 
             public PlayerMatchRecord ToPlayerMatchRecord(byte teamIndex)
             {
-                var faction = (Faction)Enum.Parse(typeof(Faction), this.Faction);
+                Faction? faction = null;
+
+                if (this.Faction != null)
+                {
+                    faction = (Faction)Enum.Parse(typeof(Faction), this.Faction);
+                };
 
                 return new PlayerMatchRecord
                 {
@@ -91,18 +96,21 @@ namespace BL.API.Services.Matches.Commands
                     TeamWon = (byte)(request.Team1Records.First().RoundsWon > request.Team2Records.First().RoundsWon ? 1 : 2)
                 };
 
-                var matchRecords = request.Team1Records.Select(t1 => t1.ToPlayerMatchRecord(1))
-                    .Concat(request.Team2Records.Select(t2 => t2.ToPlayerMatchRecord(2)));
-
-                match.PlayerRecords = matchRecords.ToList();
+                match.PlayerRecords = request.Team1Records.Select(t1 => t1.ToPlayerMatchRecord(1))
+                    .Concat(request.Team2Records.Select(t2 => t2.ToPlayerMatchRecord(2)))
+                    .ToList();
 
                 foreach (var record in match.PlayerRecords)
                 {
                     record.Match = match;
-                    var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
+                    
+                    if (record.PlayerId.HasValue)
+                    {
+                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
 
-                    record.CalibrationIndex = (byte)(playerMatchRecordCount >= 10 ? 0 : 10 - playerMatchRecordCount);
-                    record.MMRChange = _mmrCalculation.CalculateMMRChange(record);
+                        record.CalibrationIndex = (byte)(playerMatchRecordCount >= 10 ? 0 : 10 - playerMatchRecordCount);
+                        record.MMRChange = _mmrCalculation.CalculateMMRChange(record);
+                    }
                 }
 
                 await _matchRepository.CreateAsync(match);
@@ -110,10 +118,13 @@ namespace BL.API.Services.Matches.Commands
                 //UNSAFE CHANGE TO TRANSACTION
                 foreach (var record in match.PlayerRecords)
                 {
-                    var player = await _players.GetByIdAsync(record.PlayerId);
+                    if (record.PlayerId.HasValue && record.MMRChange.HasValue)
+                    {
+                        var player = await _players.GetByIdAsync(record.PlayerId.Value);
 
-                    player.PlayerMMR += record.MMRChange;
-                    await _players.UpdateAsync(player);
+                        player.PlayerMMR += record.MMRChange.Value;
+                        await _players.UpdateAsync(player);
+                    }
                 }
 
                 _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");

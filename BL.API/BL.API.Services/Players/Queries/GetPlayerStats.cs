@@ -39,7 +39,7 @@ namespace BL.API.Services.Players.Queries
 
                 var records =
                     from record in matchRecords
-                    group record by record.PlayerId into g
+                    group record by record.PlayerId.Value into g
                     select g;
 
                 var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault());

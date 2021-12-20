@@ -28,9 +28,10 @@ namespace BL.API.Services.MMR
             }
 
             var calibrationIndexAdjust = record.CalibrationIndex + 1 == 1 ? 1 : (isWon == 0 ? 0 : 4);
-            var totalTeamScore = record.Match.PlayerRecords.Where(pr => pr.TeamIndex == record.TeamIndex).Sum(r => r.Score) ?? 0;
+            var totalTeamScore = record.Match.PlayerRecords.Where(pr => pr.TeamIndex == record.TeamIndex).Sum(r => r.Score);
 
             int? mmrChange = null;
+
             try
             {
                 mmrChange =
@@ -39,9 +40,7 @@ namespace BL.API.Services.MMR
                 + 2 * DefaultChange * isWon - DefaultChange //regular mmr change
                 + AdditionalBank * record.Score / totalTeamScore; //% from additional bank
             }
-            catch(Exception) {}
-
-            if (!mmrChange.HasValue || mmrChange == 0)
+            catch (Exception)
             {
                 mmrChange = CalculateWithDefaultFormula(isWon);
             }
@@ -53,7 +52,7 @@ namespace BL.API.Services.MMR
 
         private int CalculateWithDefaultFormula(int isWon)
         {
-            return DefaultChange* isWon == 1 ? 1 : -1;
+            return DefaultChange * (isWon == 1 ? 1 : -1);
         }
     }
 }

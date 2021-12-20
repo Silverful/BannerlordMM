@@ -65,7 +65,7 @@ namespace BL.API.UnitTests.WebHost.Matches.Commands
             return players;
         }
 
-        public UploadMatchCommand CreateMatchCommand(IList<Player> players)
+        public UploadMatchCommand CreateMatchCommand(IList<Player> players = null)
         {
             var rnd = new Random();
 
@@ -85,7 +85,10 @@ namespace BL.API.UnitTests.WebHost.Matches.Commands
             int i = 0;
             team1.ForEach(r => 
             {
-                r.PlayerId = players[i].Id;
+                if (players != null)
+                {
+                    r.PlayerId = players[i].Id;
+                }
                 r.RoundsWon = roundsWon;
                 r.Faction = faction1.ToString();
                 i++;
@@ -95,7 +98,10 @@ namespace BL.API.UnitTests.WebHost.Matches.Commands
 
             team2.ForEach(r =>
             {
-                r.PlayerId = players[i].Id;
+                if (players != null)
+                {
+                    r.PlayerId = players[i].Id;
+                }
                 r.Faction = faction2.ToString();
                 r.RoundsWon = roundsLost;
                 i++;
@@ -120,6 +126,29 @@ namespace BL.API.UnitTests.WebHost.Matches.Commands
 
             _playersMoq.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(players);
+
+            Core.Domain.Match.Match nullObj = null;
+
+            _matchMoq.Setup(repo => repo.GetFirstWhereAsync(m => m.ScreenshotLink == matchCommand.ScreenshotLink))
+                .ReturnsAsync(nullObj);
+
+            _matchMoq.Setup(repo => repo.CreateAsync(It.IsAny<Core.Domain.Match.Match>()))
+                .ReturnsAsync(It.Is<Guid>(g => g != Guid.Empty));
+
+            var handler = new UploadMatchCommandHandler(_matchMoq.Object, _matchRecords.Object, _playersMoq.Object, _mmrCalcService, null);
+
+            //Act
+            var result = await handler.Handle(matchCommand, new System.Threading.CancellationToken());
+
+            //Assert
+            result.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task UploadMatch_NoPlayerIds_ReturnsOk()
+        {
+            //Arrange
+            var matchCommand = CreateMatchCommand(null);
 
             Core.Domain.Match.Match nullObj = null;
 

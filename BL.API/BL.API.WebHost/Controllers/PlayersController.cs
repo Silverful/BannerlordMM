@@ -8,6 +8,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using System.Collections.Generic;
+using BL.API.Services.Stats.Model;
 
 namespace BL.API.WebHost.Controllers
 {
@@ -25,7 +27,7 @@ namespace BL.API.WebHost.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<Player>>> Get()
         {
             return Ok(await _mediator.Send(new GetAllPlayersQuery.Query()));
         }
@@ -34,7 +36,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById(string playerId)
+        public async Task<ActionResult<Player>> GetById(string playerId)
         {
             var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
 
@@ -45,7 +47,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetPlayerStats(string playerId)
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStats(string playerId)
         {
             var player = await _mediator.Send(new GetPlayerStats.Query(playerId));
 
@@ -53,13 +55,13 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpGet("stats")]
-        public async Task<IActionResult> GetPlayersStats()
+        public async Task<ActionResult<IEnumerable<PlayerStatItemResponse>>> GetPlayersStats()
         {
             return Ok(await _mediator.Send(new GetPlayersStats.Query()));
         }
 
         [HttpGet("nicknames")]
-        public async Task<IActionResult> GetNicknames()
+        public async Task<ActionResult<GetNicknamesQuery.PlayerNickname>> GetNicknames()
         {
             return Ok(await _mediator.Send(new GetNicknamesQuery.Query()));
         }

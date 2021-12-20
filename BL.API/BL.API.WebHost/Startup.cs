@@ -4,6 +4,7 @@ using BL.API.DataAccess.Data;
 using BL.API.DataAccess.Repositories;
 using BL.API.Services.MMR;
 using BL.API.Services.Players.Commands;
+using BL.API.Services.Stats.Model;
 using BL.API.WebHost.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -14,6 +15,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace BL.API.WebHost
@@ -32,6 +36,7 @@ namespace BL.API.WebHost
             var sqlConnectionString = Configuration.GetConnectionString("DefaultConnectionString");
 
             services.Configure<BasicMMRCalculationProperties>(options => Configuration.GetSection("MMRProps").Bind(options));
+            services.Configure<StatsProps>(options => Configuration.GetSection("StatsProps").Bind(options));
 
             services.AddDbContext<EFContext>(option =>
             {
@@ -59,6 +64,10 @@ namespace BL.API.WebHost
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BL.API.WebHost", Version = "v1" });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddMediatR(typeof(AddPlayerCommand.AddPlayerCommandHandler).Assembly);

@@ -3,6 +3,7 @@ using BL.API.Services.Matches.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
@@ -22,7 +23,7 @@ namespace BL.API.WebHost.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<GetMatchesQuery.PlayerMatchResponse>>> Get()
         {
             var matchRecords = await _mediator.Send(new GetMatchesQuery.Query());
             return Ok(matchRecords);

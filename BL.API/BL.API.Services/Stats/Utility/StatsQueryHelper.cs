@@ -1,36 +1,22 @@
-﻿using BL.API.Core.Domain.Match;
-using BL.API.Core.Domain.Player;
-using BL.API.Services.Stats.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace BL.API.Services.Stats.Utility
 {
     public static class StatsQueryHelper
     {
-        public static IEnumerable<PlayerStatItemResponse> GetPlayersStats(IEnumerable<Player> players, IEnumerable<PlayerMatchRecord> matchRecords)
+        private static Dictionary<string, decimal> _rankMultipliers = new Dictionary<string, decimal>()
         {
-            var groupedMatchRecords = from record in matchRecords
-                                      where record.PlayerId.HasValue
-                                      group record by record.PlayerId.Value into g
-                                      join p in players on g.Key equals p.Id
-                                      select PlayerStatItemResponse.FromMatchRecordGrouping(p, g);
+            ["Beast"] = 0.97M,
+            ["Diamond"] = 0.75M,
+            ["Platinum"] = 0.63M,
+            ["Gold"] = 0.51M,
+            ["Silver"] = 0.4M,
+            ["Bronze"] = 0.28M,
+            ["Iron"] = 0.14M,
+            ["Classic"] = 0M,
+            ["Wood"] = -1M
+        };
 
-            return groupedMatchRecords;
-        }
-
-        public static PlayerStatItemResponse GetPlayerStats(Player player, IEnumerable<PlayerMatchRecord> matchRecords)
-        {
-            var records =
-                from record in matchRecords
-                group record by record.PlayerId.Value into g
-                select g;
-
-            var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault());
-            return stats;
-        }
+        public static Dictionary<string, decimal> RankMultipliers { get => _rankMultipliers; }
     }
 }

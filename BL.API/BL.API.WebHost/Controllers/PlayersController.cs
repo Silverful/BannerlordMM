@@ -57,7 +57,7 @@ namespace BL.API.WebHost.Controllers
         [HttpGet("stats")]
         public async Task<ActionResult<IEnumerable<PlayerStatItemResponse>>> GetPlayersStats()
         {
-            return Ok(await _mediator.Send(new GetPlayersStats.Query()));
+            return Ok(await _mediator.Send(new GetPlayersStats.Query(null, null, null)));
         }
 
         [HttpGet("nicknames")]

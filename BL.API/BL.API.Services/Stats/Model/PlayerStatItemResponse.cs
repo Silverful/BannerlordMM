@@ -1,6 +1,7 @@
 ﻿using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BL.API.Services.Stats.Model
@@ -14,6 +15,7 @@ namespace BL.API.Services.Stats.Model
         public string MainClass { get; set; }
         public string SecondaryClass { get; set; }
         public long? DiscordId { get; set; }
+        public string Rank { get; set; }
         public int? MMR { get; set; }
         public int? MatchesPlayed { get; set; }
         public int? MatchesWon { get; set; }
@@ -29,9 +31,9 @@ namespace BL.API.Services.Stats.Model
         public int? MVP { get; set; }
         public decimal? MVPR { get; set; }
 
-        public static PlayerStatItemResponse FromMatchRecordGrouping(Player player, IGrouping<Guid, PlayerMatchRecord> record)
+        public static PlayerStatItemResponse FromMatchRecordGrouping(Player player, IGrouping<Guid, PlayerMatchRecord> record, IDictionary<string, decimal> RankTable)
         {
-            return new PlayerStatItemResponse 
+            return new PlayerStatItemResponse
             {
                 PlayerId = player.Id.ToString(),
                 Nickname = player.Nickname,
@@ -40,6 +42,7 @@ namespace BL.API.Services.Stats.Model
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
                 DiscordId = player.DiscordId,
+                Rank = RankTable.Where(x => x.Value < player.PlayerMMR).First().Key ?? "Classic",
                 MMR = player.PlayerMMR,
                 MatchesPlayed = record?.Count() ?? 0,
                 MatchesWon = record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() ?? 0,

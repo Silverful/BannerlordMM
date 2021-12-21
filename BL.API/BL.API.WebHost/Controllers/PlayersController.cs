@@ -14,7 +14,7 @@ using BL.API.Services.Stats.Model;
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PlayersController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class MatchesController : ControllerBase
     {
         private readonly IMediator _mediator;

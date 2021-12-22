@@ -7,62 +7,17 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace BL.API.Services.Matches.Commands
 {
-    public class UploadMatchCommand : IRequest<Guid>
+    public class UploadMatchCommand : UploadMatchRequest, IRequest<Guid> 
     {
-        [Required]
-        public string ScreenshotLink { get; set; }
-        [Required]
-        public DateTime MatchDate { get; set; }
-        [Required, Range(3, 5)]
-        public byte RoundsPlayed { get; set; }
-        [Required, MaxLength(6)]
-        public List<MatchRecord> Team1Records { get; set; }
-        [Required, MaxLength(6)]
-        public List<MatchRecord> Team2Records { get; set; }
-
-        public class MatchRecord
-        {
-            public Guid? PlayerId { get; set; }
-            public byte RoundsWon { get; set; }
-            public string Faction { get; set; }
-            public sbyte? Kills { get; set; }
-            public sbyte? Assists { get; set; }
-            public int? Score { get; set; }
-            [Range(0, 5)]
-            public byte? MVPs { get; set; }
-
-            public PlayerMatchRecord ToPlayerMatchRecord(byte teamIndex)
-            {
-                Faction? faction = null;
-
-                if (this.Faction != null)
-                {
-                    faction = (Faction)Enum.Parse(typeof(Faction), this.Faction);
-                };
-
-                return new PlayerMatchRecord
-                {
-                    PlayerId = this.PlayerId,
-                    TeamIndex = teamIndex,
-                    RoundsWon = this.RoundsWon,
-                    Faction = faction,
-                    Kills = this.Kills,
-                    Assists = this.Assists,
-                    Score = this.Score,
-                    MVPs = this.MVPs
-                };
-            }
-        }
-
         public class UploadMatchCommandHandler: IRequestHandler<UploadMatchCommand, Guid>
         {
             private readonly IRepository<Match> _matchRepository;
@@ -70,17 +25,20 @@ namespace BL.API.Services.Matches.Commands
             private readonly IRepository<Player> _players;
             private readonly IMMRCalculationService _mmrCalculation;
             private readonly ILogger<UploadMatchCommandHandler> _logger;
+            private readonly ISeasonResolverService _seasonService;
 
             public UploadMatchCommandHandler(IRepository<Match> matchRepository, 
                 IRepository<PlayerMatchRecord> playerRecords,
                 IRepository<Player> players,
                 IMMRCalculationService mmrCalculation,
+                ISeasonResolverService seasonService,
                 ILogger<UploadMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
                 _playerRecords = playerRecords;
                 _players = players;
                 _mmrCalculation = mmrCalculation;
+                _seasonService = seasonService;
                 _logger = logger;
             }
 
@@ -88,9 +46,13 @@ namespace BL.API.Services.Matches.Commands
             {
                 if ((await _matchRepository.GetFirstWhereAsync(m => m.ScreenshotLink == request.ScreenshotLink)) != null) throw new AlreadyExistsException();
 
+                var season = await _seasonService.GetCurrentSeasonAsync();
+
                 var match = new Match()
                 {
                     ScreenshotLink = request.ScreenshotLink,
+                    Season = season,
+                    SeasonId = season.Id,
                     MatchDate = request.MatchDate,
                     RoundsPlayed = request.RoundsPlayed,
                     TeamWon = (byte)(request.Team1Records.First().RoundsWon > request.Team2Records.First().RoundsWon ? 1 : 2)
@@ -100,10 +62,11 @@ namespace BL.API.Services.Matches.Commands
                     .Concat(request.Team2Records.Select(t2 => t2.ToPlayerMatchRecord(2)))
                     .ToList();
 
+
                 foreach (var record in match.PlayerRecords)
                 {
                     record.Match = match;
-                    
+
                     if (record.PlayerId.HasValue)
                     {
                         var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
@@ -113,19 +76,26 @@ namespace BL.API.Services.Matches.Commands
                     }
                 }
 
-                await _matchRepository.CreateAsync(match);
-
-                //UNSAFE CHANGE TO TRANSACTION
-                foreach (var record in match.PlayerRecords)
+                using (var scope = new TransactionScope())
                 {
-                    if (record.PlayerId.HasValue && record.MMRChange.HasValue)
-                    {
-                        var player = await _players.GetByIdAsync(record.PlayerId.Value);
+                    await _matchRepository.CreateAsync(match);
 
-                        player.PlayerMMR += record.MMRChange.Value;
-                        await _players.UpdateAsync(player);
+                    var playersToUpdate = new List<Player>();
+
+                    foreach (var record in match.PlayerRecords)
+                    {
+                        if (record.PlayerId.HasValue && record.MMRChange.HasValue)
+                        {
+                            var player = await _players.GetByIdAsync(record.PlayerId.Value);
+
+                            player.PlayerMMR += record.MMRChange.Value;
+                            playersToUpdate.Add(player);
+                        }
                     }
+
+                    await _players.UpdateRangeAsync(playersToUpdate);
                 }
+                
 
                 _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
 

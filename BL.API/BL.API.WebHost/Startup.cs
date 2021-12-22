@@ -4,6 +4,7 @@ using BL.API.DataAccess.Data;
 using BL.API.DataAccess.Repositories;
 using BL.API.Services.MMR;
 using BL.API.Services.Players.Commands;
+using BL.API.Services.Seasons;
 using BL.API.Services.Stats.Model;
 using BL.API.WebHost.Middleware;
 using MediatR;
@@ -50,6 +51,7 @@ namespace BL.API.WebHost
 
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
+            services.AddScoped(typeof(ISeasonResolverService), typeof(SeasonResolverService)); //temporary - must be changed to cache
 
             services.AddCors(options =>
             {

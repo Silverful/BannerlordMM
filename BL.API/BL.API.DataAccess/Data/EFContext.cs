@@ -15,6 +15,7 @@ namespace BL.API.DataAccess.Data
         public virtual DbSet<Player> Players { get; protected set; }
         public virtual DbSet<Match> Matches { get; protected set; }
         public virtual DbSet<PlayerMatchRecord> PlayerMatchRecords { get; protected set; }
+        public virtual DbSet<Season> Seasons { get; protected set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,6 +24,14 @@ namespace BL.API.DataAccess.Data
             modelBuilder.Entity<NLog>()
                 .Property(l => l.ID)
                 .UseIdentityColumn(1, 1);
+
+            modelBuilder.Entity<Season>()
+                .Property(l => l.Index)
+                .UseIdentityColumn(1, 1);
+
+            modelBuilder.Entity<Season>()
+                .Property(l => l.Created)
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<Match>()
                 .Property(p => p.Created)

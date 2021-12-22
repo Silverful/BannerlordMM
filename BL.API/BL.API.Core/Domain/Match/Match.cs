@@ -9,6 +9,8 @@ namespace BL.API.Core.Domain.Match
         public DateTime MatchDate { get; set; }
         public byte RoundsPlayed { get; set; }
         public byte TeamWon { get; set; }
+        public Guid? SeasonId { get; set; }
+        public virtual Season Season { get; set; }
         public virtual ICollection<PlayerMatchRecord> PlayerRecords { get; set; }
     }
 }

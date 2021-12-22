@@ -16,12 +16,15 @@ namespace BL.API.Core.Abstractions.Repositories
         Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids);
 
         Task<Guid> CreateAsync(T model);
+        Task<IEnumerable<Guid>> CreateRangeAsync(IEnumerable<T> models);
 
         Task DeleteAsync(T model);
-
+        Task DeleteRangeAsync(IEnumerable<T> models);
         Task UpdateAsync(T model);
+        Task UpdateRangeAsync(IEnumerable<T> models);
 
         Task DeleteAsync(Guid id);
+        Task DeleteRangeAsync(IEnumerable<Guid> ids);
 
         Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate);
 

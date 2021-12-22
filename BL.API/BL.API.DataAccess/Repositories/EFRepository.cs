@@ -29,6 +29,28 @@ namespace BL.API.DataAccess.Repositories
             return model.Id;
         }
 
+        public async Task<IEnumerable<Guid>> CreateRangeAsync(IEnumerable<T> models)
+        {
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    await _dbContext.Set<T>().AddRangeAsync(models);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch(Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;  
+                }
+            }
+
+            return models.Select(m => m.Id).ToList();
+        }
+
         public async Task DeleteAsync(T model)
         {
             _dbContext.Set<T>().Remove(model);
@@ -40,6 +62,47 @@ namespace BL.API.DataAccess.Repositories
         {
             var entity = await _dbContext.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
             await DeleteAsync(entity);
+        }
+
+        public async Task DeleteRangeAsync(IEnumerable<T> models)
+        {
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    _dbContext.Set<T>().RemoveRange(models);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+        }
+
+        public async Task DeleteRangeAsync(IEnumerable<Guid> ids)
+        {
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var models = await GetRangeByIdsAsync(ids.ToList());
+                    await DeleteRangeAsync(models);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -90,6 +153,26 @@ namespace BL.API.DataAccess.Repositories
         {
             _dbContext.Set<T>().Update(model);
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateRangeAsync(IEnumerable<T> models)
+        {
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    _dbContext.Set<T>().UpdateRange(models);
+
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
     }
 }

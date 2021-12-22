@@ -3,6 +3,7 @@ using BL.API.Services.Matches.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -33,10 +34,25 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Post([FromBody] UploadMatchCommand request)
+        public async Task<ActionResult<Guid>> Post([FromBody] UploadMatchCommand request)
         {
             var matchId = await _mediator.Send(request);
             return CreatedAtAction("Post", new { id = matchId }, matchId);
+        }
+
+        [HttpPut("{matchId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> Put(Guid matchId, [FromBody] UpdateMatchCommand request)
+        {
+            if (request.MatchId != matchId)
+            {
+                return BadRequest();
+            }
+
+            await _mediator.Send(request);
+            return Ok();
         }
     }
 }

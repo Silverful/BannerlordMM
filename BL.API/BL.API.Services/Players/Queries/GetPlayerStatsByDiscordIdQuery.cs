@@ -11,17 +11,17 @@ using System.Threading.Tasks;
 
 namespace BL.API.Services.Players.Queries
 {
-    public static class GetPlayerStats
+    public static class GetPlayerStatsByDiscordIdQuery
     {
-        public record Query(string PlayerId) : IRequest<PlayerStatItemResponse>;
+        public record Query(long discordId) : IRequest<PlayerStatItemResponse>;
 
-        public class GetPlayerStatsHandler : IRequestHandler<Query, PlayerStatItemResponse>
+        public class GetPlayerStatsByDiscordIdQueryHandler : IRequestHandler<Query, PlayerStatItemResponse>
         {
             private readonly IRepository<PlayerMatchRecord> _matchRecords;
             private readonly IRepository<Player> _players;
             private readonly IMediator _mediator;
 
-            public GetPlayerStatsHandler(IRepository<Player> players, 
+            public GetPlayerStatsByDiscordIdQueryHandler(IRepository<Player> players,
                 IRepository<PlayerMatchRecord> matchRecords,
                 IMediator mediator)
             {
@@ -32,15 +32,12 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<PlayerStatItemResponse> Handle(Query request, CancellationToken cancellationToken)
             {
-                if (!Guid.TryParse(request.PlayerId, out Guid id)) throw new GuidCantBeParsedException();
-
-                var players = await _players.GetAllAsync();
-
-                var player = players.Where(p => p.Id == id).FirstOrDefault();
+                var player = await _players.GetFirstWhereAsync(p => p.DiscordId == request.discordId);
 
                 if (player == null) throw new NotFoundException();
 
-                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id);
+                var players = await _players.GetAllAsync();
+                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == player.Id);
 
                 var records =
                     from record in matchRecords
@@ -49,7 +46,7 @@ namespace BL.API.Services.Players.Queries
 
                 var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
                 var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable);
-                
+
                 return stats;
             }
         }

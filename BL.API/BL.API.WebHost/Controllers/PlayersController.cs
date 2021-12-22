@@ -24,6 +24,10 @@ namespace BL.API.WebHost.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Gets all players
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -32,6 +36,11 @@ namespace BL.API.WebHost.Controllers
             return Ok(await _mediator.Send(new GetAllPlayersQuery.Query()));
         }
 
+        /// <summary>
+        /// Gets player by GUID
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <returns></returns>
         [HttpGet("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -43,13 +52,34 @@ namespace BL.API.WebHost.Controllers
             return Ok(player);
         }
 
+        /// <summary>
+        /// Get players stats by GUID
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <returns></returns>
         [HttpGet("{playerId}/stats")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStats(string playerId)
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStats([FromRoute]string playerId)
         {
-            var player = await _mediator.Send(new GetPlayerStats.Query(playerId));
+            var player = await _mediator.Send(new GetPlayerStatsQuery.Query(playerId));
+
+            return Ok(player);
+        }
+
+        /// <summary>
+        /// Gets players stats by DiscordId
+        /// </summary>
+        /// <param name="discordId"></param>
+        /// <returns></returns>
+        [HttpGet("discord/{discordId}/stats")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStatsByDiscordId([FromRoute]long discordId)
+        {
+            var player = await _mediator.Send(new GetPlayerStatsByDiscordIdQuery.Query(discordId));
 
             return Ok(player);
         }
@@ -57,7 +87,7 @@ namespace BL.API.WebHost.Controllers
         [HttpGet("stats")]
         public async Task<ActionResult<IEnumerable<PlayerStatItemResponse>>> GetPlayersStats()
         {
-            return Ok(await _mediator.Send(new GetPlayersStats.Query(null, null, null)));
+            return Ok(await _mediator.Send(new GetPlayersStatsQuery.Query(null, null, null)));
         }
 
         [HttpGet("nicknames")]

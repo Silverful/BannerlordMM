@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BL.API.Services.Players.Queries
 {
-    public static class GetPlayersStats
+    public static class GetPlayersStatsQuery
     {
         public record Query(IEnumerable<Player> Players, IEnumerable<PlayerMatchRecord> MatchRecords, IDictionary<string, decimal> RankTable) : IRequest<IEnumerable<PlayerStatItemResponse>>;
 
@@ -35,13 +35,19 @@ namespace BL.API.Services.Players.Queries
                 var matchRecords = request.MatchRecords ?? await _matchRecords.GetAllAsync();
                 var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(players));
 
-                var stats = from record in matchRecords
+                var groupedMatchRecords = from record in matchRecords
                                           where record.PlayerId.HasValue
                                           group record by record.PlayerId.Value into g
-                                          join p in players on g.Key equals p.Id
-                                          select PlayerStatItemResponse.FromMatchRecordGrouping(p, g, rankTable);
+                                          select g;
 
-                return stats.OrderByDescending(s => s.MMR);
+                var stats = from p in players
+                            join gmr in groupedMatchRecords on p.Id equals gmr.Key into jgmr
+                            from gmr in jgmr.DefaultIfEmpty()
+                            select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr, rankTable);
+
+                return stats
+                    .OrderByDescending(s => s.MMR)
+                    .ToList();
             }
         }
     }

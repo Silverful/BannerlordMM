@@ -43,7 +43,7 @@ namespace BL.API.Services.Players.Queries
                 var matchRecords = await _matchRecords.GetAllAsync();
                 var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
 
-                var playerStats = await _mediator.Send(new GetPlayersStats.Query(players, matchRecords, rankTable));
+                var playerStats = await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable));
 
                 var iglStats = (from mr in matchRecords
                                 where mr.PlayerId.HasValue
@@ -51,15 +51,13 @@ namespace BL.API.Services.Players.Queries
                                 join player in players on gmr.Key equals player.Id
                                 where gmr.Count() > MinimumMatchesPlayed && player.IsIGL
                                 select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
-                                .OrderByDescending(x => x.Value)
-                                .ToDictionary();
+                                .OrderByDescending(x => x.Value);
 
                 var factionStats = (from mr in matchRecords
                                    where mr.Faction.HasValue
                                    group mr by mr.Faction into gmr
                                    select new KeyValuePair<string, decimal>(gmr.Key.ToString(), (decimal)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
-                                   .OrderByDescending(x => x.Value)
-                                   .ToDictionary();
+                                   .OrderByDescending(x => x.Value);
 
                 var infStats = (from mr in matchRecords
                                 where mr.PlayerId.HasValue
@@ -68,7 +66,7 @@ namespace BL.API.Services.Players.Queries
                                 where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Infantry
                                 select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
-                                .ToDictionary();
+                                .Take(15);
 
                 var archerStats = (from mr in matchRecords
                                 where mr.PlayerId.HasValue
@@ -77,7 +75,7 @@ namespace BL.API.Services.Players.Queries
                                 where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Archer
                                 select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
-                                .ToDictionary();
+                                .Take(15);
 
                 var cavStats = (from mr in matchRecords
                                 where mr.PlayerId.HasValue
@@ -86,7 +84,7 @@ namespace BL.API.Services.Players.Queries
                                 where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Cavalry
                                 select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
-                                .ToDictionary();
+                                .Take(15);
 
                 var playerByFactionStats =
                     from mr in matchRecords
@@ -112,15 +110,15 @@ namespace BL.API.Services.Players.Queries
                 return new AllStatsResponse
                 {
                     PlayerStats = playerStats,
-                    IGLStats = iglStats,
-                    FactionStats = factionStats,
+                    IGLStats = iglStats.ToDictionary(),
+                    FactionStats = factionStats.ToDictionary(),
                     DivisionStats = rankTable,
                     PlayersByFactionStats = playerByFactionStats,
                     TopPlayerByClassStats = new TopPlayersByClassStats
                     {
-                        Infantry = infStats,
-                        Archer = archerStats,
-                        Cavalry = cavStats
+                        Infantry = infStats.ToDictionary(),
+                        Archer = archerStats.ToDictionary(),
+                        Cavalry = cavStats.ToDictionary()
                     }
                 };
             }

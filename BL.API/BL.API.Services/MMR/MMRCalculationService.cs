@@ -27,6 +27,11 @@ namespace BL.API.Services.MMR
                 return 0; //MMR does not decrease on calibration
             }
 
+            if (AdditionalBank == 0)
+            {
+                return isWon == 1 ? DefaultChange : -1 * DefaultChange;
+            }
+
             var calibrationIndexAdjust = record.CalibrationIndex + 1 == 1 ? 1 : (isWon == 0 ? 0 : 4);
             var totalTeamScore = record.Match.PlayerRecords.Where(pr => pr.TeamIndex == record.TeamIndex).Sum(r => r.Score);
 

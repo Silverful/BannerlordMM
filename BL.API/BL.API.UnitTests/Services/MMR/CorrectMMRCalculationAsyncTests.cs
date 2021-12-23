@@ -164,5 +164,39 @@ namespace BL.API.UnitTests.Services.MMR
             int i = 0;
             testMMRChange.ForEach(t => Assert.Equal(realMMRChange[i++], t));
         }
+
+        [Fact]
+        public void CorrectMMRCalculation_ZeroAdditionalBank_ArraysIdentical()
+        {
+            var options = Options.Create(new BasicMMRCalculationProperties
+            {
+                DefaultChange = 27,
+                AdditionalBank = 0
+            });
+
+            var mmrService = new MMRCalculationService(options);
+
+            //Arrange
+            var testScores = new List<(byte, int, byte)>
+            {
+                (0, 714, 0), (0, 707, 0), (0, 650, 0), (0, 573, 0), (0, 356, 0), (0, 135, 0),
+                (1, 1194, 0), (1, 1069, 0), (1, 801, 0), (1, 634, 0), (1, 614, 0), (1, 574, 0)
+            };
+
+            var realMMRChange = new List<int>
+            {
+                -27, -27, -27, -27, -27, -27,
+                27, 27, 27, 27, 27, 27
+            };
+
+            var testMatch = CreateBaseMatch(1, 5, testScores);
+
+            //Act
+            var testMMRChange = testMatch.PlayerRecords.Select(pr => mmrService.CalculateMMRChange(pr)).ToList();
+
+            //Assert
+            int i = 0;
+            testMMRChange.ForEach(t => Assert.Equal(realMMRChange[i++], t));
+        }
     }
 }

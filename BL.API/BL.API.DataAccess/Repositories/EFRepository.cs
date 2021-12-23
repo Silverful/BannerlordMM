@@ -31,22 +31,12 @@ namespace BL.API.DataAccess.Repositories
 
         public async Task<IEnumerable<Guid>> CreateRangeAsync(IEnumerable<T> models)
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    await _dbContext.Set<T>().AddRangeAsync(models);
 
-                    await _dbContext.SaveChangesAsync();
+            await _dbContext.Set<T>().AddRangeAsync(models);
 
-                    await transaction.CommitAsync();
-                }
-                catch(Exception)
-                {
-                    await transaction.RollbackAsync();
-                    throw;  
-                }
-            }
+            await _dbContext.SaveChangesAsync();
+
+
 
             return models.Select(m => m.Id).ToList();
         }
@@ -66,43 +56,19 @@ namespace BL.API.DataAccess.Repositories
 
         public async Task DeleteRangeAsync(IEnumerable<T> models)
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    _dbContext.Set<T>().RemoveRange(models);
+            _dbContext.Set<T>().RemoveRange(models);
 
-                    await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
-                    await transaction.CommitAsync();
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                    throw;
-                }
-            }
         }
 
         public async Task DeleteRangeAsync(IEnumerable<Guid> ids)
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    var models = await GetRangeByIdsAsync(ids.ToList());
-                    await DeleteRangeAsync(models);
+            var models = await GetRangeByIdsAsync(ids.ToList());
+            await DeleteRangeAsync(models);
 
-                    await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
 
-                    await transaction.CommitAsync();
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                    throw;
-                }
-            }
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -157,22 +123,9 @@ namespace BL.API.DataAccess.Repositories
 
         public async Task UpdateRangeAsync(IEnumerable<T> models)
         {
-            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
-            {
-                try
-                {
-                    _dbContext.Set<T>().UpdateRange(models);
+            _dbContext.Set<T>().UpdateRange(models);
 
-                    await _dbContext.SaveChangesAsync();
-
-                    await transaction.CommitAsync();
-                }
-                catch (Exception)
-                {
-                    await transaction.RollbackAsync();
-                    throw;
-                }
-            }
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

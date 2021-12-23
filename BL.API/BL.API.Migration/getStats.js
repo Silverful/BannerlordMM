@@ -1,4 +1,6 @@
-﻿function getStats() {
+﻿/** @OnlyCurrentDoc */
+
+function getStats() {
     var stats = JSON.parse(UrlFetchApp.fetch("https://bannerlordmm.com/api/stats").getContentText());
 
     const playerStats = stats.playerStats;
@@ -129,3 +131,10 @@
         pfSheet.getRange(row, cell++).setValue(obj.vlandiaWR);
     })
 }
+
+function timeoutstats() {
+    ScriptApp.newTrigger('getStats')
+        .timeBased()
+        .everyMinutes(3)
+        .create();
+};

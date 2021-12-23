@@ -24,8 +24,7 @@ namespace BL.API.Services.Players.Commands
         public string MainClass { get; set; }
         [StringLength(8)]
         public string SecondaryClass { get; set; }
-        [Required]
-        public long DiscordId { get; set; }
+        public long? DiscordId { get; set; }
         public bool IGL { get; set; }
 
         public Player ToPlayer()
@@ -59,7 +58,14 @@ namespace BL.API.Services.Players.Commands
 
             public async Task<Guid> Handle(AddPlayerCommand request, CancellationToken cancellationToken)
             {
-                if (await _repository.GetFirstWhereAsync(p => p.DiscordId == request.DiscordId) != null) throw new AlreadyExistsException();
+                if (request.DiscordId.HasValue)
+                {
+                    if (await _repository.GetFirstWhereAsync(p => p.DiscordId == request.DiscordId) != null) throw new AlreadyExistsException();
+                }
+                else
+                {
+                    if (await _repository.GetFirstWhereAsync(p => p.Nickname == request.Nickname) != null) throw new AlreadyExistsException();
+                }
 
                 var player = request.ToPlayer();
 

@@ -22,7 +22,7 @@ namespace BL.API.Core.Domain.Player
 
         public PlayerClass SecondaryClass { get; set; }
 
-        public long DiscordId { get; set; }
+        public long? DiscordId { get; set; }
 
         public int PlayerMMR { get; set; }
     }

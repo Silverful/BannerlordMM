@@ -26,8 +26,7 @@ namespace BL.API.Services.Players.Commands
         public string MainClass { get; set; }
         [StringLength(8)]
         public string SecondaryClass { get; set; }
-        [Required]
-        public long DiscordId { get; set; }
+        public long? DiscordId { get; set; }
         [Required]
         public int PlayerMMR { get; set; }
         public bool IGL { get; set; }

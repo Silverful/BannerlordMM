@@ -51,7 +51,6 @@ namespace BL.API.Services.Matches.Commands
                 var match = new Match()
                 {
                     ScreenshotLink = request.ScreenshotLink,
-                    Season = season,
                     SeasonId = season.Id,
                     MatchDate = request.MatchDate,
                     RoundsPlayed = request.RoundsPlayed,
@@ -76,7 +75,7 @@ namespace BL.API.Services.Matches.Commands
                     }
                 }
 
-                using (var scope = new TransactionScope())
+                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     await _matchRepository.CreateAsync(match);
 
@@ -94,6 +93,7 @@ namespace BL.API.Services.Matches.Commands
                     }
 
                     await _players.UpdateRangeAsync(playersToUpdate);
+                    scope.Complete();
                 }
                 
 

@@ -68,7 +68,7 @@ namespace BL.API.Services.Matches.Commands
 
                     if (record.PlayerId.HasValue)
                     {
-                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
+                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId && pr.Match.SeasonId == season.Id)).Count();
 
                         record.CalibrationIndex = (byte)(playerMatchRecordCount >= 10 ? 0 : 10 - playerMatchRecordCount);
                         record.MMRChange = _mmrCalculation.CalculateMMRChange(record);
@@ -87,7 +87,7 @@ namespace BL.API.Services.Matches.Commands
                         {
                             var player = await _players.GetByIdAsync(record.PlayerId.Value);
 
-                            player.PlayerMMR += record.MMRChange.Value;
+                            player.PlayerMMR.MMR += record.MMRChange.Value;
                             playersToUpdate.Add(player);
                         }
                     }

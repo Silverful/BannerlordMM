@@ -25,23 +25,28 @@ namespace BL.API.Services.Matches.Commands
             private readonly IRepository<Player> _players;
             private readonly IMMRCalculationService _mmrCalculation;
             private readonly ILogger<UpdateMatchCommandHandler> _logger;
+            private readonly ISeasonResolverService _seasonService;
 
             public UpdateMatchCommandHandler(IRepository<Match> matchRepository,
                 IRepository<PlayerMatchRecord> playerRecords,
                 IRepository<Player> players,
                 IMMRCalculationService mmrCalculation,
+                ISeasonResolverService seasonService,
                 ILogger<UpdateMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
                 _playerRecords = playerRecords;
                 _players = players;
                 _mmrCalculation = mmrCalculation;
+                _seasonService = seasonService;
                 _logger = logger;
             }
 
             public async Task<Task> Handle(UpdateMatchCommand request, CancellationToken cancellationToken)
             {
                 var match = await _matchRepository.GetByIdAsync(request.MatchId);
+
+                var matchSeason = await _seasonService.GetSeasonOnDateAsync(match.MatchDate);
 
                 if (match == null) throw new NotFoundException();
 
@@ -52,7 +57,7 @@ namespace BL.API.Services.Matches.Commands
 
                 //reduce old MMR changes
                 var oldRecords = match.PlayerRecords.ToList();
-                oldRecords.ForEach(pr => { pr.Player.PlayerMMR -= pr.MMRChange ?? 0; });
+                oldRecords.ForEach(pr => { pr.Player.PlayerMMR.MMR -= pr.MMRChange ?? 0; });
                 var reversedPlayers = match.PlayerRecords.Select(pr => pr.Player).ToList();
 
                 var updatedRecords = request.Team1Records.Select(t1 => t1.ToPlayerMatchRecord(1))
@@ -84,7 +89,7 @@ namespace BL.API.Services.Matches.Commands
                 {
                     if (record.PlayerId.HasValue)
                     {
-                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId)).Count();
+                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId && pr.Match.SeasonId.Value == matchSeason.Id)).Count();
 
                         var isExistsAdd = record.Id == Guid.Empty? 0 : 1;
 
@@ -107,7 +112,7 @@ namespace BL.API.Services.Matches.Commands
                         {
                             var player = reversedPlayers.Where(p => p.Id == record.PlayerId).FirstOrDefault() ?? await _players.GetByIdAsync(record.PlayerId.Value);
 
-                            player.PlayerMMR += record.MMRChange.Value;
+                            player.PlayerMMR.MMR += record.MMRChange.Value;
                             playersToUpdate.Add(player);
                         }
                     }

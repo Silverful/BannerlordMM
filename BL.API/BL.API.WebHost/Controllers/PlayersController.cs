@@ -155,8 +155,7 @@ namespace BL.API.WebHost.Controllers
                 Clan = player.Clan,
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
-                DiscordId = player.DiscordId,
-                PlayerMMR = player.PlayerMMR
+                DiscordId = player.DiscordId
             };
 
             return Ok(await _mediator.Send(updateCmd));

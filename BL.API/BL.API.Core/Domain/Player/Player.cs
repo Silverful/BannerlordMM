@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BL.API.Core.Domain.Player
 {
@@ -23,7 +24,8 @@ namespace BL.API.Core.Domain.Player
         public PlayerClass SecondaryClass { get; set; }
 
         public long? DiscordId { get; set; }
-
-        public int PlayerMMR { get; set; }
+        [ForeignKey("PlayerMMR")]
+        public Guid PlayerMMRId { get; set; }
+        public virtual PlayerMMR PlayerMMR { get; set; }
     }
 }

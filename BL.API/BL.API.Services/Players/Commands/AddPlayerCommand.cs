@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
 using MediatR;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,8 +42,7 @@ namespace BL.API.Services.Players.Commands
                 IsIGL = this.IGL,
                 MainClass = mainClass,
                 SecondaryClass = secondaryClass,
-                DiscordId = this.DiscordId,
-                PlayerMMR = 0
+                DiscordId = this.DiscordId
             };
         }
 
@@ -49,10 +50,14 @@ namespace BL.API.Services.Players.Commands
         {
             private readonly IRepository<Player> _repository;
             private readonly ILogger<AddPlayerCommandHandler> _logger;
+            private readonly ISeasonResolverService _seasonService;
 
-            public AddPlayerCommandHandler(IRepository<Player> repository, ILogger<AddPlayerCommandHandler> logger)
+            public AddPlayerCommandHandler(IRepository<Player> repository,
+                ISeasonResolverService seasonService,
+                ILogger<AddPlayerCommandHandler> logger)
             {
                 _repository = repository;
+                _seasonService = seasonService;
                 _logger = logger;
             }
 
@@ -67,11 +72,19 @@ namespace BL.API.Services.Players.Commands
                     if (await _repository.GetFirstWhereAsync(p => p.Nickname == request.Nickname) != null) throw new AlreadyExistsException();
                 }
 
+                var currentSeason = await _seasonService.GetCurrentSeasonAsync();
+
                 var player = request.ToPlayer();
+                player.PlayerMMR = new PlayerMMR
+                {
+                    Player = player,
+                    SeasonId = currentSeason.Id,
+                    MMR = 0
+                };
 
                 await _repository.CreateAsync(player);
 
-                _logger?.LogInformation($"Player created {JsonSerializer.Serialize(player)}");
+                _logger?.LogInformation($"Player created {JsonSerializer.Serialize(player, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
 
                 return player.Id;
             }

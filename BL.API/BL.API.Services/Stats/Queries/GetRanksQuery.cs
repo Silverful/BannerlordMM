@@ -28,8 +28,8 @@ namespace BL.API.Services.Players.Queries
             {
                 var players = request.Players ?? (await _players.GetAllAsync());
 
-                var maxRating = players.Max(x => x.PlayerMMR);
-                var minRating = players.Min(x => x.PlayerMMR);
+                var maxRating = players.Max(x => x.PlayerMMR.MMR);
+                var minRating = players.Min(x => x.PlayerMMR.MMR);
 
                 var rankTable = StatsQueryHelper.RankMultipliers;
 

@@ -81,32 +81,32 @@ namespace BL.API.DataAccess.Repositories
         public async Task<T> GetByIdAsync(Guid id)
         {
             return await _dbContext.Set<T>()
-                .Where(x => x.Id == id)
                 .AsNoTracking()
+                .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbContext.Set<T>()
-                .Where(predicate)
                 .AsNoTracking()
+                .Where(predicate)
                 .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids)
         {
             return await _dbContext.Set<T>()
-                .Where(x => ids.Contains(x.Id))
                 .AsNoTracking()
+                .Where(x => ids.Contains(x.Id))
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbContext.Set<T>()
-                .Where(predicate)
                 .AsNoTracking()
+                .Where(predicate)
                 .ToListAsync();
         }
 

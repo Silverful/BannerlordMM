@@ -27,8 +27,6 @@ namespace BL.API.Services.Players.Commands
         [StringLength(8)]
         public string SecondaryClass { get; set; }
         public long? DiscordId { get; set; }
-        [Required]
-        public int PlayerMMR { get; set; }
         public bool IGL { get; set; }
 
         public Player ToPlayer(Guid id)
@@ -45,8 +43,7 @@ namespace BL.API.Services.Players.Commands
                 Clan = this.Clan,
                 MainClass = mainClass,
                 SecondaryClass = secondaryClass,
-                DiscordId = this.DiscordId,
-                PlayerMMR = this.PlayerMMR
+                DiscordId = this.DiscordId
             };
         }
 

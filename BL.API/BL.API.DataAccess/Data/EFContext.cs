@@ -10,12 +10,19 @@ namespace BL.API.DataAccess.Data
     //dotnet ef database update -s..\BL.API.WebHost\BL.API.WebHost.csproj
     public class EFContext : DbContext
     {
-        public EFContext(DbContextOptions options) : base(options) { }
+        public EFContext(DbContextOptions options) : base(options) 
+        {
+        }
 
         public virtual DbSet<Player> Players { get; protected set; }
         public virtual DbSet<Match> Matches { get; protected set; }
         public virtual DbSet<PlayerMatchRecord> PlayerMatchRecords { get; protected set; }
         public virtual DbSet<Season> Seasons { get; protected set; }
+        public virtual DbSet<PlayerMMR> PlayerMMR { get; protected set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +35,10 @@ namespace BL.API.DataAccess.Data
             modelBuilder.Entity<Season>()
                 .Property(l => l.Index)
                 .UseIdentityColumn(1, 1);
+
+            modelBuilder.Entity<PlayerMMR>()
+                .Property(l => l.Created)
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<Season>()
                 .Property(l => l.Created)
@@ -49,6 +60,10 @@ namespace BL.API.DataAccess.Data
                 .Property(p => p.Created)
                 .HasDefaultValueSql("getdate()");
 
+            modelBuilder.Entity<Player>()
+                .Navigation(p => p.PlayerMMR)
+                .AutoInclude();
+
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Navigation(p => p.Player)
                 .AutoInclude();
@@ -59,6 +74,10 @@ namespace BL.API.DataAccess.Data
 
             modelBuilder.Entity<Match>()
                 .Navigation(p => p.PlayerRecords)
+                .AutoInclude();
+
+            modelBuilder.Entity<Match>()
+                .Navigation(p => p.Season)
                 .AutoInclude();
         }
     }

@@ -22,6 +22,7 @@ namespace BL.API.DataAccess.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,21 +33,24 @@ namespace BL.API.DataAccess.Data
                 .Property(l => l.ID)
                 .UseIdentityColumn(1, 1);
 
+
             modelBuilder.Entity<Season>()
                 .Property(l => l.Index)
                 .UseIdentityColumn(1, 1);
+
+            modelBuilder.Entity<Season>()
+                .Property(l => l.Created)
+                .HasDefaultValueSql("getdate()");
+
 
             modelBuilder.Entity<PlayerMMR>()
                 .Property(l => l.Created)
                 .HasDefaultValueSql("getdate()");
 
-            modelBuilder.Entity<Season>()
-                .Property(l => l.Created)
-                .HasDefaultValueSql("getdate()");
+            modelBuilder.Entity<PlayerMMR>()
+                .Navigation(l => l.Season)
+                .AutoInclude();
 
-            modelBuilder.Entity<Match>()
-                .Property(p => p.Created)
-                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<Player>()
                 .Property(p => p.Created)
@@ -56,21 +60,14 @@ namespace BL.API.DataAccess.Data
                 .Property(p => p.IsIGL)
                 .HasDefaultValue(false);
 
-            modelBuilder.Entity<PlayerMatchRecord>()
+            modelBuilder.Entity<Player>()
+                .Navigation(p => p.PlayerMMRs)
+                .AutoInclude();
+
+
+            modelBuilder.Entity<Match>()
                 .Property(p => p.Created)
                 .HasDefaultValueSql("getdate()");
-
-            modelBuilder.Entity<Player>()
-                .Navigation(p => p.PlayerMMR)
-                .AutoInclude();
-
-            modelBuilder.Entity<PlayerMatchRecord>()
-                .Navigation(p => p.Player)
-                .AutoInclude();
-
-            modelBuilder.Entity<PlayerMatchRecord>()
-                .Navigation(p => p.Match)
-                .AutoInclude();
 
             modelBuilder.Entity<Match>()
                 .Navigation(p => p.PlayerRecords)
@@ -78,6 +75,23 @@ namespace BL.API.DataAccess.Data
 
             modelBuilder.Entity<Match>()
                 .Navigation(p => p.Season)
+                .AutoInclude();
+
+            modelBuilder.Entity<Match>()
+                .HasIndex(p => p.ScreenshotLink)
+                .IsUnique();
+
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Navigation(p => p.Player)
+                .AutoInclude();
+
+            modelBuilder.Entity<PlayerMatchRecord>()
+                .Navigation(p => p.Match)
                 .AutoInclude();
         }
     }

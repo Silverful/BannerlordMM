@@ -1,13 +1,17 @@
-﻿using System;
+﻿using BL.API.Core.Domain.Player;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BL.API.Core.Domain.Player
+namespace BL.API.Migration
 {
-    public class Player : BaseEntity
+    public class Player 
     {
+        public Guid Id { get; set; }
+        public DateTime Created { get; set; }
         public Player() : base() { }
 
         [MaxLength(64)]
@@ -26,10 +30,5 @@ namespace BL.API.Core.Domain.Player
         public PlayerClass SecondaryClass { get; set; }
 
         public long? DiscordId { get; set; }
-
-        public ICollection<PlayerMMR> PlayerMMRs { get; set; }
-
-        [NotMapped]
-        public PlayerMMR PlayerMMR { get => PlayerMMRs.FirstOrDefault(m => m.Season?.OnGoing ?? false) ?? null; }
     }
 }

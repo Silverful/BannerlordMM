@@ -5,11 +5,13 @@ using BL.API.Core.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace BL.API.Services.Players.Commands
 {
@@ -49,14 +51,17 @@ namespace BL.API.Services.Players.Commands
         public class AddPlayerCommandHandler : IRequestHandler<AddPlayerCommand, Guid>
         {
             private readonly IRepository<Player> _repository;
+            private readonly IRepository<PlayerMMR> _mmr;
             private readonly ILogger<AddPlayerCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
 
             public AddPlayerCommandHandler(IRepository<Player> repository,
+                IRepository<PlayerMMR> mmr,
                 ISeasonResolverService seasonService,
                 ILogger<AddPlayerCommandHandler> logger)
             {
                 _repository = repository;
+                _mmr = mmr;
                 _seasonService = seasonService;
                 _logger = logger;
             }
@@ -75,13 +80,16 @@ namespace BL.API.Services.Players.Commands
                 var currentSeason = await _seasonService.GetCurrentSeasonAsync();
 
                 var player = request.ToPlayer();
-                player.PlayerMMR = new PlayerMMR
+
+                var playerMMRs = player.PlayerMMRs ?? new List<PlayerMMR>();
+                playerMMRs.Add(new PlayerMMR
                 {
-                    Player = player,
                     SeasonId = currentSeason.Id,
                     MMR = 0
-                };
+                });
 
+                player.PlayerMMRs = playerMMRs;
+                    
                 await _repository.CreateAsync(player);
 
                 _logger?.LogInformation($"Player created {JsonSerializer.Serialize(player, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");

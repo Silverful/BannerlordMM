@@ -4,14 +4,16 @@ using BL.API.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BL.API.DataAccess.Migrations
 {
     [DbContext(typeof(EFContext))]
-    partial class EFContextModelSnapshot : ModelSnapshot
+    [Migration("20211225114348_FollowUpMigration")]
+    partial class FollowUpMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,8 +82,7 @@ namespace BL.API.DataAccess.Migrations
                         .HasColumnType("tinyint");
 
                     b.Property<string>("ScreenshotLink")
-                        .IsRequired()
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("varchar(128)");
 
                     b.Property<Guid?>("SeasonId")
                         .HasColumnType("uniqueidentifier");
@@ -91,8 +92,7 @@ namespace BL.API.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ScreenshotLink")
-                        .IsUnique();
+                    b.HasIndex("ScreenshotLink");
 
                     b.HasIndex("SeasonId");
 

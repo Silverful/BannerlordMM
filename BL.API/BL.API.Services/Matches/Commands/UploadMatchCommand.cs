@@ -6,7 +6,6 @@ using BL.API.Core.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,31 +20,23 @@ namespace BL.API.Services.Matches.Commands
         public class UploadMatchCommandHandler: IRequestHandler<UploadMatchCommand, Guid>
         {
             private readonly IRepository<Match> _matchRepository;
-            private readonly IRepository<PlayerMatchRecord> _playerRecords;
-            private readonly IRepository<Player> _players;
-            private readonly IMMRCalculationService _mmrCalculation;
             private readonly ILogger<UploadMatchCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
+            private readonly IMediator _mediator;
 
             public UploadMatchCommandHandler(IRepository<Match> matchRepository, 
-                IRepository<PlayerMatchRecord> playerRecords,
-                IRepository<Player> players,
-                IMMRCalculationService mmrCalculation,
                 ISeasonResolverService seasonService,
+                IMediator mediator,
                 ILogger<UploadMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
-                _playerRecords = playerRecords;
-                _players = players;
-                _mmrCalculation = mmrCalculation;
                 _seasonService = seasonService;
+                _mediator = mediator;
                 _logger = logger;
             }
 
             public async Task<Guid> Handle(UploadMatchCommand request, CancellationToken cancellationToken)
             {
-                if ((await _matchRepository.GetFirstWhereAsync(m => m.ScreenshotLink == request.ScreenshotLink)) != null) throw new AlreadyExistsException();
-
                 var season = await _seasonService.GetCurrentSeasonAsync();
 
                 var match = new Match()
@@ -65,37 +56,14 @@ namespace BL.API.Services.Matches.Commands
                 foreach (var record in match.PlayerRecords)
                 {
                     record.Match = match;
-
-                    if (record.PlayerId.HasValue)
-                    {
-                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId && pr.Match.SeasonId == season.Id)).Count();
-
-                        record.CalibrationIndex = (byte)(playerMatchRecordCount >= 10 ? 0 : 10 - playerMatchRecordCount);
-                        record.MMRChange = _mmrCalculation.CalculateMMRChange(record);
-                    }
-                }
-
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                {
-                    await _matchRepository.CreateAsync(match);
-
-                    var playersToUpdate = new List<Player>();
-
-                    foreach (var record in match.PlayerRecords)
-                    {
-                        if (record.PlayerId.HasValue && record.MMRChange.HasValue)
-                        {
-                            var player = await _players.GetByIdAsync(record.PlayerId.Value);
-
-                            player.PlayerMMR.MMR += record.MMRChange.Value;
-                            playersToUpdate.Add(player);
-                        }
-                    }
-
-                    await _players.UpdateRangeAsync(playersToUpdate);
-                    scope.Complete();
                 }
                 
+                await _matchRepository.CreateAsync(match);
+
+                foreach (var rec in match.PlayerRecords)
+                {
+                    await _mediator.Send(new ReloadPlayersRecordsCommand.Query(rec));
+                }
 
                 _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
 

@@ -9,27 +9,26 @@ namespace BL.API.Core.Abstractions.Repositories
     public interface IRepository<T>
         where T : IBaseEntity
     {
-        Task<IEnumerable<T>> GetAllAsync();
-
-        Task<T> GetByIdAsync(Guid id);
-
-        Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids);
+        Task<IEnumerable<T>> GetAllAsync(bool isRead = true);
+        Task<T> GetByIdAsync(Guid id, bool isRead = true);
+        Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids, bool isRead = true);
+        Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool isRead = true);
+        Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate, bool isRead = true);
 
         Task<Guid> CreateAsync(T model);
         Task<IEnumerable<Guid>> CreateRangeAsync(IEnumerable<T> models);
 
         Task DeleteAsync(T model);
         Task DeleteRangeAsync(IEnumerable<T> models);
+
         Task UpdateAsync(T model);
         Task UpdateRangeAsync(IEnumerable<T> models);
 
         Task DeleteAsync(Guid id);
         Task DeleteRangeAsync(IEnumerable<Guid> ids);
 
-        Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate);
-
-        Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate);
-
         Task SaveAsync();
+        void Detach(T entity);
+        void DetachRange(IEnumerable<T> entities);
     }
 }

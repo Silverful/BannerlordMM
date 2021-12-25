@@ -26,12 +26,14 @@ namespace BL.API.Services.Matches.Commands
             private readonly IMMRCalculationService _mmrCalculation;
             private readonly ILogger<UpdateMatchCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
+            private readonly IMediator _mediator;
 
             public UpdateMatchCommandHandler(IRepository<Match> matchRepository,
                 IRepository<PlayerMatchRecord> playerRecords,
                 IRepository<Player> players,
                 IMMRCalculationService mmrCalculation,
                 ISeasonResolverService seasonService,
+                IMediator mediator,
                 ILogger<UpdateMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
@@ -39,16 +41,17 @@ namespace BL.API.Services.Matches.Commands
                 _players = players;
                 _mmrCalculation = mmrCalculation;
                 _seasonService = seasonService;
+                _mediator = mediator;
                 _logger = logger;
             }
 
             public async Task<Task> Handle(UpdateMatchCommand request, CancellationToken cancellationToken)
             {
-                var match = await _matchRepository.GetByIdAsync(request.MatchId);
-
-                var matchSeason = await _seasonService.GetSeasonOnDateAsync(match.MatchDate);
+                 var match = await _matchRepository.GetByIdAsync(request.MatchId, false);
 
                 if (match == null) throw new NotFoundException();
+
+                var matchSeason = await _seasonService.GetSeasonOnDateAsync(match.MatchDate);
 
                 match.ScreenshotLink = request.ScreenshotLink;
                 match.MatchDate = request.MatchDate;
@@ -85,18 +88,7 @@ namespace BL.API.Services.Matches.Commands
 
                 match.PlayerRecords = updatedRecords;
 
-                foreach (var record in match.PlayerRecords)
-                {
-                    if (record.PlayerId.HasValue)
-                    {
-                        var playerMatchRecordCount = (await _playerRecords.GetWhereAsync(pr => pr.PlayerId == record.PlayerId && pr.Match.SeasonId.Value == matchSeason.Id)).Count();
-
-                        var isExistsAdd = record.Id == Guid.Empty? 0 : 1;
-
-                        record.CalibrationIndex = (byte)((playerMatchRecordCount - isExistsAdd) >= 10 ? 0 : 10 - playerMatchRecordCount + isExistsAdd); //old records still in the db
-                        record.MMRChange = _mmrCalculation.CalculateMMRChange(record);
-                    }
-                }
+                
 
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
@@ -104,21 +96,26 @@ namespace BL.API.Services.Matches.Commands
                     await _players.UpdateRangeAsync(reversedPlayers);
                     await _matchRepository.UpdateAsync(match);
 
-                    var playersToUpdate = new List<Player>();
+                    //var playersToUpdate = new List<Player>();
 
-                    foreach (var record in match.PlayerRecords)
-                    {
-                        if (record.PlayerId.HasValue && record.MMRChange.HasValue)
-                        {
-                            var player = reversedPlayers.Where(p => p.Id == record.PlayerId).FirstOrDefault() ?? await _players.GetByIdAsync(record.PlayerId.Value);
+                    //foreach (var record in match.PlayerRecords)
+                    //{
+                    //    if (record.PlayerId.HasValue && record.MMRChange.HasValue)
+                    //    {
+                    //        var player = reversedPlayers.Where(p => p.Id == record.PlayerId).FirstOrDefault() ?? await _players.GetByIdAsync(record.PlayerId.Value);
 
-                            player.PlayerMMR.MMR += record.MMRChange.Value;
-                            playersToUpdate.Add(player);
-                        }
-                    }
-                    await _players.UpdateRangeAsync(playersToUpdate);
+                    //        player.PlayerMMR.MMR += record.MMRChange.Value;
+                    //        playersToUpdate.Add(player);
+                    //    }
+                    //}
+                    //await _players.UpdateRangeAsync(playersToUpdate);
 
                     scope.Complete();
+                }
+
+                foreach (var rec in match.PlayerRecords)
+                {
+                    await _mediator.Send(new ReloadPlayersRecordsCommand.Query(rec));
                 }
 
                 _logger?.LogInformation($"Match updated {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");

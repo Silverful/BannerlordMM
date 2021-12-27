@@ -8,6 +8,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using System.Collections.Generic;
+using BL.API.Services.Stats.Model;
 
 namespace BL.API.WebHost.Controllers
 {
@@ -15,51 +17,83 @@ namespace BL.API.WebHost.Controllers
     [Route("api/[controller]")]
     public class PlayersController : ControllerBase
     {
-        private readonly ILogger<PlayersController> _logger;
         private readonly IMediator _mediator;
 
-        public PlayersController(ILogger<PlayersController> logger, IMediator mediator)
+        public PlayersController(IMediator mediator)
         {
-            _logger = logger;
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Gets all players
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<Player>>> Get()
         {
             return Ok(await _mediator.Send(new GetAllPlayersQuery.Query()));
         }
 
+        /// <summary>
+        /// Gets player by GUID
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <returns></returns>
         [HttpGet("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetById([FromQuery] string playerId)
+        public async Task<ActionResult<Player>> GetById(string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
+            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
 
-            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            return player == null ? NotFound() : Ok(player);
+            return Ok(player);
         }
 
+        /// <summary>
+        /// Get players stats by GUID
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <returns></returns>
         [HttpGet("{playerId}/stats")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetPlayerStats([FromQuery] string playerId)
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStats([FromRoute]string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
+            var player = await _mediator.Send(new GetPlayerStatsQuery.Query(playerId));
 
-            var player = await _mediator.Send(new GetPlayerStats.Query(id));
-
-            return player == null ? NotFound() : Ok(player);
+            return Ok(player);
         }
 
-        [HttpGet("/stats")]
-        public async Task<IActionResult> GetPlayersStats()
+        /// <summary>
+        /// Gets players stats by DiscordId
+        /// </summary>
+        /// <param name="discordId"></param>
+        /// <returns></returns>
+        [HttpGet("discord/{discordId}/stats")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStatsByDiscordId([FromRoute]long discordId)
         {
-            return Ok(await _mediator.Send(new GetPlayersStats.Query()));
+            var player = await _mediator.Send(new GetPlayerStatsByDiscordIdQuery.Query(discordId));
+
+            return Ok(player);
+        }
+
+        [HttpGet("stats")]
+        public async Task<ActionResult<IEnumerable<PlayerStatItemResponse>>> GetPlayersStats()
+        {
+            return Ok(await _mediator.Send(new GetPlayersStatsQuery.Query(null, null, null)));
+        }
+
+        [HttpGet("nicknames")]
+        public async Task<ActionResult<GetNicknamesQuery.PlayerNickname>> GetNicknames()
+        {
+            return Ok(await _mediator.Send(new GetNicknamesQuery.Query()));
         }
 
         [HttpPost]
@@ -68,69 +102,60 @@ namespace BL.API.WebHost.Controllers
         [ProducesDefaultResponseType]
         public async Task<IActionResult> Post([FromBody] AddPlayerCommand request)
         {
-            var player = await _mediator.Send(request);
-            return CreatedAtAction(nameof(AddPlayerCommand), new { id = player }, player);
+            var playerId = await _mediator.Send(request);
+            return CreatedAtAction("Post", new { id = playerId }, playerId);
         }
 
-        [HttpPut]
+        [HttpPut("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Put([FromBody] UpdatePlayerCommand request, string playerId)
+        public async Task<IActionResult> Put(string playerId, [FromBody] UpdatePlayerCommand request)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
-
-            var dbPlayer = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            if (dbPlayer == null)
-                return NotFound();
+            if (request.Id != playerId)
+            {
+                return BadRequest();
+            }
 
             return Ok(await _mediator.Send(request));
         }
 
-        [HttpDelete]
+        [HttpDelete("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Delete([FromQuery] string playerId)
+        public async Task<IActionResult> Delete(string playerId)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
-
-            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            if (player == null)
-                return NotFound();
-
-            return Ok(await _mediator.Send(new DeletePlayerCommand.Command(id)));
+            return Ok(await _mediator.Send(new DeletePlayerCommand.Command(playerId)));
         }
 
-        [HttpPatch]
+        /// <summary>
+        /// Partial update method. Body request example "[{"value": "Archer", "path": "/mainClass", "op": "replace"}]
+        /// </summary>
+        /// <param name="playerId"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPatch("{playerId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<Player> request, string playerId)
+        public async Task<IActionResult> Patch(string playerId, [FromBody] JsonPatchDocument<Player> request)
         {
-            if (!Guid.TryParse(playerId, out Guid id)) return BadRequest();
-
-            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(id));
-
-            if (player == null)
-                return NotFound();
+            var player = await _mediator.Send(new GetPlayerByIdQuery.Query(playerId));
 
             request.ApplyTo(player, ModelState);
 
             var updateCmd = new UpdatePlayerCommand
             {
-                Id = player.Id,
+                Id = playerId,
                 Nickname = player.Nickname,
                 Country = player.Country,
                 Clan = player.Clan,
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
-                DiscordId = player.DiscordId,
-                PlayerMMR = player.PlayerMMR
+                DiscordId = player.DiscordId
             };
 
             return Ok(await _mediator.Send(updateCmd));

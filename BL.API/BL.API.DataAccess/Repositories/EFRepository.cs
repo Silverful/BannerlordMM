@@ -20,6 +20,7 @@ namespace BL.API.DataAccess.Repositories
             _dbContext = context;
         }
 
+        #region Create
         public async Task<Guid> CreateAsync(T model)
         {
             await _dbContext.Set<T>().AddAsync(model);
@@ -29,6 +30,20 @@ namespace BL.API.DataAccess.Repositories
             return model.Id;
         }
 
+        public async Task<IEnumerable<Guid>> CreateRangeAsync(IEnumerable<T> models)
+        {
+
+            await _dbContext.Set<T>().AddRangeAsync(models);
+
+            await _dbContext.SaveChangesAsync();
+
+
+
+            return models.Select(m => m.Id);
+        }
+        #endregion
+
+        #region Delete
         public async Task DeleteAsync(T model)
         {
             _dbContext.Set<T>().Remove(model);
@@ -42,30 +57,78 @@ namespace BL.API.DataAccess.Repositories
             await DeleteAsync(entity);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task DeleteRangeAsync(IEnumerable<T> models)
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            _dbContext.Set<T>().RemoveRange(models);
+
+            await _dbContext.SaveChangesAsync();
+
         }
 
-        public async Task<T> GetByIdAsync(Guid id)
+        public async Task DeleteRangeAsync(IEnumerable<Guid> ids)
         {
-            return await _dbContext.Set<T>().Where(x => x.Id == id).FirstOrDefaultAsync();
+            var models = await GetRangeByIdsAsync(ids.ToList(), false);
+            await DeleteRangeAsync(models);
+
+            await _dbContext.SaveChangesAsync();
+
+        }
+        #endregion
+
+        #region Get
+        public async Task<IEnumerable<T>> GetAllAsync(bool isRead, params Expression<Func<T, object>>[] includes)
+        {
+            var query = GetQuery(isRead, includes);
+
+            return await query.ToListAsync();
         }
 
-        public async Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T> GetByIdAsync(Guid id, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return await _dbContext.Set<T>().Where(predicate).FirstOrDefaultAsync();
+            var query = GetQuery(isRead, includes);
+
+            return await query.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids)
+        public async Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return await _dbContext.Set<T>().Where(x => ids.Contains(x.Id)).ToListAsync();
+            var query = GetQuery(isRead, includes);
+
+            return await query.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
+            var query = GetQuery(isRead, includes);
+
+            return await query.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
+
+        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool isRead, params Expression<Func<T, object>>[] includes)
+        {
+            var query = GetQuery(isRead, includes);
+
+            return await query.Where(predicate).ToListAsync();
+        }
+
+        private IQueryable<T> GetQuery(bool isRead, params Expression<Func<T, object>>[] includes)
+        {
+            var query = _dbContext.Set<T>().AsQueryable();
+
+            if (isRead)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (includes != null)
+            {
+                query = includes.Aggregate(query,
+                  (current, include) => current.Include(include));
+            }
+
+            return query;
+        }
+        #endregion
 
         public async Task SaveAsync()
         {
@@ -77,5 +140,26 @@ namespace BL.API.DataAccess.Repositories
             _dbContext.Set<T>().Update(model);
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task UpdateRangeAsync(IEnumerable<T> models)
+        {
+            _dbContext.Set<T>().UpdateRange(models);
+
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public void Detach(T entity)
+        {
+            _dbContext.Entry(entity).State = EntityState.Detached;
+        }
+
+        public void DetachRange(IEnumerable<T> entities)
+        {
+            foreach (var entity in entities)
+            {
+                _dbContext.Entry(entity).State = EntityState.Detached;
+            }
+        }
+
     }
 }

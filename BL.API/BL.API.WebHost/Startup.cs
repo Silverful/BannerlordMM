@@ -42,7 +42,7 @@ namespace BL.API.WebHost
 
             services.AddDbContext<EFContext>(option =>
             {
-                option.UseSqlServer(sqlConnectionString);
+                option.UseSqlServer(sqlConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             });
 
             services

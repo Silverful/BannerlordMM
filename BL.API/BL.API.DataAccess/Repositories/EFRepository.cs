@@ -76,63 +76,57 @@ namespace BL.API.DataAccess.Repositories
         #endregion
 
         #region Get
-        public async Task<IEnumerable<T>> GetAllAsync(bool isRead)
+        public async Task<IEnumerable<T>> GetAllAsync(bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return isRead ?
-                await _dbContext.Set<T>()
-                .AsNoTracking()
-                .ToListAsync()
-                :
-                await _dbContext.Set<T>()
-                .ToListAsync();
+            var query = GetQuery(isRead, includes);
+
+            return await query.ToListAsync();
         }
 
-        public async Task<T> GetByIdAsync(Guid id, bool isRead)
+        public async Task<T> GetByIdAsync(Guid id, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return isRead ?
-                await _dbContext.Set<T>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id)
-                :
-                await _dbContext.Set<T>()
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var query = GetQuery(isRead, includes);
+
+            return await query.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate, bool isRead)
+        public async Task<T> GetFirstWhereAsync(Expression<Func<T, bool>> predicate, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return isRead ? 
-                await _dbContext.Set<T>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(predicate)
-                :
-                await _dbContext.Set<T>()
-                .FirstOrDefaultAsync(predicate);
+            var query = GetQuery(isRead, includes);
+
+            return await query.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids, bool isRead)
+        public async Task<IEnumerable<T>> GetRangeByIdsAsync(List<Guid> ids, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return isRead ?
-                await _dbContext.Set<T>()
-                .AsNoTracking()
-                .Where(x => ids.Contains(x.Id))
-                .ToListAsync()
-                :
-                await _dbContext.Set<T>()
-                .Where(x => ids.Contains(x.Id))
-                .ToListAsync();
+            var query = GetQuery(isRead, includes);
+
+            return await query.Where(x => ids.Contains(x.Id)).ToListAsync();
         }
 
-        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool isRead)
+        public async Task<IEnumerable<T>> GetWhereAsync(Expression<Func<T, bool>> predicate, bool isRead, params Expression<Func<T, object>>[] includes)
         {
-            return isRead ? 
-                await _dbContext.Set<T>()
-                .Where(predicate)
-                .AsNoTracking()
-                .ToListAsync()
-                : 
-                await _dbContext.Set<T>()
-                .Where(predicate)
-                .ToListAsync();
+            var query = GetQuery(isRead, includes);
+
+            return await query.Where(predicate).ToListAsync();
+        }
+
+        private IQueryable<T> GetQuery(bool isRead, params Expression<Func<T, object>>[] includes)
+        {
+            var query = _dbContext.Set<T>().AsQueryable();
+
+            if (isRead)
+            {
+                query = query.AsNoTracking();
+            }
+
+            if (includes != null)
+            {
+                query = includes.Aggregate(query,
+                  (current, include) => current.Include(include));
+            }
+
+            return query;
         }
         #endregion
 
@@ -166,5 +160,6 @@ namespace BL.API.DataAccess.Repositories
                 _dbContext.Entry(entity).State = EntityState.Detached;
             }
         }
+
     }
 }

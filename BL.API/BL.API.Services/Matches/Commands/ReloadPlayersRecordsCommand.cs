@@ -76,8 +76,8 @@ namespace BL.API.Services.Matches.Commands
                             && pr.Match.SeasonId == redoMatch.SeasonId
                             && pr.PlayerId == redoRecord.PlayerId
                             && pr.CalibrationIndex.HasValue
-                            && pr.CalibrationIndex > 0
-                            && pr.CalibrationIndex.Value <= calibrationIndex, false))
+                            && pr.CalibrationIndex.Value > 0
+                            && pr.CalibrationIndex.Value <= calibrationIndex, false, pr => pr.Match))
                         .OrderByDescending(pr => pr.CalibrationIndex);
 
                         if (successiveRecords.Count() > 0)

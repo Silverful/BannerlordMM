@@ -22,7 +22,9 @@ namespace BL.API.DataAccess.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+#if DEBUG
             optionsBuilder.EnableSensitiveDataLogging();
+#endif
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -88,10 +90,6 @@ namespace BL.API.DataAccess.Data
 
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Navigation(p => p.Player)
-                .AutoInclude();
-
-            modelBuilder.Entity<PlayerMatchRecord>()
-                .Navigation(p => p.Match)
                 .AutoInclude();
         }
     }

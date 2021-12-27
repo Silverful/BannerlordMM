@@ -16,15 +16,15 @@ namespace BL.API.Services.Players.Queries
 
         public class GetPlayersStatsHandler : IRequestHandler<Query, IEnumerable<PlayerStatItemResponse>>
         {
-            private readonly IRepository<PlayerMatchRecord> _matchRecords;
+            private readonly IRepository<Match> _matches;
             private readonly IRepository<Player> _players;
             private readonly IMediator _mediator;
 
-            public GetPlayersStatsHandler(IRepository<PlayerMatchRecord> matchRecords, 
+            public GetPlayersStatsHandler(IRepository<Match> matches,
                 IRepository<Player> players,
                 IMediator mediator)
             {
-                _matchRecords = matchRecords;
+                _matches = matches;
                 _players = players;
                 _mediator = mediator;
             }
@@ -32,7 +32,7 @@ namespace BL.API.Services.Players.Queries
             public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var players = request.Players ?? await _players.GetAllAsync();
-                var matchRecords = request.MatchRecords ?? await _matchRecords.GetAllAsync();
+                var matchRecords = request.MatchRecords ?? (await _matches.GetAllAsync()).Select(x => x.PlayerRecords).SelectMany(x => x);
                 var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(players));
 
                 var groupedMatchRecords = from record in matchRecords

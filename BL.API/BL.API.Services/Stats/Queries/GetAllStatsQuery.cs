@@ -18,19 +18,19 @@ namespace BL.API.Services.Players.Queries
 
         public class GetAllStatsQueryHandler : IRequestHandler<Query, AllStatsResponse>
         {
-            private readonly IRepository<PlayerMatchRecord> _matchRecords;
             private readonly IRepository<Player> _players;
             private readonly StatsProps _statsProps;
+            private readonly IRepository<Match> _matches;
             private readonly IMediator _mediator;
 
-            public GetAllStatsQueryHandler(IRepository<PlayerMatchRecord> matchRecords, 
-                IRepository<Player> players,
+            public GetAllStatsQueryHandler(IRepository<Player> players,
+                IRepository<Match> matches,
                 IOptions<StatsProps> statsProps,
                 IMediator mediator
                 )
             {
-                _matchRecords = matchRecords;
                 _players = players;
+                _matches = matches;
                 _statsProps = statsProps.Value;
                 _mediator = mediator;
             }
@@ -40,7 +40,8 @@ namespace BL.API.Services.Players.Queries
             public async Task<AllStatsResponse> Handle(Query request, CancellationToken cancellationToken)
             {
                 var players = await _players.GetAllAsync();
-                var matchRecords = await _matchRecords.GetAllAsync();
+                var matches = await _matches.GetAllAsync();
+                var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
                 var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
 
                 var playerStats = await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable));

@@ -40,7 +40,7 @@ namespace BL.API.Services.Players.Queries
 
                 var players = await _players.GetAllAsync();
 
-                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id);
+                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id, false, mr => mr.Match);
 
                 var records =
                     from record in matchRecords

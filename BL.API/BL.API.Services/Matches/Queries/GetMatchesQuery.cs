@@ -11,9 +11,9 @@ namespace BL.API.Services.Matches.Queries
 {
     public static class GetMatchesQuery 
     {
-        public record Query() : IRequest<IEnumerable<PlayerMatchResponse>>;
+        public record Query() : IRequest<IEnumerable<MatchResponse>>;
 
-        public class GetMatchesQueryHandler : IRequestHandler<Query, IEnumerable<PlayerMatchResponse>>
+        public class GetMatchesQueryHandler : IRequestHandler<Query, IEnumerable<MatchResponse>>
         {
             private readonly IRepository<Match> _repository;
 
@@ -22,42 +22,14 @@ namespace BL.API.Services.Matches.Queries
                 _repository = repository;
             }
 
-            public async Task<IEnumerable<PlayerMatchResponse>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<IEnumerable<MatchResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var matchRecords = (await _repository.GetAllAsync())
-                    .OrderBy(m => m.MatchDate)
-                    .SelectMany(m => m.PlayerRecords)
-                    .Select(mr => new PlayerMatchResponse
-                    {
-                        Date = mr.Match.MatchDate,
-                        Nickname = mr.Player.Nickname,
-                        Played = (byte)1,
-                        Wins = (byte)(mr.TeamIndex == mr.Match.TeamWon ? 1 : 0),
-                        Rounds = mr.Match.RoundsPlayed,
-                        Kills = mr.Kills,
-                        Assists = mr.Assists,
-                        Score = mr.Score,
-                        ScreenshotLink = mr.Match.ScreenshotLink,
-                        CalibrationIndex = 0
-                    })
-                    .ToList();
+                var matchRecords = await _repository.GetAllAsync();
 
-                return matchRecords;
+                var response = matchRecords.Select(m => MatchResponse.FromMatch(m)).ToList();
+
+                return response;
             }
-        }
-
-        public class PlayerMatchResponse
-        {
-            public DateTime Date { get; set; }
-            public string Nickname { get; set; }
-            public byte? Played { get; set; }
-            public byte? Wins { get; set; }
-            public byte? Rounds { get; set; }
-            public sbyte? Kills { get; set; }
-            public sbyte? Assists { get; set; }
-            public int? Score { get; set; }
-            public string ScreenshotLink { get; set; }
-            public byte CalibrationIndex { get; set; }
         }
     }
 }

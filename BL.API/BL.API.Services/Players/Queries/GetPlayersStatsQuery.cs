@@ -45,9 +45,17 @@ namespace BL.API.Services.Players.Queries
                             from gmr in jgmr.DefaultIfEmpty()
                             select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr, rankTable);
 
-                return stats
+                var response = stats
                     .OrderByDescending(s => s.MMR)
                     .ToList();
+
+                int i = 1;
+                foreach (var r in response)
+                {
+                    r.Position = i++;
+                }
+
+                return response;
             }
         }
     }

@@ -52,7 +52,8 @@ namespace BL.API.Services.Players.Queries
                                 join player in players on gmr.Key equals player.Id
                                 where gmr.Count() > MinimumMatchesPlayed && player.IsIGL
                                 select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
-                                .OrderByDescending(x => x.Value);
+                                .OrderByDescending(x => x.Value)
+                                .Take(10);
 
                 var factionStats = (from mr in matchRecords
                                    where mr.Faction.HasValue

@@ -47,13 +47,12 @@ namespace BL.API.Services.Players.Queries
 
                 var response = stats
                     .OrderByDescending(s => s.MMR)
+                    .Select((s, i) =>
+                    {
+                        s.Position = i + 1;
+                        return s;
+                    })
                     .ToList();
-
-                int i = 1;
-                foreach (var r in response)
-                {
-                    r.Position = i++;
-                }
 
                 return response;
             }

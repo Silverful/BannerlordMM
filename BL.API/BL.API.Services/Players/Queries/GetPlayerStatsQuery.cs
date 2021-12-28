@@ -20,13 +20,16 @@ namespace BL.API.Services.Players.Queries
             private readonly IRepository<PlayerMatchRecord> _matchRecords;
             private readonly IRepository<Player> _players;
             private readonly IMediator _mediator;
+            private readonly IRepository<PlayerMMR> _mmrs;
 
             public GetPlayerStatsHandler(IRepository<Player> players, 
+                IRepository<PlayerMMR> mmrs,
                 IRepository<PlayerMatchRecord> matchRecords,
                 IMediator mediator)
             {
                 _matchRecords = matchRecords;
                 _players = players;
+                _mmrs = mmrs;
                 _mediator = mediator;
             }
 
@@ -49,7 +52,17 @@ namespace BL.API.Services.Players.Queries
 
                 var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
                 var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable);
-                
+
+                var pos = (await _mmrs.GetAllAsync())
+                    .Where(m => m.Season.OnGoing)
+                    .OrderByDescending(m => m.MMR)
+                    .Select((m, i) => new { m.PlayerId, i })
+                    .Where(mi => mi.PlayerId == player.Id)
+                    .Select(mi => mi.i)
+                    .First();
+
+                stats.Position = pos + 1;
+
                 return stats;
             }
         }

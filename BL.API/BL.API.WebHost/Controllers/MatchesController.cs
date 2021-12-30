@@ -63,5 +63,14 @@ namespace BL.API.WebHost.Controllers
             await _mediator.Send(request);
             return Ok();
         }
+
+        [HttpDelete("{matchId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Delete(Guid matchId)
+        {
+            await _mediator.Send(new DeleteMatchCommand.Query(matchId));
+            return Ok();
+        }
     }
 }

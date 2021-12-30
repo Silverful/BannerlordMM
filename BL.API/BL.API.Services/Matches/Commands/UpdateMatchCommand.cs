@@ -78,37 +78,21 @@ namespace BL.API.Services.Matches.Commands
                     if (sameRecord != null)
                     {
                         r.Created = sameRecord.Created;
-                    }
-
-                    if (sameRecord != null)
-                    {
                         oldRecords.Remove(sameRecord);
                     }
                 });
 
                 match.PlayerRecords = updatedRecords;
 
-                
-
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    await _playerRecords.DeleteRangeAsync(oldRecords);
+                    //after match deletion all the next games should be recalculated 
+                    foreach (var oldRecord in oldRecords)
+                    {
+                        await _mediator.Send(new DeleteMatchRecordCommand.Query(oldRecord));
+                    }
                     await _players.UpdateRangeAsync(reversedPlayers);
                     await _matchRepository.UpdateAsync(match);
-
-                    //var playersToUpdate = new List<Player>();
-
-                    //foreach (var record in match.PlayerRecords)
-                    //{
-                    //    if (record.PlayerId.HasValue && record.MMRChange.HasValue)
-                    //    {
-                    //        var player = reversedPlayers.Where(p => p.Id == record.PlayerId).FirstOrDefault() ?? await _players.GetByIdAsync(record.PlayerId.Value);
-
-                    //        player.PlayerMMR.MMR += record.MMRChange.Value;
-                    //        playersToUpdate.Add(player);
-                    //    }
-                    //}
-                    //await _players.UpdateRangeAsync(playersToUpdate);
 
                     scope.Complete();
                 }

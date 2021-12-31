@@ -13,7 +13,7 @@ function getStats() {
     const mainSpread = SpreadsheetApp.getActiveSpreadsheet().getSheets();
 
     const spreadsheet = mainSpread[0];
-    const pfSheet = mainSpread[2];
+    const pfSheet = mainSpread[1];
 
     let cell = parseInt(1);
     let row = 0;
@@ -35,6 +35,8 @@ function getStats() {
         spreadsheet.getRange(row, cell++).setValue(obj.mainClass);
         spreadsheet.getRange(row, cell).setValue('');
         spreadsheet.getRange(row, cell++).setValue(obj.secondaryClass);
+        spreadsheet.getRange(row, cell).setValue('');
+        spreadsheet.getRange(row, cell++).setValue(obj.rank);
         spreadsheet.getRange(row, cell).setValue('');
         spreadsheet.getRange(row, cell++).setValue(obj.mmr);
         spreadsheet.getRange(row, cell).setValue('');
@@ -65,8 +67,7 @@ function getStats() {
         spreadsheet.getRange(row, cell++).setValue(obj.mvpr);
         spreadsheet.getRange(row, cell).setValue('');
         spreadsheet.getRange(row, cell++).setValue(obj.discordId);
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell++).setValue(obj.rank);
+        
         cell = parseInt(1);
     });
 
@@ -74,81 +75,76 @@ function getStats() {
 
     row = 19;
     cell += 2;
-    const archers = topPlayerByClassStats.archer;
-    Object.keys(archers).forEach((obj, i) => {
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell).setValue(i + 1);
-        spreadsheet.getRange(row, cell + 1).setValue('');
-        spreadsheet.getRange(row, cell + 1).setValue(obj);
-        spreadsheet.getRange(row, cell + 2).setValue('');
-        spreadsheet.getRange(row, cell + 2).setValue(archers[obj]);
 
-        row++;
-    })
+    const rowsTotal = 15;
+    const archers = Object.keys(topPlayerByClassStats.archer);
+    const infs = Object.keys(topPlayerByClassStats.infantry);
+    const cavalry = Object.keys(topPlayerByClassStats.cavalry);
 
-    row = 19;
-    cell += 3;
+    for (var i = 0; i < rowsTotal; i++){
+      let arch = archers[i];
+      let inf = infs[i];
+      let cav = cavalry[i];
 
-    const infs = topPlayerByClassStats.infantry;
-    Object.keys(infs).forEach((obj, i) => {
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell).setValue(obj);
-        spreadsheet.getRange(row, cell + 1).setValue('');
-        spreadsheet.getRange(row, cell + 1).setValue(infs[obj]);
+      spreadsheet.getRange(row, cell).setValue('');
+      spreadsheet.getRange(row, cell).setValue(i + 1);
 
-        row++;
-    })
+      spreadsheet.getRange(row, cell + 1).setValue('');
+      spreadsheet.getRange(row, cell + 2).setValue('');
+      if (arch){
+        spreadsheet.getRange(row, cell + 1).setValue(arch);
+        spreadsheet.getRange(row, cell+ 2).setValue(topPlayerByClassStats.archer[arch]);
+      } 
 
-    row = 19;
-    cell += 2;
+      spreadsheet.getRange(row, cell + 3).setValue('');
+      spreadsheet.getRange(row, cell + 4).setValue('');
+      if (inf){
+        spreadsheet.getRange(row, cell + 3).setValue(inf);
+        spreadsheet.getRange(row, cell + 4).setValue(topPlayerByClassStats.infantry[inf]);
+      }
 
-    const cavalry = topPlayerByClassStats.cavalry;
-    Object.keys(cavalry).forEach((obj, i) => {
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell).setValue(obj);
-        spreadsheet.getRange(row, cell + 1).setValue('');
-        spreadsheet.getRange(row, cell + 1).setValue(cavalry[obj]);
+      spreadsheet.getRange(row, cell + 5).setValue('');
+      spreadsheet.getRange(row, cell + 6).setValue('');
+      if (cav){
+        spreadsheet.getRange(row, cell + 5).setValue(cav);
+        spreadsheet.getRange(row, cell + 6).setValue(topPlayerByClassStats.cavalry[cav]);
+      }
+      row++;
+    }
 
-        row++;
-    })
-
-    const lastStatsRow = row += 3;
+    const lastStatsRow = row;
     row += 2;
-    cell -= 5;
+
+    const iglStatsIndices = 10;
+
+    for (var i = 0; i < iglStatsIndices; i++){
+      spreadsheet.getRange(row + i, cell).setValue('');
+      spreadsheet.getRange(row + i, cell).setValue(i + 1);
+    }
 
     Object.keys(iglStats).forEach((obj, i) => {
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell).setValue(i + 1);
-        spreadsheet.getRange(row, cell + 1).setValue('');
-        spreadsheet.getRange(row, cell + 1).setValue(obj);
-        spreadsheet.getRange(row, cell + 2).setValue('');
-        spreadsheet.getRange(row, cell + 2).setValue(iglStats[obj]);
-
-        row++;
+        spreadsheet.getRange(row + i, cell + 1).setValue('');
+        spreadsheet.getRange(row + i, cell + 1).setValue(obj);
+        spreadsheet.getRange(row + i, cell + 2).setValue('');
+        spreadsheet.getRange(row + i, cell + 2).setValue(iglStats[obj]);
     })
 
     cell += 3;
-    row = lastStatsRow + 2;
 
     Object.keys(divisionStats).forEach((obj, i) => {
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell).setValue(obj);
-        spreadsheet.getRange(row, cell + 1).setValue('');
-        spreadsheet.getRange(row, cell + 1).setValue(divisionStats[obj]);
-
-        row++;
+        spreadsheet.getRange(row + i, cell).setValue('');
+        spreadsheet.getRange(row + i, cell).setValue(obj);
+        spreadsheet.getRange(row + i, cell + 1).setValue('');
+        spreadsheet.getRange(row + i, cell + 1).setValue(divisionStats[obj]);
     })
 
     cell += 2;
-    row = lastStatsRow + 2;
 
     Object.keys(factionStats).forEach((obj, i) => {
-        spreadsheet.getRange(row, cell).setValue('');
-        spreadsheet.getRange(row, cell).setValue(obj);
-        spreadsheet.getRange(row, cell + 1).setValue('');
-        spreadsheet.getRange(row, cell + 1).setValue(factionStats[obj]);
-
-        row++;
+        spreadsheet.getRange(row + i, cell).setValue('');
+        spreadsheet.getRange(row + i, cell).setValue(obj);
+        spreadsheet.getRange(row + i, cell + 1).setValue('');
+        spreadsheet.getRange(row + i, cell + 1).setValue(factionStats[obj]);
     })
 
     playersByFactionStats.forEach((obj, i) => {
@@ -179,10 +175,3 @@ function getStats() {
         pfSheet.getRange(row, cell++).setValue(obj.vlandiaWR);
     })
 }
-
-function timeoutstats() {
-    ScriptApp.newTrigger('getStats')
-        .timeBased()
-        .everyMinutes(3)
-        .create();
-};

@@ -45,6 +45,7 @@ namespace BL.API.Services.Matches.Commands
                         var succeedingRecords = (await _matchRecords.GetWhereAsync(mr =>
                             mr.Id != record.Id
                             && mr.PlayerId == record.PlayerId
+                            && mr.Match.SeasonId == match.SeasonId
                             && mr.CalibrationIndex < record.CalibrationIndex, false, mr => mr.Match))
                         .OrderByDescending(mr => mr.CalibrationIndex)
                         .Take(record.CalibrationIndex.Value)

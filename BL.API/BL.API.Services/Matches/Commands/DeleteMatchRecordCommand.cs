@@ -51,12 +51,14 @@ namespace BL.API.Services.Matches.Commands
                         .Take(record.CalibrationIndex.Value)
                         .ToList();
 
+                        var calibrationIndex = record.CalibrationIndex;
                         foreach (var rec in succeedingRecords)
                         {
-                            rec.CalibrationIndex++;
+                            rec.CalibrationIndex = calibrationIndex;
                             var newMMRChange = _mmrService.CalculateMMRChange(record);
                             player.PlayerMMR.MMR = player.PlayerMMR.MMR - rec.MMRChange.Value + newMMRChange;
                             rec.MMRChange = newMMRChange;
+                            calibrationIndex--;
                         }
 
                         await _matchRecords.UpdateRangeAsync(succeedingRecords);

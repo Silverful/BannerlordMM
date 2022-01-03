@@ -76,15 +76,15 @@ namespace BL.API.Services.Matches.Commands
                             && pr.Match.SeasonId == redoMatch.SeasonId
                             && pr.PlayerId == redoRecord.PlayerId
                             && pr.CalibrationIndex.HasValue
-                            && pr.CalibrationIndex.Value > 0
                             && pr.CalibrationIndex.Value <= calibrationIndex, false, pr => pr.Match))
-                        .OrderByDescending(pr => pr.CalibrationIndex);
+                        .OrderByDescending(pr => pr.CalibrationIndex)
+                        .Take(calibrationIndex);
 
                         if (successiveRecords.Count() > 0)
                         {
                             foreach (var sucRec in successiveRecords)
                             {
-                                sucRec.CalibrationIndex -= 1;
+                                sucRec.CalibrationIndex = (byte?)(calibrationIndex - 1);
                                 if (sucRec.CalibrationIndex < 0)
                                 {
                                     sucRec.CalibrationIndex = 0;
@@ -93,6 +93,7 @@ namespace BL.API.Services.Matches.Commands
                                 var sMMRChange = _mmrCalculation.CalculateMMRChange(sucRec);
                                 updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (sucRec.MMRChange ?? 0) + sMMRChange;
                                 sucRec.MMRChange = sMMRChange;
+                                calibrationIndex--;
                             }
 
                             await _playerRecords.UpdateRangeAsync(successiveRecords);

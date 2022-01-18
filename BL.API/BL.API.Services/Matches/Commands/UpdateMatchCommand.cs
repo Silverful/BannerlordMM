@@ -47,7 +47,7 @@ namespace BL.API.Services.Matches.Commands
 
             public async Task<Task> Handle(UpdateMatchCommand request, CancellationToken cancellationToken)
             {
-                 var match = await _matchRepository.GetByIdAsync(request.MatchId, false);
+                var match = await _matchRepository.GetByIdAsync(request.MatchId, false, m => m.PlayerRecords);
 
                 if (match == null) throw new NotFoundException();
 
@@ -59,13 +59,12 @@ namespace BL.API.Services.Matches.Commands
                 match.TeamWon = (byte)(request.Team1Records.First().RoundsWon > request.Team2Records.First().RoundsWon ? 1 : 2);
 
                 //reduce old MMR changes
-                var oldRecords = match.PlayerRecords.ToList();
-                oldRecords.ForEach(pr => { pr.Player.PlayerMMR.MMR -= pr.MMRChange ?? 0; });
-                var reversedPlayers = match.PlayerRecords.Select(pr => pr.Player).ToList();
 
                 var updatedRecords = request.Team1Records.Select(t1 => t1.ToPlayerMatchRecord(1))
                     .Concat(request.Team2Records.Select(t2 => t2.ToPlayerMatchRecord(2)))
                     .ToList();
+
+                var oldRecords = match.PlayerRecords.ToList();
 
                 updatedRecords.ForEach(r =>
                 {
@@ -73,6 +72,7 @@ namespace BL.API.Services.Matches.Commands
 
                     r.Match = match;
                     r.MatchId = match.Id;
+                    r.MMRChange = sameRecord?.MMRChange;
                     r.Id = sameRecord?.Id ?? r.Id;
 
                     if (sameRecord != null)
@@ -82,16 +82,16 @@ namespace BL.API.Services.Matches.Commands
                     }
                 });
 
-                match.PlayerRecords = updatedRecords;
-
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    //after match deletion all the next games should be recalculated 
+                    //after match deletion all the next games should be recalculated
                     foreach (var oldRecord in oldRecords)
                     {
-                        await _mediator.Send(new DeleteMatchRecordCommand.Query(oldRecord));
+                        await _mediator.Send(new DeleteMatchRecordCommand.Query(oldRecord.Id));
                     }
-                    await _players.UpdateRangeAsync(reversedPlayers);
+
+                    match.PlayerRecords = updatedRecords;
+
                     await _matchRepository.UpdateAsync(match);
 
                     scope.Complete();

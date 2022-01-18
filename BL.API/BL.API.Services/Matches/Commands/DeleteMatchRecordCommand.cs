@@ -3,6 +3,7 @@ using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using MediatR;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace BL.API.Services.Matches.Commands
 {
     public class DeleteMatchRecordCommand
     {
-        public record Query(PlayerMatchRecord Record) : IRequest<Task>;
+        public record Query(Guid RecordId) : IRequest<Task>;
 
         public class DeleteMatchRecordCommandHandler : IRequestHandler<Query, Task>
         {
@@ -30,9 +31,9 @@ namespace BL.API.Services.Matches.Commands
 
             public async Task<Task> Handle(Query request, CancellationToken cancellationToken)
             {
-                var record = request.Record;
-                var match = request.Record.Match;
-                var player = request.Record.Player;
+                var record = await _matchRecords.GetByIdAsync(request.RecordId, false, r => r.Match, r => r.Player);
+                var match = record.Match;
+                var player = record.Player;
 
                 if (record.PlayerId.HasValue
                     && record.MMRChange.HasValue
@@ -55,7 +56,7 @@ namespace BL.API.Services.Matches.Commands
                         foreach (var rec in succeedingRecords)
                         {
                             rec.CalibrationIndex = calibrationIndex;
-                            var newMMRChange = _mmrService.CalculateMMRChange(record);
+                            var newMMRChange = _mmrService.CalculateMMRChange(rec);
                             player.PlayerMMR.MMR = player.PlayerMMR.MMR - rec.MMRChange.Value + newMMRChange;
                             rec.MMRChange = newMMRChange;
                             calibrationIndex--;
@@ -63,6 +64,7 @@ namespace BL.API.Services.Matches.Commands
 
                         await _matchRecords.UpdateRangeAsync(succeedingRecords);
                     }
+
                     await _players.UpdateAsync(player);
                 }
 

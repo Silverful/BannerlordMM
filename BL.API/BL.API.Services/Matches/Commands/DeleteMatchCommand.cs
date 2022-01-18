@@ -4,9 +4,6 @@ using BL.API.Core.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -41,7 +38,7 @@ namespace BL.API.Services.Matches.Commands
                 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 foreach (var record in match.PlayerRecords)
                 {
-                    await _mediator.Send(new DeleteMatchRecordCommand.Query(record));
+                    await _mediator.Send(new DeleteMatchRecordCommand.Query(record.Id));
                 }
 
                 await _matches.DeleteAsync(request.MatchId);

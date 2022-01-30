@@ -12,7 +12,7 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayersStatsQuery
     {
-        public record Query(IEnumerable<Player> Players, IEnumerable<PlayerMatchRecord> MatchRecords, IDictionary<string, decimal> RankTable) : IRequest<IEnumerable<PlayerStatItemResponse>>;
+        public record Query(IEnumerable<Player> Players, IEnumerable<PlayerMatchRecord> MatchRecords, IDictionary<string, double> RankTable) : IRequest<IEnumerable<PlayerStatItemResponse>>;
 
         public class GetPlayersStatsHandler : IRequestHandler<Query, IEnumerable<PlayerStatItemResponse>>
         {

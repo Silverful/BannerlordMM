@@ -12,9 +12,9 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetRanksQuery
     {
-        public record Query(IEnumerable<Player> Players) : IRequest<IDictionary<string, decimal>>;
+        public record Query(IEnumerable<Player> Players) : IRequest<IDictionary<string, double>>;
 
-        public class GetRanksQueryHandler : IRequestHandler<Query, IDictionary<string, decimal>>
+        public class GetRanksQueryHandler : IRequestHandler<Query, IDictionary<string, double>>
         {
             private readonly IRepository<Player> _players;
 
@@ -24,7 +24,7 @@ namespace BL.API.Services.Players.Queries
             }
 
 
-            public async Task<IDictionary<string, decimal>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<IDictionary<string, double>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var players = request.Players ?? (await _players.GetAllAsync());
 
@@ -34,7 +34,7 @@ namespace BL.API.Services.Players.Queries
                 var rankTable = StatsQueryHelper.RankMultipliers;
 
                 var ranks = rankTable
-                    .Select(rm => new KeyValuePair<string, decimal>(rm.Key, rm.Key == "Wood" ? minRating + rm.Value : maxRating * rm.Value))
+                    .Select(rm => new KeyValuePair<string, double>(rm.Key, rm.Key == "Wood" ? minRating + rm.Value : maxRating * rm.Value))
                     .ToDictionary();
 
                 return ranks;

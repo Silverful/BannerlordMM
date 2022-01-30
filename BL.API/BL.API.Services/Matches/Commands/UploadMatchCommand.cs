@@ -62,7 +62,7 @@ namespace BL.API.Services.Matches.Commands
 
                 foreach (var rec in match.PlayerRecords)
                 {
-                    await _mediator.Send(new ReloadPlayersRecordsCommand.Query(rec));
+                    await _mediator.Send(new LoadPlayersRecordCommand.Query(rec));
                 }
 
                 _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");

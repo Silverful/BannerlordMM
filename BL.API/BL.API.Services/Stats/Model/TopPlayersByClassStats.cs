@@ -4,8 +4,8 @@ namespace BL.API.Services.Stats.Model
 {
     public class TopPlayersByClassStats
     {
-        public IDictionary<string, decimal> Archer { get; set; }
-        public IDictionary<string, decimal> Infantry { get; set; }
-        public IDictionary<string, decimal> Cavalry { get; set; }
+        public IDictionary<string, double> Archer { get; set; }
+        public IDictionary<string, double> Infantry { get; set; }
+        public IDictionary<string, double> Cavalry { get; set; }
     }
 }

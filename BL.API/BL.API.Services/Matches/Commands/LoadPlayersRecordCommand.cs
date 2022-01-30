@@ -13,24 +13,27 @@ using static BL.API.Services.Matches.Commands.UpdateMatchCommand;
 
 namespace BL.API.Services.Matches.Commands
 {
-    public class ReloadPlayersRecordsCommand
+    public class LoadPlayersRecordCommand
     {
         public record Query(PlayerMatchRecord record) : IRequest<Task>;
         /// <summary>
         /// Reloads playerRecord to update the MMR and also (!) reload next games to ensure calibration is not broken
         /// </summary>
-        public class ReloadPlayersRecordsCommandHandler : IRequestHandler<Query, Task>
+        public class LoadPlayersRecordCommandHandler : IRequestHandler<Query, Task>
         {
             private readonly IRepository<PlayerMatchRecord> _playerRecords;
             private readonly IRepository<Player> _players;
             private readonly IMMRCalculationService _mmrCalculation;
+            private readonly IMediator _mediator;
 
-            public ReloadPlayersRecordsCommandHandler(IRepository<PlayerMatchRecord> playerRecords,
+            public LoadPlayersRecordCommandHandler(IRepository<PlayerMatchRecord> playerRecords,
                     IRepository<Player> players,
+                    IMediator mediator,
                     IMMRCalculationService mmrCalculation)
             {
                 _playerRecords = playerRecords;
                 _players = players;
+                _mediator = mediator;
                 _mmrCalculation = mmrCalculation;
             }
 
@@ -58,7 +61,7 @@ namespace BL.API.Services.Matches.Commands
                 byte calibrationIndex = (byte)(precedingRecord == null ? 10 : (precedingRecord.CalibrationIndex == 0 ? 0 : precedingRecord.CalibrationIndex - 1));
 
                 redoRecord.CalibrationIndex = calibrationIndex;
-                var mmrChange = _mmrCalculation.CalculateMMRChange(redoRecord);
+                var mmrChange = await _mmrCalculation.CalculateMMRChangeAsync(redoRecord);
 
                 var updatedPlayer = await _players.GetFirstWhereAsync(p => p.Id == redoRecord.PlayerId, false);
                 updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (redoRecord.MMRChange ?? 0) + mmrChange;
@@ -90,7 +93,7 @@ namespace BL.API.Services.Matches.Commands
                                     sucRec.CalibrationIndex = 0;
                                 }
 
-                                var sMMRChange = _mmrCalculation.CalculateMMRChange(sucRec);
+                                var sMMRChange = await _mmrCalculation.CalculateMMRChangeAsync(sucRec);
                                 updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (sucRec.MMRChange ?? 0) + sMMRChange;
                                 sucRec.MMRChange = sMMRChange;
                                 calibrationIndex--;

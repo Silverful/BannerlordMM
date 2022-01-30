@@ -4,19 +4,19 @@ namespace BL.API.Services.Stats.Utility
 {
     public static class StatsQueryHelper
     {
-        private static Dictionary<string, decimal> _rankMultipliers = new Dictionary<string, decimal>()
+        private static Dictionary<string, double> _rankMultipliers = new Dictionary<string, double>()
         {
-            ["Beast"] = 0.97M,
-            ["Diamond"] = 0.75M,
-            ["Platinum"] = 0.63M,
-            ["Gold"] = 0.51M,
-            ["Silver"] = 0.4M,
-            ["Bronze"] = 0.28M,
-            ["Iron"] = 0.14M,
-            ["Classic"] = 0M,
-            ["Wood"] = -1M
+            ["Beast"] = 0.97,
+            ["Diamond"] = 0.75,
+            ["Platinum"] = 0.63,
+            ["Gold"] = 0.51,
+            ["Silver"] = 0.4,
+            ["Bronze"] = 0.28,
+            ["Iron"] = 0.14,
+            ["Classic"] = 0,
+            ["Wood"] = -1
         };
 
-        public static Dictionary<string, decimal> RankMultipliers { get => _rankMultipliers; }
+        public static Dictionary<string, double> RankMultipliers { get => _rankMultipliers; }
     }
 }

@@ -1,64 +1,30 @@
 ﻿using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using Microsoft.Extensions.Options;
-using System;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace BL.API.Services.MMR
 {
     public class MMRCalculationService : IMMRCalculationService
     {
         private readonly BasicMMRCalculationProperties _mmrProps;
+        private readonly ISeasonResolverService _seasonResolverService;
 
-        public MMRCalculationService(IOptions<BasicMMRCalculationProperties> settings)
+        public MMRCalculationService(IOptions<BasicMMRCalculationProperties> settings, ISeasonResolverService seasonResolverService)
         {
             _mmrProps = settings.Value;
+            _seasonResolverService = seasonResolverService;
         }
          
-        private int DefaultChange { get => _mmrProps.DefaultChange; }
-        private int AdditionalBank { get => _mmrProps.AdditionalBank; }
-
-        public int CalculateMMRChange(PlayerMatchRecord record)
+        public async Task<double> CalculateMMRChangeAsync(PlayerMatchRecord record)
         {
-            var isWon = record.TeamIndex == record.Match.TeamWon ? 1 : 0;
+            var currentSeason = await _seasonResolverService.GetCurrentSeasonAsync();
 
-            if (isWon == 0 && record.CalibrationIndex > 0)
-            {
-                return 0; //MMR does not decrease on calibration
-            }
+            var strategy = MMRCalculationBuilder.BuildMMRStrategy(currentSeason, _mmrProps);
 
-            var calibrationIndexAdjust = record.CalibrationIndex + 1 == 1 ? 1 : (isWon == 0 ? 0 : 4);
+            var mmrChange = strategy.Execute(record);
 
-            if (AdditionalBank == 0)
-            {
-                return (isWon == 1 ? DefaultChange : -1 * DefaultChange) * calibrationIndexAdjust;
-            }
-
-            var totalTeamScore = record.Match.PlayerRecords.Where(pr => pr.TeamIndex == record.TeamIndex).Sum(r => r.Score);
-
-            int? mmrChange = null;
-
-            try
-            {
-                mmrChange =
-                isWon * -1 + 1 //loss mmr constant increase
-                + (isWon - 1) * AdditionalBank * 2 / 6 //loss punishment
-                + 2 * DefaultChange * isWon - DefaultChange //regular mmr change
-                + AdditionalBank * record.Score / totalTeamScore; //% from additional bank
-            }
-            catch (Exception ex )
-            {
-                mmrChange = CalculateWithDefaultFormula(isWon);
-            }
-
-            mmrChange *= calibrationIndexAdjust;
-
-            return mmrChange.Value;
-        }
-
-        private int CalculateWithDefaultFormula(int isWon)
-        {
-            return DefaultChange * (isWon == 1 ? 1 : -1);
+            return mmrChange;
         }
     }
 }

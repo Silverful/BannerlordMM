@@ -40,7 +40,7 @@ namespace BL.API.Services.Matches.Queries
         public sbyte? Assists { get; set; }
         public int? Score { get; set; }
         public byte? MVPs { get; set; }
-        public int? MMRChange { get; set; }
+        public double? MMRChange { get; set; }
         public byte? CalibrationIndex { get; set; }
 
         public static PlayerMatchResponse FromPlayerMatchRecord(PlayerMatchRecord matchRecord)

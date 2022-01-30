@@ -1,6 +1,7 @@
 ﻿using BL.API.Core.Domain.Logs;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -19,7 +20,7 @@ namespace BL.API.DataAccess.Data
         public virtual DbSet<PlayerMatchRecord> PlayerMatchRecords { get; protected set; }
         public virtual DbSet<Season> Seasons { get; protected set; }
         public virtual DbSet<PlayerMMR> PlayerMMR { get; protected set; }
-
+        public virtual DbSet<Configuration> Configurations { get; protected set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #if DEBUG
@@ -30,6 +31,10 @@ namespace BL.API.DataAccess.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema("dbo");
+
+            modelBuilder.Entity<Configuration>()
+                .Property(l => l.Created)
+                .HasDefaultValueSql("getdate()");
 
             modelBuilder.Entity<NLog>()
                 .Property(l => l.ID)

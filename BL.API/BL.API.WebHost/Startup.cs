@@ -52,6 +52,7 @@ namespace BL.API.WebHost
                 .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
+            services.AddScoped(typeof(IMMRCalculationBuilder), typeof(MMRCalculationBuilder));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
             services.AddScoped(typeof(ISeasonResolverService), typeof(SeasonResolverService)); //temporary - must be changed to cache
 

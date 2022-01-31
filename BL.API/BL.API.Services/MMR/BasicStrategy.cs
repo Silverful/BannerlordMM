@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Domain.Match;
+using System.Threading.Tasks;
 
 namespace BL.API.Services.MMR
 {
@@ -25,6 +26,13 @@ namespace BL.API.Services.MMR
             var calibrationIndexAdjust = record.CalibrationIndex == 0 || record.CalibrationIndex == null ? 1 : (isWon == 0 ? 0 : CalibrationIndexFactor);
 
             return (isWon == 1 ? DefaultChange : -1 * DefaultChange) * calibrationIndexAdjust;
+        }
+
+        public Task<double> ExecuteAsync(PlayerMatchRecord record)
+        {
+            var result = Execute(record);
+
+            return Task.FromResult(result);
         }
     }
 }

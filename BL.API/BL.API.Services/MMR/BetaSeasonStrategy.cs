@@ -1,6 +1,7 @@
 ﻿using BL.API.Core.Domain.Match;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BL.API.Services.MMR
 {
@@ -53,6 +54,13 @@ namespace BL.API.Services.MMR
             mmrChange *= calibrationIndexAdjust;
 
             return mmrChange.Value;
+        }
+
+        public Task<double> ExecuteAsync(PlayerMatchRecord record)
+        {
+            var result = Execute(record);
+
+            return Task.FromResult(result);
         }
 
         private double CalculateWithDefaultFormula(int isWon)

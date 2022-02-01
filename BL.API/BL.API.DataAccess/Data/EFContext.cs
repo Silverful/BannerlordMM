@@ -49,6 +49,10 @@ namespace BL.API.DataAccess.Data
                 .Property(l => l.Created)
                 .HasDefaultValueSql("getdate()");
 
+            modelBuilder.Entity<Season>()
+                .Property(l => l.IsTestingSeason)
+                .HasDefaultValueSql("0");
+
 
             modelBuilder.Entity<PlayerMMR>()
                 .Property(l => l.Created)

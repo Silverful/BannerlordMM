@@ -24,7 +24,7 @@ namespace BL.API.WebHost.Controllers
         public async Task<IActionResult> StartNewSeason([FromBody] StartNewSeasonCommand request)
         {
             var seasonId = await _mediator.Send(request);
-            return CreatedAtAction("Post", new { id = seasonId }, seasonId);
+            return CreatedAtAction("StartNewSeason", new { id = seasonId }, seasonId);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace BL.API.Services.Stats.Model
         public string MainClass { get; set; }
         public string SecondaryClass { get; set; }
         public string Rank { get; set; }
-        public double? MMR { get; set; }
+        public int? MMR { get; set; }
         public int? Played { get; set; }
         public int? Wins { get; set; }
         public double? WR { get; set; }
@@ -46,7 +46,7 @@ namespace BL.API.Services.Stats.Model
                 SecondaryClass = player.SecondaryClass.ToString(),
                 DiscordId = player.DiscordId,
                 Rank = RankTable.Where(x => x.Value < player.PlayerMMR.MMR).First().Key ?? "Classic",
-                MMR = player.PlayerMMR.MMR,
+                MMR = (int)player.PlayerMMR.MMR,
                 Played = record?.Count() ?? 0,
                 Wins = record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() ?? 0,
                 WR = record == null ? 0 : record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() == 0 ? 0 : (double)record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() / record?.Count(),

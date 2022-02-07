@@ -31,7 +31,7 @@ namespace BL.API.Services.Matches.Commands
 
             public async Task<Task> Handle(Query request, CancellationToken cancellationToken)
             {
-                var match = await _matches.GetByIdAsync(request.MatchId, false);
+                var match = await _matches.GetByIdAsync(request.MatchId, false, m => m.PlayerRecords);
 
                 if (match == null) throw new NotFoundException();
 

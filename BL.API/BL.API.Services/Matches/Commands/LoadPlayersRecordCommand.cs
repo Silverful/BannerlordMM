@@ -47,13 +47,13 @@ namespace BL.API.Services.Matches.Commands
                         pr.MatchId != redoMatch.Id
                         && pr.Match.SeasonId == redoMatch.SeasonId
                         && pr.PlayerId == redoRecord.PlayerId
-                        && pr.Match.MatchDate <= redoMatch.MatchDate, true))
+                        && pr.Match.MatchDate <= redoMatch.MatchDate, true, pr => pr.Player, pr => pr.Match))
                     .OrderBy(pr => pr.CalibrationIndex)
                     .Take(1)
                     .FirstOrDefault();
 
                 //get current record in the right place
-                byte calibrationIndex = (byte)(precedingRecord == null ? 10 : (precedingRecord.CalibrationIndex == 0 ? 0 : precedingRecord.CalibrationIndex - 1));
+                byte calibrationIndex = (byte)(precedingRecord == null ? 10 : (!precedingRecord.CalibrationIndex.HasValue || precedingRecord.CalibrationIndex == 0? 0 : precedingRecord.CalibrationIndex - 1));
 
                 redoRecord.CalibrationIndex = calibrationIndex;
                 var mmrChange = await _mmrCalculation.CalculateMMRChangeAsync(redoRecord);
@@ -74,7 +74,7 @@ namespace BL.API.Services.Matches.Commands
                             pr.Match.SeasonId == redoMatch.SeasonId &&
                             pr.PlayerId == redoRecord.PlayerId &&
                             pr.CalibrationIndex.HasValue &&
-                            pr.CalibrationIndex.Value > 0, false, pr => pr.Match))
+                            pr.CalibrationIndex.Value > 0, false, pr => pr.Match, pr => pr.Player))
                         .OrderByDescending(pr => pr.CalibrationIndex)
                         .ThenByDescending(pr => pr.Match.MatchDate)
                         .ThenByDescending(pr => pr.Match.Created)

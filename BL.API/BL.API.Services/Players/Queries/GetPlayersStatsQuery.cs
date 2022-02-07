@@ -32,7 +32,7 @@ namespace BL.API.Services.Players.Queries
             public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
                 var players = request.Players ?? await _players.GetAllAsync();
-                var matchRecords = request.MatchRecords ?? (await _matches.GetAllAsync()).Select(x => x.PlayerRecords).SelectMany(x => x);
+                var matchRecords = request.MatchRecords ?? (await _matches.GetAllAsync(true, m => m.PlayerRecords)).Select(x => x.PlayerRecords).SelectMany(x => x);
                 var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(players));
 
                 var groupedMatchRecords = from record in matchRecords

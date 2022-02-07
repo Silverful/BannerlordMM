@@ -85,9 +85,9 @@ namespace BL.API.DataAccess.Data
                 .Property(p => p.Created)
                 .HasDefaultValueSql("getdate()");
 
-            modelBuilder.Entity<Match>()
-                .Navigation(p => p.PlayerRecords)
-                .AutoInclude();
+            //modelBuilder.Entity<Match>()
+            //    .Navigation(p => p.PlayerRecords)
+            //    .AutoInclude();
 
             modelBuilder.Entity<Match>()
                 .Navigation(p => p.Season)

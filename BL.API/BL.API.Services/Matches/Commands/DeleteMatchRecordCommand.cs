@@ -47,7 +47,7 @@ namespace BL.API.Services.Matches.Commands
                         .GetWhereAsync(pr =>
                             pr.MatchId != match.Id
                             && pr.Match.SeasonId == match.SeasonId
-                            && pr.PlayerId == record.PlayerId, false, pr => pr.Match))
+                            && pr.PlayerId == record.PlayerId, false, pr => pr.Match, pr => pr.Player))
                         .OrderByDescending(pr => pr.CalibrationIndex)
                         .ThenByDescending(pr => pr.Match.MatchDate)
                         .ThenByDescending(pr => pr.Match.Created)

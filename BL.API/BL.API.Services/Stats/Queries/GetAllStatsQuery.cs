@@ -40,7 +40,7 @@ namespace BL.API.Services.Players.Queries
             public async Task<AllStatsResponse> Handle(Query request, CancellationToken cancellationToken)
             {
                 var players = await _players.GetAllAsync();
-                var matches = await _matches.GetAllAsync();
+                var matches = await _matches.GetAllAsync(true, m => m.PlayerRecords);
                 var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
                 var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
 

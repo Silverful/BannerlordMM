@@ -26,7 +26,7 @@ namespace BL.API.Services.Players.Queries
             {
                 var records = request.Records ?? await _repository.GetWhereAsync(x => x.PlayerId == request.PlayerId);
 
-                var avgScore = (double)records.Sum(x => x.Score) / records.Count();
+                var avgScore = (double)records.Sum(x => x.Score) / records.Sum(x => x.Match.RoundsPlayed);
 
                 return avgScore;
             }

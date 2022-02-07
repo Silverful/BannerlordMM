@@ -73,21 +73,25 @@ namespace BL.API.Services.Matches.Commands
 
                     if (calibrationIndex > 0)
                     {
-                        var successiveRecords = (await _playerRecords
+                        var calibrationRecords = (await _playerRecords
                         .GetWhereAsync(pr =>
-                            pr.MatchId != redoMatch.Id
-                            && pr.Match.SeasonId == redoMatch.SeasonId
-                            && pr.PlayerId == redoRecord.PlayerId
-                            && pr.CalibrationIndex.HasValue
-                            && pr.CalibrationIndex.Value <= calibrationIndex, false, pr => pr.Match))
+                            //pr.MatchId != redoMatch.Id &&
+                            pr.Match.SeasonId == redoMatch.SeasonId &&
+                            pr.PlayerId == redoRecord.PlayerId &&
+                            pr.CalibrationIndex.HasValue &&
+                            pr.CalibrationIndex.Value > 0, false, pr => pr.Match))
                         .OrderByDescending(pr => pr.CalibrationIndex)
-                        .Take(calibrationIndex);
+                        .ThenByDescending(pr => pr.Match.MatchDate)
+                        .ThenByDescending(pr => pr.Match.Created)
+                        .ToList();
 
-                        if (successiveRecords.Count() > 0)
+                        calibrationIndex = 10;
+
+                        if (calibrationRecords.Count() > 0)
                         {
-                            foreach (var sucRec in successiveRecords)
+                            foreach (var sucRec in calibrationRecords)
                             {
-                                sucRec.CalibrationIndex = (byte?)(calibrationIndex - 1);
+                                sucRec.CalibrationIndex = calibrationIndex;
                                 if (sucRec.CalibrationIndex < 0)
                                 {
                                     sucRec.CalibrationIndex = 0;
@@ -99,7 +103,7 @@ namespace BL.API.Services.Matches.Commands
                                 calibrationIndex--;
                             }
 
-                            await _playerRecords.UpdateRangeAsync(successiveRecords);
+                            await _playerRecords.UpdateRangeAsync(calibrationRecords);
                         }
                     }
 

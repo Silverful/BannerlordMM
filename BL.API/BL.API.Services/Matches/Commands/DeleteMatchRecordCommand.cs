@@ -43,17 +43,19 @@ namespace BL.API.Services.Matches.Commands
 
                     if (record.CalibrationIndex > 0)
                     {
-                        var succeedingRecords = (await _matchRecords.GetWhereAsync(mr =>
-                            mr.Id != record.Id
-                            && mr.PlayerId == record.PlayerId
-                            && mr.Match.SeasonId == match.SeasonId
-                            && mr.CalibrationIndex < record.CalibrationIndex, false, mr => mr.Match))
-                        .OrderByDescending(mr => mr.CalibrationIndex)
-                        .Take(record.CalibrationIndex.Value)
+                        var calibrationRecords = (await _matchRecords
+                        .GetWhereAsync(pr =>
+                            pr.MatchId != match.Id
+                            && pr.Match.SeasonId == match.SeasonId
+                            && pr.PlayerId == record.PlayerId, false, pr => pr.Match))
+                        .OrderByDescending(pr => pr.CalibrationIndex)
+                        .ThenByDescending(pr => pr.Match.MatchDate)
+                        .ThenByDescending(pr => pr.Match.Created)
+                        .Take(11)
                         .ToList();
 
-                        var calibrationIndex = record.CalibrationIndex;
-                        foreach (var rec in succeedingRecords)
+                        byte calibrationIndex = 10;
+                        foreach (var rec in calibrationRecords)
                         {
                             rec.CalibrationIndex = calibrationIndex;
                             var newMMRChange = await _mmrService.CalculateMMRChangeAsync(rec);
@@ -62,7 +64,7 @@ namespace BL.API.Services.Matches.Commands
                             calibrationIndex--;
                         }
 
-                        await _matchRecords.UpdateRangeAsync(succeedingRecords);
+                        await _matchRecords.UpdateRangeAsync(calibrationRecords);
                     }
 
                     await _players.UpdateAsync(player);

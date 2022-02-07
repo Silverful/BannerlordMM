@@ -21,25 +21,16 @@ namespace BL.API.Services.Matches.Commands
         public class UpdateMatchCommandHandler : IRequestHandler<UpdateMatchCommand, Task>
         {
             private readonly IRepository<Match> _matchRepository;
-            private readonly IRepository<PlayerMatchRecord> _playerRecords;
-            private readonly IRepository<Player> _players;
-            private readonly IMMRCalculationService _mmrCalculation;
             private readonly ILogger<UpdateMatchCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
             private readonly IMediator _mediator;
 
             public UpdateMatchCommandHandler(IRepository<Match> matchRepository,
-                IRepository<PlayerMatchRecord> playerRecords,
-                IRepository<Player> players,
-                IMMRCalculationService mmrCalculation,
                 ISeasonResolverService seasonService,
                 IMediator mediator,
                 ILogger<UpdateMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
-                _playerRecords = playerRecords;
-                _players = players;
-                _mmrCalculation = mmrCalculation;
                 _seasonService = seasonService;
                 _mediator = mediator;
                 _logger = logger;

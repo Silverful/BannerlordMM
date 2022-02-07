@@ -3,13 +3,11 @@ using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using static BL.API.Services.Matches.Commands.UpdateMatchCommand;
 
 namespace BL.API.Services.Matches.Commands
 {
@@ -24,16 +22,13 @@ namespace BL.API.Services.Matches.Commands
             private readonly IRepository<PlayerMatchRecord> _playerRecords;
             private readonly IRepository<Player> _players;
             private readonly IMMRCalculationService _mmrCalculation;
-            private readonly IMediator _mediator;
 
             public LoadPlayersRecordCommandHandler(IRepository<PlayerMatchRecord> playerRecords,
                     IRepository<Player> players,
-                    IMediator mediator,
                     IMMRCalculationService mmrCalculation)
             {
                 _playerRecords = playerRecords;
                 _players = players;
-                _mediator = mediator;
                 _mmrCalculation = mmrCalculation;
             }
 

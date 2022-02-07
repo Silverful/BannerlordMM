@@ -37,7 +37,7 @@ namespace BL.API.Services.Players.Queries
                 if (player == null) throw new NotFoundException();
 
                 var players = await _players.GetAllAsync();
-                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == player.Id);
+                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == player.Id, false, mr => mr.Match);
 
                 var records =
                     from record in matchRecords

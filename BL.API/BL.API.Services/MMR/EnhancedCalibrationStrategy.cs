@@ -1,5 +1,7 @@
 ﻿using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Services.Players.Queries;
+using MediatR;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,12 +11,12 @@ namespace BL.API.Services.MMR
     public class EnhancedCalibrationStrategy : ICalculateMMRStrategy
     {
         private readonly BasicMMRCalculationProperties _mmrProps;
-        private readonly Func<Guid, Task<double>> _avrScoreResolver;
+        private readonly IMediator _mediator;
 
-        public EnhancedCalibrationStrategy(BasicMMRCalculationProperties settings, Func<Guid, Task<double>> avrScoreResolver = null)
+        public EnhancedCalibrationStrategy(BasicMMRCalculationProperties settings, IMediator mediator)
         {
             _mmrProps = settings;
-            _avrScoreResolver = avrScoreResolver;
+            _mediator = mediator;
         }
 
         private int DefaultChange { get => _mmrProps.DefaultChange; }
@@ -31,11 +33,11 @@ namespace BL.API.Services.MMR
             var calibrationIndexAdjust = record.CalibrationIndex == 0 || record.CalibrationIndex == null ? 1 : (isWon == 0 ? 0 : CalibrationIndexFactor);
             double bonusMMR = 0;
 
-            if (record.CalibrationIndex > 0 && _avrScoreResolver != null && record.PlayerId.HasValue)
+            if (record.CalibrationIndex > 0 && _mediator != null && record.PlayerId.HasValue)
             {
                 double exp = 0;
                 double avgClassScore = 0;
-                double avgPlayerScore = await _avrScoreResolver(record.PlayerId.Value);    
+                double avgPlayerScore = await _mediator.Send(new GetPlayersAvgCalibrationScoreQuery.Query(record.PlayerId.Value, null));    
 
                 switch (record.Player.MainClass)
                 {

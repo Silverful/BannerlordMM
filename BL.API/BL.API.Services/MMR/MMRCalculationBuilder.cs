@@ -1,7 +1,5 @@
 ﻿using BL.API.Core.Domain.Match;
-using BL.API.Services.Players.Queries;
 using MediatR;
-using System.Threading.Tasks;
 
 namespace BL.API.Services.MMR
 {
@@ -20,7 +18,7 @@ namespace BL.API.Services.MMR
             ICalculateMMRStrategy strategy = season.Title switch
             {
                 "Beta" => new BetaSeasonStrategy(props),
-                "Test" => new EnhancedCalibrationStrategy(props, async id => await _mediator.Send(new GetPlayersAvgCalibrationScoreQuery.Query(id, null))),
+                "Test" => new EnhancedCalibrationStrategy(props, _mediator),
                 _ => new BasicStrategy(props),
             };
 

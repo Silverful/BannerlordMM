@@ -24,7 +24,11 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<double> Handle(Query request, CancellationToken cancellationToken)
             {
-                var records = request.Records ?? await _repository.GetWhereAsync(x => x.PlayerId == request.PlayerId);
+                var records = (request.Records ?? await _repository.GetWhereAsync(x => x.PlayerId == request.PlayerId, true, x => x.Match))
+                    .OrderByDescending(r => r.CalibrationIndex)
+                    .ThenByDescending(r => r.Match.MatchDate)
+                    .ThenByDescending(r => r.Match.Created)
+                    .Take(10);
 
                 var roundsPlayed = records.Sum(x => x.Match.RoundsPlayed);
 

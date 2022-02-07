@@ -1,8 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
-using BL.API.Core.Domain.Player;
-using BL.API.Core.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -11,7 +9,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 
 namespace BL.API.Services.Matches.Commands
 {

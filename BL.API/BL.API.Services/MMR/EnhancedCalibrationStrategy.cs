@@ -27,19 +27,21 @@ namespace BL.API.Services.MMR
             var isWon = record.TeamIndex == record.Match.TeamWon ? 1 : 0;
 
             var team1Score = record.RoundsWon;
-            var team2Score = record.Match.PlayerRecords.Where(pr => pr.TeamIndex != record.TeamIndex).First().RoundsWon;
+            var team2Score = record.Match.RoundsPlayed - team1Score;
 
             var defaultChange = DefaultChange * Math.Abs(team1Score - team2Score);
             var calibrationIndexAdjust = record.CalibrationIndex == 0 || record.CalibrationIndex == null ? 1 : (isWon == 0 ? 0 : CalibrationIndexFactor);
+            var isWonAdjust = isWon == 1 ? 1 : -1;
             double bonusMMR = 0;
 
             if (record.CalibrationIndex > 0 && _mediator != null && record.PlayerId.HasValue)
             {
                 double exp = 0;
                 double avgClassScore = 0;
-                double avgPlayerScore = await _mediator.Send(new GetPlayersAvgCalibrationScoreQuery.Query(record.PlayerId.Value, null));    
+                double avgPlayerScore = await _mediator.Send(new GetPlayersAvgCalibrationScoreQuery.Query(record.PlayerId.Value, null));
+                var player = record.Player ?? await _mediator.Send(new GetPlayerByIdQuery.Query(record.PlayerId.Value.ToString()));
 
-                switch (record.Player.MainClass)
+                switch (player.MainClass)
                 {
                     case PlayerClass.Archer:
                         avgClassScore = _mmrProps.AvgArcherScore;
@@ -55,10 +57,10 @@ namespace BL.API.Services.MMR
                         break;
                 }
 
-                bonusMMR = Math.Pow(Math.Abs(avgClassScore - avgPlayerScore), exp) * _mmrProps.Factor; 
-            } 
+                bonusMMR = Math.Pow(Math.Abs(avgClassScore - avgPlayerScore), exp) * _mmrProps.Factor;
+            }
 
-            return defaultChange * calibrationIndexAdjust + bonusMMR;
+            return defaultChange * calibrationIndexAdjust * isWonAdjust + bonusMMR;
         }
     }
 }

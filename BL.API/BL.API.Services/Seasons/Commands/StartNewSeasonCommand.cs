@@ -20,7 +20,7 @@ namespace BL.API.Services.Seasons.Commands
             private readonly IRepository<Season> _seasons;
             private readonly IRepository<PlayerMMR> _mmrs;
 
-            public StartNewSeasonCommandHandler(IRepository<Season> seasons, 
+            public StartNewSeasonCommandHandler(IRepository<Season> seasons,
                 IRepository<PlayerMMR> mmrs)
             {
                 _seasons = seasons;
@@ -34,18 +34,17 @@ namespace BL.API.Services.Seasons.Commands
                 currentSeason.OnGoing = false;
                 currentSeason.Finished = DateTime.UtcNow;
 
+                var newSeason = new Season
+                {
+                    Title = request.SeasonName,
+                    OnGoing = true,
+                    IsTestingSeason = false,
+                    Started = DateTime.UtcNow
+                };
+
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     await _seasons.UpdateAsync(currentSeason);
-
-                    var newSeason = new Season
-                    {
-                        Title = request.SeasonName,
-                        OnGoing = true,
-                        IsTestingSeason = false,
-                        Created = DateTime.UtcNow
-                    };
-
                     await _seasons.CreateAsync(newSeason);
 
                     var mmrs = await _mmrs.GetAllAsync();
@@ -62,8 +61,10 @@ namespace BL.API.Services.Seasons.Commands
                         await _mmrs.CreateAsync(newMMR);
                     }
 
-                    return newSeason.Id;
+                    scope.Complete();
                 }
+
+                return newSeason.Id;
             }
         }
     }

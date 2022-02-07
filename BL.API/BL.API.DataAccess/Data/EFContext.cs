@@ -46,6 +46,11 @@ namespace BL.API.DataAccess.Data
                 .UseIdentityColumn(1, 1);
 
             modelBuilder.Entity<Season>()
+                .Property(l => l.Index)
+                .Metadata
+                .SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+
+            modelBuilder.Entity<Season>()
                 .Property(l => l.Created)
                 .HasDefaultValueSql("getdate()");
 

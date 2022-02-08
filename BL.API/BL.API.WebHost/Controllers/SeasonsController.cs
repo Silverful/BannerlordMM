@@ -26,5 +26,15 @@ namespace BL.API.WebHost.Controllers
             var seasonId = await _mediator.Send(request);
             return CreatedAtAction("StartNewSeason", new { id = seasonId }, seasonId);
         }
+
+        [HttpDelete("DeleteCurrentSeason")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
+        public async Task<IActionResult> DeleteCurrentSeason()
+        {
+            await _mediator.Send(new DeleteCurrentSeasonCommand());
+            return Ok();
+        }
     }
 }

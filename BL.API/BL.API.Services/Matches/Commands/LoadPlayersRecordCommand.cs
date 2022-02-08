@@ -59,6 +59,17 @@ namespace BL.API.Services.Matches.Commands
                 var mmrChange = await _mmrCalculation.CalculateMMRChangeAsync(redoRecord);
 
                 var updatedPlayer = await _players.GetFirstWhereAsync(p => p.Id == redoRecord.PlayerId, false);
+
+                if (updatedPlayer.PlayerMMR == null)
+                {
+                    updatedPlayer.PlayerMMRs.Add(new PlayerMMR
+                    {
+                        SeasonId = redoMatch.SeasonId.Value,
+                        MMR = 0,
+                        PlayerId = updatedPlayer.Id
+                    });
+                }
+
                 updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (redoRecord.MMRChange ?? 0) + mmrChange;
                 redoRecord.MMRChange = mmrChange;
 

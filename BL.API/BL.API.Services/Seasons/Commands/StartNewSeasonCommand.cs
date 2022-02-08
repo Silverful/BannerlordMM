@@ -47,7 +47,7 @@ namespace BL.API.Services.Seasons.Commands
                     await _seasons.UpdateAsync(currentSeason);
                     await _seasons.CreateAsync(newSeason);
 
-                    var mmrs = await _mmrs.GetAllAsync();
+                    var mmrs = await _mmrs.GetWhereAsync(m => m.SeasonId == currentSeason.Id);
 
                     foreach (var mmr in mmrs)
                     {

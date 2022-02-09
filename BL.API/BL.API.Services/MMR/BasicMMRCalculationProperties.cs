@@ -2,6 +2,8 @@
 {
     public class BasicMMRCalculationProperties
     {
+        public double StartMMR { get; set; }
+
         public int DefaultChange { get; set; }
         public int AdditionalBank { get; set; }
 

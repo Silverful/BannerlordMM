@@ -1,6 +1,7 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Services.Players.Commands;
 using MediatR;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -19,10 +20,13 @@ namespace BL.API.Services.Seasons.Commands
         {
             private readonly IRepository<Season> _seasons;
             private readonly IRepository<PlayerMMR> _mmrs;
+            private readonly IMediator _mediator;
 
             public StartNewSeasonCommandHandler(IRepository<Season> seasons,
+                IMediator mediator,
                 IRepository<PlayerMMR> mmrs)
             {
+                _mediator = mediator;
                 _seasons = seasons;
                 _mmrs = mmrs;
             }
@@ -51,12 +55,7 @@ namespace BL.API.Services.Seasons.Commands
 
                     foreach (var mmr in mmrs)
                     {
-                        var newMMR = new PlayerMMR
-                        {
-                            MMR = 0,
-                            SeasonId = newSeason.Id,
-                            PlayerId = mmr.PlayerId
-                        };
+                        var newMMR = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = mmr.PlayerId, SeasonId = newSeason.Id });
 
                         await _mmrs.CreateAsync(newMMR);
                     }

@@ -29,7 +29,7 @@ namespace BL.API.Services.Players.Queries
             {
                 _matches = matches;
                 _players = players;
-                ._seasonResolver = seasonResolver;
+                _seasonResolver = seasonResolver;
                 _mediator = mediator;
             }
 

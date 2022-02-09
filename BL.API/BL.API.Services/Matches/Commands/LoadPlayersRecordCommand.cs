@@ -2,6 +2,7 @@
 using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Services.Players.Commands;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,17 @@ namespace BL.API.Services.Matches.Commands
         {
             private readonly IRepository<PlayerMatchRecord> _playerRecords;
             private readonly IRepository<Player> _players;
+            private readonly IMediator _mediator;
             private readonly IMMRCalculationService _mmrCalculation;
 
             public LoadPlayersRecordCommandHandler(IRepository<PlayerMatchRecord> playerRecords,
                     IRepository<Player> players,
+                    IMediator mediator,
                     IMMRCalculationService mmrCalculation)
             {
                 _playerRecords = playerRecords;
                 _players = players;
+                _mediator = mediator;
                 _mmrCalculation = mmrCalculation;
             }
 
@@ -60,14 +64,10 @@ namespace BL.API.Services.Matches.Commands
 
                 var updatedPlayer = await _players.GetFirstWhereAsync(p => p.Id == redoRecord.PlayerId, false);
 
-                if (updatedPlayer.PlayerMMR == null)
+                if (updatedPlayer != null && updatedPlayer.PlayerMMR == null)
                 {
-                    updatedPlayer.PlayerMMRs.Add(new PlayerMMR
-                    {
-                        SeasonId = redoMatch.SeasonId.Value,
-                        MMR = 0,
-                        PlayerId = updatedPlayer.Id
-                    });
+                    var mmr = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = updatedPlayer.Id, SeasonId = redoMatch.SeasonId.Value });
+                    updatedPlayer.PlayerMMRs.Add(mmr);
                 }
 
                 updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (redoRecord.MMRChange ?? 0) + mmrChange;

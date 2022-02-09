@@ -23,9 +23,9 @@ namespace BL.API.Services.Seasons
         {
             _seasonRep = seasonRep;
             _logger = logger;
-            var timer = new Timer(1000 * 60);
-            timer.Elapsed += Timer_Elapsed;
-            timer.Start();
+            _updateTimer = new Timer(1000 * 60);
+            _updateTimer.Elapsed += Timer_Elapsed;
+            _updateTimer.Start();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -33,6 +33,10 @@ namespace BL.API.Services.Seasons
             try
             {
                 _seasons = _seasonRep.GetAllAsync().GetAwaiter().GetResult();
+            }
+            catch (ObjectDisposedException)
+            {
+                _updateTimer?.Stop();
             }
             catch (Exception ex)
             {

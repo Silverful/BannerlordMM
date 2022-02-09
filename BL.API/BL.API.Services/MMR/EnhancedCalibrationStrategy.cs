@@ -32,7 +32,7 @@ namespace BL.API.Services.MMR
             var defaultChange = DefaultChange * Math.Abs(team1Score - team2Score);
             var calibrationIndexAdjust = CalculateCalibrationAdjustment(record.CalibrationIndex);
             var isWonAdjust = isWon == 1 ?
-                isOnCalibration ? 4 : 1 //x4 for win on calibration
+                isOnCalibration ? CalibrationIndexFactor : 1 //x4 for win on calibration
                 :
                 isOnCalibration ? 0 : -1; //-1 for loss and 0 for calibration loss
             double bonusMMR = 0;
@@ -60,7 +60,14 @@ namespace BL.API.Services.MMR
                         break;
                 }
 
-                bonusMMR = Math.Pow(Math.Abs(avgClassScore - avgPlayerScore), exp) * _mmrProps.Factor;
+                if (avgPlayerScore > 1000)
+                {
+                    avgPlayerScore = 1000;
+                }
+
+                var factor = (avgPlayerScore > avgClassScore ? 1 : -1) * _mmrProps.Factor;
+
+                bonusMMR = Math.Pow(Math.Abs(avgClassScore - avgPlayerScore), exp) * factor;
             }
 
             return defaultChange * isWonAdjust + bonusMMR * calibrationIndexAdjust;

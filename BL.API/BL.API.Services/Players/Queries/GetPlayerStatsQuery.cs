@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
@@ -18,6 +19,7 @@ namespace BL.API.Services.Players.Queries
         public class GetPlayerStatsHandler : IRequestHandler<Query, PlayerStatItemResponse>
         {
             private readonly IRepository<PlayerMatchRecord> _matchRecords;
+            private readonly ISeasonResolverService _seasonResolver;
             private readonly IRepository<Player> _players;
             private readonly IMediator _mediator;
             private readonly IRepository<PlayerMMR> _mmrs;
@@ -25,9 +27,11 @@ namespace BL.API.Services.Players.Queries
             public GetPlayerStatsHandler(IRepository<Player> players, 
                 IRepository<PlayerMMR> mmrs,
                 IRepository<PlayerMatchRecord> matchRecords,
+                ISeasonResolverService seasonResolver,
                 IMediator mediator)
             {
                 _matchRecords = matchRecords;
+                _seasonResolver = seasonResolver;
                 _players = players;
                 _mmrs = mmrs;
                 _mediator = mediator;
@@ -43,7 +47,9 @@ namespace BL.API.Services.Players.Queries
 
                 var players = await _players.GetAllAsync();
 
-                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id, false, mr => mr.Match);
+                var season = await _seasonResolver.GetCurrentSeasonAsync();
+
+                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id && m.Match.SeasonId == season.Id, false, mr => mr.Match);
 
                 var records =
                     from record in matchRecords

@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Services.Extensions;
@@ -21,16 +22,19 @@ namespace BL.API.Services.Players.Queries
             private readonly IRepository<Player> _players;
             private readonly StatsProps _statsProps;
             private readonly IRepository<Match> _matches;
+            private readonly ISeasonResolverService seasonResolver;
             private readonly IMediator _mediator;
 
             public GetAllStatsQueryHandler(IRepository<Player> players,
                 IRepository<Match> matches,
                 IOptions<StatsProps> statsProps,
+                ISeasonResolverService seasonResolver,
                 IMediator mediator
                 )
             {
                 _players = players;
                 _matches = matches;
+                this.seasonResolver = seasonResolver;
                 _statsProps = statsProps.Value;
                 _mediator = mediator;
             }
@@ -39,8 +43,9 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<AllStatsResponse> Handle(Query request, CancellationToken cancellationToken)
             {
+                var season = await seasonResolver.GetCurrentSeasonAsync();
                 var players = await _players.GetAllAsync();
-                var matches = await _matches.GetAllAsync(true, m => m.PlayerRecords);
+                var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords);
                 var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
                 var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
 

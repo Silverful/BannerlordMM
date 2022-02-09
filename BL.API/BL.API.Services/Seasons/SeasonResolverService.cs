@@ -23,7 +23,7 @@ namespace BL.API.Services.Seasons
         {
             _seasonRep = seasonRep;
             _logger = logger;
-            var timer = new Timer(1000 * 60 * 60);
+            var timer = new Timer(1000 * 60);
             timer.Elapsed += Timer_Elapsed;
             timer.Start();
         }

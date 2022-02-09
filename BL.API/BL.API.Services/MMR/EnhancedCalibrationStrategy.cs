@@ -3,7 +3,6 @@ using BL.API.Core.Domain.Player;
 using BL.API.Services.Players.Queries;
 using MediatR;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BL.API.Services.MMR
@@ -25,16 +24,20 @@ namespace BL.API.Services.MMR
         public async Task<double> ExecuteAsync(PlayerMatchRecord record)
         {
             var isWon = record.TeamIndex == record.Match.TeamWon ? 1 : 0;
+            var isOnCalibration = record.CalibrationIndex.HasValue && record.CalibrationIndex > 0;
 
             var team1Score = record.RoundsWon;
             var team2Score = record.Match.RoundsPlayed - team1Score;
 
             var defaultChange = DefaultChange * Math.Abs(team1Score - team2Score);
-            var calibrationIndexAdjust = record.CalibrationIndex == 0 || record.CalibrationIndex == null ? 1 : (isWon == 0 ? 0 : CalibrationIndexFactor);
-            var isWonAdjust = isWon == 1 ? 1 : -1;
+            var calibrationIndexAdjust = CalculateCalibrationAdjustment(record.CalibrationIndex);
+            var isWonAdjust = isWon == 1 ?
+                isOnCalibration ? 4 : 1 //x4 for win on calibration
+                :
+                isOnCalibration ? 0 : -1; //-1 for loss and 0 for calibration loss
             double bonusMMR = 0;
 
-            if (record.CalibrationIndex > 0 && _mediator != null && record.PlayerId.HasValue)
+            if (isOnCalibration && _mediator != null && record.PlayerId.HasValue)
             {
                 double exp = 0;
                 double avgClassScore = 0;
@@ -60,7 +63,20 @@ namespace BL.API.Services.MMR
                 bonusMMR = Math.Pow(Math.Abs(avgClassScore - avgPlayerScore), exp) * _mmrProps.Factor;
             }
 
-            return defaultChange * calibrationIndexAdjust * isWonAdjust + bonusMMR;
+            return defaultChange * isWonAdjust + bonusMMR * calibrationIndexAdjust;
         }
+
+        private double CalculateCalibrationAdjustment(int? calibrationIndex)
+        {
+            switch (10 - calibrationIndex + 1)
+            {
+                case 1:
+                    return 5;
+                case >= 2 and <= 6:
+                    return 1;
+                default:
+                    return 0;
+            }
+        } 
     }
 }

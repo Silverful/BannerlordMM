@@ -30,6 +30,7 @@ namespace BL.API.Services.Stats.Model
         public int? Deaths { get; set; }
         public double? KD { get; set; }
         public double? KDA { get; set; }
+        public double? DR { get; set; }
         public int? Score { get; set; }
         public double? SR { get; set; }
         public int? MVP { get; set; }
@@ -48,7 +49,7 @@ namespace BL.API.Services.Stats.Model
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
                 DiscordId = player.DiscordId,
-                Rank = RankTable.Where(x => x.Value < player.PlayerMMR.MMR).First().Key ?? "Classic",
+                Rank = RankTable.Where(x => x.Value <= player.PlayerMMR.MMR).First().Key ?? "Copper",
                 MMR = (int)player.PlayerMMR.MMR,
                 Played = record?.Count() ?? 0,
                 Wins = record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() ?? 0,
@@ -62,6 +63,7 @@ namespace BL.API.Services.Stats.Model
                 Deaths = record?.Sum(x => x.Deaths) ?? 0,
                 KD = record == null ? 0 : (double)record?.Sum(x => x.Kills) / record?.Sum(x => x.Deaths),
                 KDA = record == null ? 0 : ((double)record?.Sum(x => x.Kills) + (double)record?.Sum(x => x.Assists)) / record?.Sum(x => x.Deaths),
+                DR = record == null ? 0 : (double)record?.Sum(x => x.Deaths) / record?.Sum(x => x.Match.RoundsPlayed),
                 Score = record?.Sum(x => x.Score) ?? 0,
                 SR = record == null ? 0 : (double)record?.Sum(x => x.Score) / record?.Sum(x => x.Match.RoundsPlayed),
                 MVP = record?.Sum(x => x.MVPs) ?? 0,

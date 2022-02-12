@@ -1,6 +1,7 @@
 ﻿using BL.API.Core.Domain.Player;
 using BL.API.Services.MMR;
 using MediatR;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,9 +18,9 @@ namespace BL.API.Services.Players.Commands
         {
             private readonly BasicMMRCalculationProperties _mmrProps;
 
-            public StartNewSeasonCommandHandler(BasicMMRCalculationProperties settings)
+            public StartNewSeasonCommandHandler(IOptions<BasicMMRCalculationProperties> settings)
             {
-                _mmrProps = settings;
+                _mmrProps = settings.Value;
             }
 
             private double StartMMR { get => _mmrProps.StartMMR; }

@@ -34,7 +34,25 @@ namespace BL.API.Services.Players.Queries
                 var rankTable = StatsQueryHelper.RankMultipliers;
 
                 var ranks = rankTable
-                    .Select(rm => new KeyValuePair<string, double>(rm.Key, rm.Key == "Wood" ? minRating + rm.Value : maxRating * rm.Value))
+                    .Select(rm => 
+                    {
+                        var rank = rm.Key;
+                        double value = 0;
+
+                        switch (rank)
+                        {
+                            case "Copper":
+                                value = 2000;
+                                break;
+                            case "Wood":
+                                value = minRating + rm.Value;
+                                break;
+                            default:
+                                value = (maxRating - 2000)  * rm.Value + 2000;
+                                break;
+                        }
+                        return new KeyValuePair<string, double>(rank, value);
+                    })
                     .ToDictionary();
 
                 return ranks;

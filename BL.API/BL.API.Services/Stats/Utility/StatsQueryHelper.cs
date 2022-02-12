@@ -13,7 +13,7 @@ namespace BL.API.Services.Stats.Utility
             ["Silver"] = 0.4,
             ["Bronze"] = 0.28,
             ["Iron"] = 0.14,
-            ["Classic"] = 0,
+            ["Copper"] = 2000,
             ["Wood"] = -1
         };
 

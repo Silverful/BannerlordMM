@@ -52,7 +52,8 @@ namespace BL.API.Services.Players.Queries
                             select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr, rankTable);
 
                 var response = stats
-                    .OrderByDescending(s => s.MMR)
+                    .OrderByDescending(s => s.Played >= 10 ? 1 : 0)
+                    .ThenByDescending(s => s.MMR)
                     .Select((s, i) =>
                     {
                         s.Position = i + 1;

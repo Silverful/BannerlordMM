@@ -11,6 +11,8 @@
         public double EmpireWR { get; set; }
         public int KhuzaitCount { get; set; }
         public double KhuzaitWR { get; set; }
+        public int SturgiaCount { get; set; }
+        public double SturgiaWR { get; set; }
         public int VlandiaCount { get; set; }
         public double VlandiaWR { get; set; }
     }

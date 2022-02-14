@@ -112,6 +112,8 @@ namespace BL.API.Services.Players.Queries
                         EmpireWR = gmr.Where(mr => mr.Faction == Faction.Empire && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Empire).Count()),
                         KhuzaitCount = gmr.Where(mr => mr.Faction == Faction.Khuzait).Count(),
                         KhuzaitWR = gmr.Where(mr => mr.Faction == Faction.Khuzait && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Khuzait).Count()),
+                        SturgiaCount = gmr.Where(mr => mr.Faction == Faction.Sturgia).Count(),
+                        SturgiaWR = gmr.Where(mr => mr.Faction == Faction.Sturgia && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Sturgia).Count()),
                         VlandiaCount = gmr.Where(mr => mr.Faction == Faction.Vlandia).Count(),
                         VlandiaWR = gmr.Where(mr => mr.Faction == Faction.Vlandia && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Vlandia).Count())
                     };

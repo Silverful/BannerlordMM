@@ -53,7 +53,7 @@ namespace BL.API.Services.Players.Queries
 
                 var response = stats
                     .OrderByDescending(s => s.Played >= 10 ? 1 : 0)
-                    .ThenByDescending(s => s.MMR)
+                    .ThenByDescending(s => s.Played >= 10 ? s.MMR : s.Played)
                     .Select((s, i) =>
                     {
                         s.Position = i + 1;

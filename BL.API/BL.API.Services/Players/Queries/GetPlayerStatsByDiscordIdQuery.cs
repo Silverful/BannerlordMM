@@ -44,7 +44,7 @@ namespace BL.API.Services.Players.Queries
                     group record by record.PlayerId.Value into g
                     select g;
 
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(null));
                 var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable);
 
                 return stats;

@@ -39,7 +39,7 @@ namespace BL.API.Services.Players.Queries
 
                 var players = request.Players ?? await _players.GetAllAsync();
                 var matchRecords = request.MatchRecords ?? (await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords)).Select(x => x.PlayerRecords).SelectMany(x => x);
-                var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(players));
+                var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(null));
 
                 var groupedMatchRecords = from record in matchRecords
                                           where record.PlayerId.HasValue

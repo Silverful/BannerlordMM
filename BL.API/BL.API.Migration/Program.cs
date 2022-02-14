@@ -26,8 +26,8 @@ namespace BL.API.Migration
 
         static async Task Main(string[] args)
         {
-            _httpClient = new RestClient("https://bannerlordmm.com/api");
-            //_httpClient = new RestClient("https://localhost:5001/api");
+            //_httpClient = new RestClient("https://bannerlordmm.com/api");
+            _httpClient = new RestClient("https://localhost:5001/api");
 
             string[] Scopes = { SheetsService.Scope.Spreadsheets };
             string ApplicationName = "MM Migration Script";
@@ -45,7 +45,7 @@ namespace BL.API.Migration
                 ApplicationName = ApplicationName,
             });
 
-            await LoadPlayers();
+            await LoadPlayers(_spreadsheetId);
             Console.WriteLine("Players Finished");
             await LoadMatches(_oldSpreadsheetId, "Screens!A2:M"); //old
             Console.WriteLine("Old screens Finished");
@@ -54,11 +54,12 @@ namespace BL.API.Migration
             Console.Read();
         }
 
-        private static async Task LoadPlayers()
+        private static async Task LoadPlayers(string spreadsheetId)
         {
+            var discordId = 1;
             string range = "Stats!A2:W";
 
-            var values = GetSpreadsheetResponse(_oldSpreadsheetId, range);
+            var values = GetSpreadsheetResponse(spreadsheetId, range);
 
             if (values != null && values.Count > 0)
             {
@@ -66,8 +67,6 @@ namespace BL.API.Migration
                 {
                     try
                     {
-                        long? discordId = row.Count > 22 ? Convert.ToInt64(row[22]) : null;
-
                         var cmd = new AddPlayerCommand
                         {
                             Nickname = row[1].ToString(),
@@ -79,6 +78,8 @@ namespace BL.API.Migration
                             DiscordId = discordId
                         };
                         await Upload("Players", cmd);
+
+                        discordId++;
                     }
                     catch(Exception ex)
                     {
@@ -118,7 +119,7 @@ namespace BL.API.Migration
                             AddNewRecord(match, row, players);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
 
                     }
@@ -196,10 +197,10 @@ namespace BL.API.Migration
 
                     var response = await _httpClient.PostAsync<string>(request);
 
-                    if (!Guid.TryParse(response, out Guid res))
-                    {
+                    //if (!Guid.TryParse(response, out Guid res))
+                    //{
 
-                    }
+                    //}
 
                     var json = System.Text.Json.JsonSerializer.Serialize(cmd);
                     isSuccessful = true;
@@ -209,8 +210,6 @@ namespace BL.API.Migration
                     Console.WriteLine(ex.Message);
                 }
             }
-
-            
         }
 
         private static async Task<T> GetData<T>(string path)

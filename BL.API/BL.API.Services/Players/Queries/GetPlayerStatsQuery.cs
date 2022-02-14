@@ -45,8 +45,6 @@ namespace BL.API.Services.Players.Queries
 
                 if (player == null) throw new NotFoundException();
 
-                var players = await _players.GetAllAsync();
-
                 var season = await _seasonResolver.GetCurrentSeasonAsync();
 
                 var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id && m.Match.SeasonId == season.Id, false, mr => mr.Match);
@@ -56,7 +54,7 @@ namespace BL.API.Services.Players.Queries
                     group record by record.PlayerId.Value into g
                     select g;
 
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(null));
                 var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable);
 
                 var pos = (await _mmrs.GetAllAsync())

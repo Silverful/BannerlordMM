@@ -1,4 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
+using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Services.Extensions;
 using BL.API.Services.MMR;
@@ -18,19 +20,28 @@ namespace BL.API.Services.Players.Queries
 
         public class GetRanksQueryHandler : IRequestHandler<Query, IDictionary<string, double>>
         {
-            private readonly IRepository<Player> _players;
+            private readonly IRepository<Match> _matches;
+            private readonly ISeasonResolverService _seasonResolver;
             private readonly double _startingMMR;
 
-            public GetRanksQueryHandler(IRepository<Player> players, IOptions<BasicMMRCalculationProperties> options)
+            public GetRanksQueryHandler(IRepository<Match> matches, IOptions<BasicMMRCalculationProperties> options, ISeasonResolverService seasonResolver)
             {
-                _players = players;
+                _matches = matches;
+                _seasonResolver = seasonResolver;
                 _startingMMR = options.Value.StartMMR;
             }
 
 
             public async Task<IDictionary<string, double>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var players = request.Players ?? (await _players.GetAllAsync());
+                var season = await _seasonResolver.GetCurrentSeasonAsync();
+
+                var players = request.Players ?? ((await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords))
+                    .Select(x => x.PlayerRecords)
+                    .SelectMany(x => x)
+                    .GroupBy(x => x.PlayerId)
+                    .Where(x => x.Count() >= 10)
+                    .Select(x => x.First()?.Player));
 
                 var maxRating = players.Max(x => x.PlayerMMR.MMR);
                 var minRating = players.Min(x => x.PlayerMMR.MMR);

@@ -10,6 +10,11 @@
 
   <ItemGroup>
     <None Remove="internal-nlog-AspNetCore.txt" />
+    <None Remove="nlog._config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="nlog._config" />
   </ItemGroup>
 
   <ItemGroup>

@@ -49,7 +49,8 @@ namespace BL.API.Services.Players.Queries
                                 value = _startingMMR;
                                 break;
                             case "Wood":
-                                value = minRating + rm.Value;
+                                var woodValue = minRating + rm.Value;
+                                value = woodValue >= _startingMMR ? _startingMMR - 1 : woodValue;
                                 break;
                             default:
                                 value = (maxRating - _startingMMR)  * rm.Value + _startingMMR;

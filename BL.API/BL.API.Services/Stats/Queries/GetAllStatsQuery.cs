@@ -47,7 +47,9 @@ namespace BL.API.Services.Players.Queries
                 var players = await _players.GetAllAsync();
                 var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords);
                 var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
+
+                var calibratedPlayers = matchRecords.GroupBy(x => x.PlayerId).Where(x => x.Count() >= 10).Select(x => x.First()?.Player);
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(calibratedPlayers));
 
                 var playerStats = await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable));
 

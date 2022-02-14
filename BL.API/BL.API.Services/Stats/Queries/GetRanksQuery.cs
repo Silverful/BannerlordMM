@@ -1,8 +1,10 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Player;
 using BL.API.Services.Extensions;
+using BL.API.Services.MMR;
 using BL.API.Services.Stats.Utility;
 using MediatR;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,10 +19,12 @@ namespace BL.API.Services.Players.Queries
         public class GetRanksQueryHandler : IRequestHandler<Query, IDictionary<string, double>>
         {
             private readonly IRepository<Player> _players;
+            private readonly double _startingMMR;
 
-            public GetRanksQueryHandler(IRepository<Player> players)
+            public GetRanksQueryHandler(IRepository<Player> players, IOptions<BasicMMRCalculationProperties> options)
             {
                 _players = players;
+                _startingMMR = options.Value.StartMMR;
             }
 
 
@@ -42,13 +46,13 @@ namespace BL.API.Services.Players.Queries
                         switch (rank)
                         {
                             case "Copper":
-                                value = 2000;
+                                value = _startingMMR;
                                 break;
                             case "Wood":
                                 value = minRating + rm.Value;
                                 break;
                             default:
-                                value = (maxRating - 2000)  * rm.Value + 2000;
+                                value = (maxRating - _startingMMR)  * rm.Value + _startingMMR;
                                 break;
                         }
                         return new KeyValuePair<string, double>(rank, value);

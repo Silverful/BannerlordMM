@@ -19,6 +19,7 @@ namespace BL.API.Services.MMR
             {
                 "Beta" => new BetaSeasonStrategy(props),
                 "Test" => new EnhancedCalibrationStrategy(props, _mediator),
+                "The Path of Retribution" => new EnhancedCalibrationStrategy(props, _mediator),
                 _ => new BasicStrategy(props),
             };
 

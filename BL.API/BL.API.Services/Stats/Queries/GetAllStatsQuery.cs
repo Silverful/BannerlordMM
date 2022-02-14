@@ -57,7 +57,7 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.IsIGL
+                                where gmr.Count() >= MinimumMatchesPlayed && player.IsIGL
                                 select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
                                 .OrderByDescending(x => x.Value)
                                 .Take(10);
@@ -72,7 +72,7 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Infantry
+                                where gmr.Count() >= MinimumMatchesPlayed && player.MainClass == PlayerClass.Infantry
                                 select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
                                 .Take(15);
@@ -81,7 +81,7 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Archer
+                                where gmr.Count() >= MinimumMatchesPlayed && player.MainClass == PlayerClass.Archer
                                 select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
                                 .Take(15);
@@ -90,7 +90,7 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Cavalry
+                                where gmr.Count() >= MinimumMatchesPlayed && player.MainClass == PlayerClass.Cavalry
                                 select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
                                 .Take(15);

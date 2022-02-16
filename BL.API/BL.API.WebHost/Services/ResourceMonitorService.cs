@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +14,8 @@ namespace BL.API.WebHost.Services
         private bool disposedValue;
         private readonly ILogger<ResourceMonitorService> _logger;
         private Timer _timer;
+        private PerformanceCounter _cpuCounter;
+        private PerformanceCounter _ramCounter;
 
         public ResourceMonitorService(ILogger<ResourceMonitorService> logger)
         {
@@ -21,7 +25,10 @@ namespace BL.API.WebHost.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Resource monitor is starting.");
-            _timer = new Timer(LogResources, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+
+            //InitializeCPUCounter();
+            //InitializeRAMCounter();
+            _timer = new Timer(LogResources, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
 
             return Task.CompletedTask;
         }
@@ -30,10 +37,11 @@ namespace BL.API.WebHost.Services
         {
             using (var proc = Process.GetCurrentProcess())
             {
+                //var msg = $"CPUI: ${_cpuCounter.NextValue()}; RAM: {_ramCounter.NextValue()}; PrivateMemory: {proc.PrivateMemorySize64 / (1024 * 1024)}";
                 var msg = $"PrivateMemory: {proc.PrivateMemorySize64 / (1024 * 1024)}";
                 var additionalInfo = 
 
-                $"  Physical memory usage     : {proc.WorkingSet64}\n"
+                $"  Physical memory usage     : {proc.WorkingSet64 / 1024}MB \n"
                 + $"  Base priority             : {proc.BasePriority}\n"
                 + $"  Priority class            : {proc.PriorityClass}\n"
                 + $"  User processor time       : {proc.UserProcessorTime}\n"
@@ -45,6 +53,21 @@ namespace BL.API.WebHost.Services
                 _logger.LogInformation(msg);
                 _logger.LogInformation(additionalInfo);
             }
+        }
+
+        private void InitializeCPUCounter()
+        {
+            _cpuCounter = new PerformanceCounter(
+            "Processor",
+            "% Processor Time",
+            "_Total",
+            true
+            );
+        }
+
+        private void InitializeRAMCounter()
+        {
+            _ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

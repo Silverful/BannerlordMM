@@ -10,7 +10,7 @@ namespace BL.API.Services.Stats.Model
     public class PlayerStatItemResponse
     {
         public string PlayerId { get; set; }
-        public int Position { get; set; }
+        public int? Position { get; set; }
         public string Nickname { get; set; }
         public string Country { get; set; }
         public string IGL { get; set; }

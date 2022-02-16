@@ -43,8 +43,8 @@ namespace BL.API.Services.Players.Queries
                     .Where(x => x.Count() >= 10)
                     .Select(x => x.First()?.Player));
 
-                var maxRating = players.Max(x => x.PlayerMMR.MMR);
-                var minRating = players.Min(x => x.PlayerMMR.MMR);
+                var maxRating = players.Count() > 0 ? players.Max(x => x.PlayerMMR.MMR) : _startingMMR;
+                var minRating = players.Count() > 0 ? players.Min(x => x.PlayerMMR.MMR) : _startingMMR;
 
                 var rankTable = StatsQueryHelper.RankMultipliers;
 

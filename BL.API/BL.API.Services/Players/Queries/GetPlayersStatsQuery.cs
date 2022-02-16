@@ -56,7 +56,7 @@ namespace BL.API.Services.Players.Queries
                     .ThenByDescending(s => s.Played >= 10 ? s.MMR : s.Played)
                     .Select((s, i) =>
                     {
-                        s.Position = i + 1;
+                        s.Position = s.Played >= 10 ? i + 1 : null;
                         return s;
                     })
                     .ToList();

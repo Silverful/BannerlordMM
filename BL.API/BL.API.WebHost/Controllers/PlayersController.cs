@@ -132,7 +132,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         /// <summary>
-        /// Partial update method. Body request example "[{"value": "Archer", "path": "/mainClass", "op": "replace"}]
+        /// Partial update method. Body request example: [{"value": "Archer", "path": "/mainClass", "op": "replace"}]
         /// </summary>
         /// <param name="playerId"></param>
         /// <param name="request"></param>
@@ -151,6 +151,7 @@ namespace BL.API.WebHost.Controllers
             {
                 Id = playerId,
                 Nickname = player.Nickname,
+                IGL = player.IsIGL,
                 Country = player.Country,
                 Clan = player.Clan,
                 MainClass = player.MainClass.ToString(),

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,22 +30,20 @@ namespace BL.API.Services.Players.Commands
         public long? DiscordId { get; set; }
         public bool IGL { get; set; }
 
-        public Player ToPlayer(Guid id)
+        public Player ToPlayer(Player player)
         {
             var mainClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.MainClass);
             var secondaryClass = (PlayerClass)Enum.Parse(typeof(PlayerClass), this.SecondaryClass);
 
-            return new Player
-            {
-                Id = id,
-                Nickname = this.Nickname,
-                Country = this.Country,
-                IsIGL = this.IGL,
-                Clan = this.Clan,
-                MainClass = mainClass,
-                SecondaryClass = secondaryClass,
-                DiscordId = this.DiscordId
-            };
+            player.Nickname = this.Nickname;
+            player.Country = this.Country;
+            player.IsIGL = this.IGL;
+            player.Clan = this.Clan;
+            player.MainClass = mainClass;
+            player.SecondaryClass = secondaryClass;
+            player.DiscordId = this.DiscordId;
+
+            return player;
         }
 
         public class UpdatePlayerCommandHandler : IRequestHandler<UpdatePlayerCommand, Task>
@@ -62,15 +61,15 @@ namespace BL.API.Services.Players.Commands
             {
                 if (!Guid.TryParse(request.Id, out Guid id)) throw new GuidCantBeParsedException();
 
-                var player = request.ToPlayer(id);
-
-                var currentPlayer = await _repository.GetByIdAsync(id);
+                var currentPlayer = await _repository.GetByIdAsync(id, false);
 
                 if (currentPlayer == null) throw new NotFoundException();
 
+                var player = request.ToPlayer(currentPlayer);
+
                 await _repository.UpdateAsync(player);
 
-                _logger?.LogInformation($"Player updated {JsonSerializer.Serialize(player)}");
+                _logger?.LogInformation($"Player updated {JsonSerializer.Serialize(player, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
                 return Task.CompletedTask;
             }
         }

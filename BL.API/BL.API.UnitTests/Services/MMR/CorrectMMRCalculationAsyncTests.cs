@@ -36,7 +36,7 @@ namespace BL.API.UnitTests.Services.MMR
                 .RuleFor(p => p.Clan, (f) => f.Company.CompanyName())
                 .RuleFor(p => p.MainClass, (f) => (PlayerClass)f.Random.Int(1, 3))
                 .RuleFor(p => p.SecondaryClass, (f) => (PlayerClass)f.Random.Int(1, 3))
-                .RuleFor(p => p.PlayerMMR, (f) => f.Random.Int(0, 1000))
+                //.RuleFor(p => p.PlayerMMR, (f) => f.Random.Int(0, 1000))
                 .Generate(12)
                 .ToList();
 
@@ -180,13 +180,13 @@ namespace BL.API.UnitTests.Services.MMR
             var testScores = new List<(byte, int, byte)>
             {
                 (0, 714, 0), (0, 707, 0), (0, 650, 0), (0, 573, 0), (0, 356, 0), (0, 135, 0),
-                (1, 1194, 0), (1, 1069, 0), (1, 801, 0), (1, 634, 0), (1, 614, 0), (1, 574, 0)
+                (1, 1194, 10), (1, 1069, 0), (1, 801, 0), (1, 634, 0), (1, 614, 0), (1, 574, 0)
             };
 
             var realMMRChange = new List<int>
             {
                 -27, -27, -27, -27, -27, -27,
-                27, 27, 27, 27, 27, 27
+                108, 27, 27, 27, 27, 27
             };
 
             var testMatch = CreateBaseMatch(1, 5, testScores);

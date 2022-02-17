@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Services.Extensions;
@@ -21,16 +22,19 @@ namespace BL.API.Services.Players.Queries
             private readonly IRepository<Player> _players;
             private readonly StatsProps _statsProps;
             private readonly IRepository<Match> _matches;
+            private readonly ISeasonResolverService seasonResolver;
             private readonly IMediator _mediator;
 
             public GetAllStatsQueryHandler(IRepository<Player> players,
                 IRepository<Match> matches,
                 IOptions<StatsProps> statsProps,
+                ISeasonResolverService seasonResolver,
                 IMediator mediator
                 )
             {
                 _players = players;
                 _matches = matches;
+                this.seasonResolver = seasonResolver;
                 _statsProps = statsProps.Value;
                 _mediator = mediator;
             }
@@ -39,10 +43,13 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<AllStatsResponse> Handle(Query request, CancellationToken cancellationToken)
             {
+                var season = await seasonResolver.GetCurrentSeasonAsync();
                 var players = await _players.GetAllAsync();
-                var matches = await _matches.GetAllAsync();
+                var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords);
                 var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(players));
+
+                var calibratedPlayers = matchRecords.GroupBy(x => x.PlayerId).Where(x => x.Count() >= 10).Select(x => x.First()?.Player);
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(calibratedPlayers));
 
                 var playerStats = await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable));
 
@@ -50,22 +57,23 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.IsIGL
-                                select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
-                                .OrderByDescending(x => x.Value);
+                                where gmr.Count() >= MinimumMatchesPlayed && player.IsIGL
+                                select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
+                                .OrderByDescending(x => x.Value)
+                                .Take(10);
 
                 var factionStats = (from mr in matchRecords
                                    where mr.Faction.HasValue
                                    group mr by mr.Faction into gmr
-                                   select new KeyValuePair<string, decimal>(gmr.Key.ToString(), (decimal)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
+                                   select new KeyValuePair<string, double>(gmr.Key.ToString(), (double)gmr.Where(mr => mr.TeamIndex == mr.Match.TeamWon).Count() / gmr.Count()))
                                    .OrderByDescending(x => x.Value);
 
                 var infStats = (from mr in matchRecords
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Infantry
-                                select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
+                                where gmr.Count() >= MinimumMatchesPlayed && player.MainClass == PlayerClass.Infantry
+                                select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
                                 .Take(15);
 
@@ -73,8 +81,8 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Archer
-                                select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
+                                where gmr.Count() >= MinimumMatchesPlayed && player.MainClass == PlayerClass.Archer
+                                select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
                                 .Take(15);
 
@@ -82,8 +90,8 @@ namespace BL.API.Services.Players.Queries
                                 where mr.PlayerId.HasValue
                                 group mr by mr.PlayerId into gmr
                                 join player in players on gmr.Key equals player.Id
-                                where gmr.Count() > MinimumMatchesPlayed && player.MainClass == PlayerClass.Cavalry
-                                select new KeyValuePair<string, decimal>(player.Nickname, (decimal)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
+                                where gmr.Count() >= MinimumMatchesPlayed && player.MainClass == PlayerClass.Cavalry
+                                select new KeyValuePair<string, double>(player.Nickname, (double)gmr.Sum(x => x.Score) / gmr.Sum(x => x.Match.RoundsPlayed)))
                                 .OrderByDescending(x => x.Value)
                                 .Take(15);
 
@@ -97,15 +105,17 @@ namespace BL.API.Services.Players.Queries
                     {
                         Nickname = player.Nickname,
                         AseraiCount = gmr.Where(mr => mr.Faction == Faction.Aserai).Count(),
-                        AseraiWR = gmr.Where(mr => mr.Faction == Faction.Aserai && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDecimal(gmr.Where(mr => mr.Faction == Faction.Aserai).Count()),
+                        AseraiWR = gmr.Where(mr => mr.Faction == Faction.Aserai && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Aserai).Count()),
                         BattaniaCount = gmr.Where(mr => mr.Faction == Faction.Battania).Count(),
-                        BattaniaWR = gmr.Where(mr => mr.Faction == Faction.Battania && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDecimal(gmr.Where(mr => mr.Faction == Faction.Battania).Count()),
+                        BattaniaWR = gmr.Where(mr => mr.Faction == Faction.Battania && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Battania).Count()),
                         EmpireCount = gmr.Where(mr => mr.Faction == Faction.Empire).Count(),
-                        EmpireWR = gmr.Where(mr => mr.Faction == Faction.Empire && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDecimal(gmr.Where(mr => mr.Faction == Faction.Empire).Count()),
+                        EmpireWR = gmr.Where(mr => mr.Faction == Faction.Empire && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Empire).Count()),
                         KhuzaitCount = gmr.Where(mr => mr.Faction == Faction.Khuzait).Count(),
-                        KhuzaitWR = gmr.Where(mr => mr.Faction == Faction.Khuzait && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDecimal(gmr.Where(mr => mr.Faction == Faction.Khuzait).Count()),
+                        KhuzaitWR = gmr.Where(mr => mr.Faction == Faction.Khuzait && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Khuzait).Count()),
+                        SturgiaCount = gmr.Where(mr => mr.Faction == Faction.Sturgia).Count(),
+                        SturgiaWR = gmr.Where(mr => mr.Faction == Faction.Sturgia && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Sturgia).Count()),
                         VlandiaCount = gmr.Where(mr => mr.Faction == Faction.Vlandia).Count(),
-                        VlandiaWR = gmr.Where(mr => mr.Faction == Faction.Vlandia && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDecimal(gmr.Where(mr => mr.Faction == Faction.Vlandia).Count())
+                        VlandiaWR = gmr.Where(mr => mr.Faction == Faction.Vlandia && mr.TeamIndex == mr.Match.TeamWon).Count().SafeDivisionToDouble(gmr.Where(mr => mr.Faction == Faction.Vlandia).Count())
                     };
 
                 return new AllStatsResponse

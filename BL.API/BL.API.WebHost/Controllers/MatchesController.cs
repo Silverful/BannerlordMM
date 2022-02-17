@@ -24,9 +24,18 @@ namespace BL.API.WebHost.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<GetMatchesQuery.PlayerMatchResponse>>> Get()
+        public async Task<ActionResult<IEnumerable<MatchResponse>>> Get()
         {
             var matchRecords = await _mediator.Send(new GetMatchesQuery.Query());
+            return Ok(matchRecords);
+        }
+
+        [HttpGet("{matchId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<MatchResponse>> GetById(Guid matchId)
+        {
+            var matchRecords = await _mediator.Send(new GetMatchByIdQuery.Query(matchId));
             return Ok(matchRecords);
         }
 
@@ -52,6 +61,15 @@ namespace BL.API.WebHost.Controllers
             }
 
             await _mediator.Send(request);
+            return Ok();
+        }
+
+        [HttpDelete("{matchId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> Delete(Guid matchId)
+        {
+            await _mediator.Send(new DeleteMatchCommand.Query(matchId));
             return Ok();
         }
     }

@@ -26,8 +26,8 @@ namespace BL.API.Migration
 
         static async Task Main(string[] args)
         {
-            //_httpClient = new RestClient("https://bannerlordmm.com/");
-            _httpClient = new RestClient("https://localhost:44365/");
+            //_httpClient = new RestClient("https://bannerlordmm.com/api");
+            _httpClient = new RestClient("https://localhost:5001/api");
 
             string[] Scopes = { SheetsService.Scope.Spreadsheets };
             string ApplicationName = "MM Migration Script";
@@ -45,36 +45,46 @@ namespace BL.API.Migration
                 ApplicationName = ApplicationName,
             });
 
-            await LoadPlayers();
+            await LoadPlayers(_spreadsheetId);
             Console.WriteLine("Players Finished");
-            await LoadMatches(_oldSpreadsheetId, "Лист2!A2:M"); //old
+            await LoadMatches(_oldSpreadsheetId, "Screens!A2:M"); //old
             Console.WriteLine("Old screens Finished");
-            await LoadMatches(_spreadsheetId, "Screens!A2:M"); //new
+            //await LoadMatches(_spreadsheetId, "Screens!A2:M"); //new
             Console.WriteLine("Finished");
             Console.Read();
         }
 
-        private static async Task LoadPlayers()
+        private static async Task LoadPlayers(string spreadsheetId)
         {
-            string range = "Stats!A2:V";
+            var discordId = 1;
+            string range = "Stats!A2:W";
 
-            var values = GetSpreadsheetResponse(_spreadsheetId, range);
+            var values = GetSpreadsheetResponse(spreadsheetId, range);
 
             if (values != null && values.Count > 0)
             {
                 foreach (var row in values)
                 {
-                    var cmd = new AddPlayerCommand
+                    try
                     {
-                        Nickname = row[1].ToString(),
-                        Country = row[2].ToString(),
-                        IGL = string.IsNullOrEmpty(row[3].ToString()) ? false : true,
-                        Clan = row[4].ToString(),
-                        MainClass = row[5].ToString(),
-                        SecondaryClass = row[6].ToString(),
-                        DiscordId = Convert.ToInt64(row[21])
-                    };
-                    await Upload("Players", cmd);
+                        var cmd = new AddPlayerCommand
+                        {
+                            Nickname = row[1].ToString(),
+                            Country = row[2].ToString(),
+                            IGL = string.IsNullOrEmpty(row[3].ToString()) ? false : true,
+                            Clan = row[4].ToString(),
+                            MainClass = row[5].ToString(),
+                            SecondaryClass = row[6].ToString(),
+                            DiscordId = discordId
+                        };
+                        await Upload("Players", cmd);
+
+                        discordId++;
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
                 }
             }
         }
@@ -90,23 +100,31 @@ namespace BL.API.Migration
                 var match = new UploadMatchCommand();
                 foreach (var row in values)
                 {
-                    if (match.ScreenshotLink == null)
+                    try
                     {
-                        CreateNewMatch(match, row);
-                    }
+                        if (match.ScreenshotLink == null)
+                        {
+                            CreateNewMatch(match, row);
+                        }
 
-                    if (match.ScreenshotLink == row[11].ToString())
+                        if (match.ScreenshotLink == row[11].ToString())
+                        {
+                            AddNewRecord(match, row, players);
+                        }
+                        else
+                        {
+                            await Upload("Matches", match);
+                            match = new UploadMatchCommand();
+                            CreateNewMatch(match, row);
+                            AddNewRecord(match, row, players);
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        AddNewRecord(match, row, players);
-                    } 
-                    else
-                    {
-                        await Upload("Matches", match);
-                        match = new UploadMatchCommand();
-                        CreateNewMatch(match, row);
-                        AddNewRecord(match, row, players);
+
                     }
                 }
+                await Upload("Matches", match);
             }
         }
 
@@ -138,21 +156,18 @@ namespace BL.API.Migration
 
         private static UploadMatchCommand.MatchRecord ParseMatchRecord(IList<object> row, IEnumerable<Player> players)
         {
-            var playerId = players.Where(p => p.Nickname == row[1].ToString()).FirstOrDefault()?.Id;
+            var playerId = players.Where(p => p.Nickname.ToLower() == row[1].ToString().ToLower()).FirstOrDefault()?.Id;
 
-            return playerId.HasValue ?
-                new UploadMatchCommand.MatchRecord
+            return new UploadMatchCommand.MatchRecord
                 {
-                    PlayerId = players.Where(p => p.Nickname == row[1].ToString()).First().Id,
+                    PlayerId = playerId,
                     RoundsWon = GetRoundsWon(row),
                     Kills = Convert.ToSByte(row[5]),
                     Assists = Convert.ToSByte(row[6]),
                     Score = Convert.ToInt32(row[7]),
                     MVPs = Convert.ToByte(row[8]),
                     Faction = row[9].ToString(),
-                }
-                :
-                null;
+                };
         }
 
         private static byte GetRoundsWon(IList<object> row)
@@ -171,17 +186,29 @@ namespace BL.API.Migration
 
         private static async Task Upload(string path, object cmd)
         {
-            try
+            var isSuccessful = false;
+            while (!isSuccessful)
             {
+                try
+                {
 
-                var request = new RestRequest(path, DataFormat.Json)
-                    .AddJsonBody(cmd);
+                    var request = new RestRequest(path, DataFormat.Json)
+                        .AddJsonBody(cmd);
 
-                await _httpClient.PostAsync<string>(request);
-            }
-            catch(Exception ex)
-            {
+                    var response = await _httpClient.PostAsync<string>(request);
 
+                    //if (!Guid.TryParse(response, out Guid res))
+                    //{
+
+                    //}
+
+                    var json = System.Text.Json.JsonSerializer.Serialize(cmd);
+                    isSuccessful = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
 

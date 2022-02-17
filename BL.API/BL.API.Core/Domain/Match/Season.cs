@@ -7,6 +7,7 @@ namespace BL.API.Core.Domain.Match
         public int Index { get; set; }
         public string Title { get; set; }
         public bool OnGoing { get; set; }
+        public bool IsTestingSeason { get; set; }
         public DateTime? Started { get; set; }
         public DateTime? Finished { get; set; }
     }

@@ -24,6 +24,7 @@ namespace BL.API.Services.Matches.Commands
             public byte RoundsWon { get; set; }
             public string Faction { get; set; }
             public sbyte? Kills { get; set; }
+            public byte? Deaths { get; set; }
             public sbyte? Assists { get; set; }
             public int? Score { get; set; }
             [Range(0, 5)]
@@ -45,6 +46,7 @@ namespace BL.API.Services.Matches.Commands
                     RoundsWon = this.RoundsWon,
                     Faction = faction,
                     Kills = this.Kills,
+                    Deaths = this.Deaths,
                     Assists = this.Assists,
                     Score = this.Score,
                     MVPs = this.MVPs

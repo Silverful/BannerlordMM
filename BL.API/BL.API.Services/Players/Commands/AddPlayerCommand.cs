@@ -11,7 +11,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 
 namespace BL.API.Services.Players.Commands
 {
@@ -51,17 +50,17 @@ namespace BL.API.Services.Players.Commands
         public class AddPlayerCommandHandler : IRequestHandler<AddPlayerCommand, Guid>
         {
             private readonly IRepository<Player> _repository;
-            private readonly IRepository<PlayerMMR> _mmr;
             private readonly ILogger<AddPlayerCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
+            private readonly IMediator _mediator;
 
             public AddPlayerCommandHandler(IRepository<Player> repository,
-                IRepository<PlayerMMR> mmr,
                 ISeasonResolverService seasonService,
+                IMediator mediator,
                 ILogger<AddPlayerCommandHandler> logger)
             {
+                _mediator = mediator;
                 _repository = repository;
-                _mmr = mmr;
                 _seasonService = seasonService;
                 _logger = logger;
             }
@@ -82,11 +81,9 @@ namespace BL.API.Services.Players.Commands
                 var player = request.ToPlayer();
 
                 var playerMMRs = player.PlayerMMRs ?? new List<PlayerMMR>();
-                playerMMRs.Add(new PlayerMMR
-                {
-                    SeasonId = currentSeason.Id,
-                    MMR = 0
-                });
+
+                var mmr = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = player.Id, SeasonId = currentSeason.Id });
+                playerMMRs.Add(mmr);
 
                 player.PlayerMMRs = playerMMRs;
                     

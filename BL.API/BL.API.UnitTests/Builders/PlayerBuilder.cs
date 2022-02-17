@@ -73,7 +73,7 @@ namespace BL.API.UnitTests.Builders
                 MainClass = _mainClass,
                 SecondaryClass = _secondaryClass,
                 DiscordId = _discordId,
-                PlayerMMR = _playerMMR
+                //PlayerMMR = _playerMMR
             };
         }
     }

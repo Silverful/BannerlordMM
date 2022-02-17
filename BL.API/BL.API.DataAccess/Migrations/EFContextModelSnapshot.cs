@@ -125,8 +125,8 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<short?>("Kills")
                         .HasColumnType("smallint");
 
-                    b.Property<int?>("MMRChange")
-                        .HasColumnType("int");
+                    b.Property<double?>("MMRChange")
+                        .HasColumnType("float");
 
                     b.Property<byte?>("MVPs")
                         .HasColumnType("tinyint");
@@ -175,6 +175,11 @@ namespace BL.API.DataAccess.Migrations
                         .HasAnnotation("SqlServer:IdentityIncrement", 1)
                         .HasAnnotation("SqlServer:IdentitySeed", 1)
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsTestingSeason")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValueSql("0");
 
                     b.Property<bool>("OnGoing")
                         .HasColumnType("bit");
@@ -243,8 +248,8 @@ namespace BL.API.DataAccess.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getdate()");
 
-                    b.Property<int>("MMR")
-                        .HasColumnType("int");
+                    b.Property<double>("MMR")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uniqueidentifier");
@@ -259,6 +264,29 @@ namespace BL.API.DataAccess.Migrations
                     b.HasIndex("SeasonId");
 
                     b.ToTable("PlayerMMR");
+                });
+
+            modelBuilder.Entity("BL.API.Core.Domain.Settings.Configuration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConfigName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("getdate()");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configurations");
                 });
 
             modelBuilder.Entity("BL.API.Core.Domain.Match.Match", b =>

@@ -7,6 +7,7 @@ using BL.API.Services.Players.Commands;
 using BL.API.Services.Seasons;
 using BL.API.Services.Stats.Model;
 using BL.API.WebHost.Middleware;
+using BL.API.WebHost.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -56,8 +57,11 @@ namespace BL.API.WebHost
                 .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
 
             services.AddScoped(typeof(IRepository<>), typeof(EFRepository<>));
+            services.AddScoped(typeof(IMMRCalculationBuilder), typeof(MMRCalculationBuilder));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
             services.AddScoped(typeof(ISeasonResolverService), typeof(SeasonResolverService)); //temporary - must be changed to cache
+
+            services.AddHostedService<ResourceMonitorService>();
 
             services.AddCors(options =>
             {

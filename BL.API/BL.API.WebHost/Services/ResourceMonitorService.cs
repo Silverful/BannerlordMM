@@ -28,7 +28,7 @@ namespace BL.API.WebHost.Services
 
             //InitializeCPUCounter();
             //InitializeRAMCounter();
-            _timer = new Timer(LogResources, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+            _timer = new Timer(LogResources, null, TimeSpan.Zero, TimeSpan.FromMinutes(30));
 
             return Task.CompletedTask;
         }

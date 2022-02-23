@@ -2,6 +2,7 @@
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
+using BL.API.Services.Regions.Queries;
 using BL.API.Services.Stats.Model;
 using MediatR;
 using System;
@@ -13,7 +14,7 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayerStatsByDiscordIdQuery
     {
-        public record Query(long discordId) : IRequest<PlayerStatItemResponse>;
+        public record Query(long discordId, string RegionShortName) : IRequest<PlayerStatItemResponse>;
 
         public class GetPlayerStatsByDiscordIdQueryHandler : IRequestHandler<Query, PlayerStatItemResponse>
         {
@@ -33,6 +34,7 @@ namespace BL.API.Services.Players.Queries
             public async Task<PlayerStatItemResponse> Handle(Query request, CancellationToken cancellationToken)
             {
                 var player = await _players.GetFirstWhereAsync(p => p.DiscordId == request.discordId);
+                var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
 
                 if (player == null) throw new NotFoundException();
 
@@ -44,8 +46,8 @@ namespace BL.API.Services.Players.Queries
                     group record by record.PlayerId.Value into g
                     select g;
 
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(null));
-                var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable);
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(null, region.Id));
+                var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable, region.Id);
 
                 return stats;
             }

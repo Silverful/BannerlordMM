@@ -12,7 +12,7 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayersAvgCalibrationScoreQuery
     {
-        public record Query(Guid PlayerId, IEnumerable<PlayerMatchRecord> Records) : IRequest<double>;
+        public record Query(Guid PlayerId, IEnumerable<PlayerMatchRecord> Records, Guid RegionId) : IRequest<double>;
 
         public class GetPlayersAvgCalibrationScoreQueryHandler : IRequestHandler<Query, double>
         {
@@ -29,7 +29,12 @@ namespace BL.API.Services.Players.Queries
             {
                 var currentSeason = await _seasonResolver.GetCurrentSeasonAsync();
 
-                var records = (request.Records ?? await _repository.GetWhereAsync(x => x.PlayerId == request.PlayerId && x.Match.SeasonId == currentSeason.Id, true, x => x.Match))
+                var records = (request.Records ?? await _repository.GetWhereAsync(x => 
+                    x.PlayerId == request.PlayerId 
+                    && x.Match.SeasonId == currentSeason.Id 
+                    && x.Match.RegionId == request.RegionId, 
+                    true, 
+                    x => x.Match))
                     .OrderByDescending(r => r.CalibrationIndex)
                     .ThenByDescending(r => r.Match.MatchDate)
                     .ThenByDescending(r => r.Match.Created)

@@ -3,6 +3,7 @@ using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
+using BL.API.Services.Regions.Queries;
 using BL.API.Services.Stats.Model;
 using MediatR;
 using System;
@@ -14,7 +15,7 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayerStatsQuery
     {
-        public record Query(string PlayerId) : IRequest<PlayerStatItemResponse>;
+        public record Query(string PlayerId, string RegionShortName) : IRequest<PlayerStatItemResponse>;
 
         public class GetPlayerStatsHandler : IRequestHandler<Query, PlayerStatItemResponse>
         {
@@ -46,6 +47,7 @@ namespace BL.API.Services.Players.Queries
                 if (player == null) throw new NotFoundException();
 
                 var season = await _seasonResolver.GetCurrentSeasonAsync();
+                var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
 
                 var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id && m.Match.SeasonId == season.Id, false, mr => mr.Match);
 
@@ -54,8 +56,8 @@ namespace BL.API.Services.Players.Queries
                     group record by record.PlayerId.Value into g
                     select g;
 
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(null));
-                var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable);
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(null, region.Id));
+                var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable, region.Id);
 
                 var pos = (await _mmrs.GetAllAsync())
                     .Where(m => m.Season.OnGoing)

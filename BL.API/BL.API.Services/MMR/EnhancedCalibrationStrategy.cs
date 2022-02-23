@@ -41,7 +41,7 @@ namespace BL.API.Services.MMR
             {
                 double exp = 0;
                 double avgClassScore = 0;
-                double avgPlayerScore = await _mediator.Send(new GetPlayersAvgCalibrationScoreQuery.Query(record.PlayerId.Value, null));
+                double avgPlayerScore = await _mediator.Send(new GetPlayersAvgCalibrationScoreQuery.Query(record.PlayerId.Value, null, record.Match.RegionId.Value));
                 var player = record.Player ?? await _mediator.Send(new GetPlayerByIdQuery.Query(record.PlayerId.Value.ToString()));
 
                 switch (player.MainClass)

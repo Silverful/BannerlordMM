@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BL.API.Core.Domain.Settings;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +15,9 @@ namespace BL.API.Core.Domain.Match
         public byte RoundsPlayed { get; set; }
         public byte TeamWon { get; set; }
         public Guid? SeasonId { get; set; }
+        public Guid? RegionId { get; set; }
+        [ForeignKey("RegionId")]
+        public virtual Region Region { get; set; }
         public virtual Season Season { get; set; }
         public virtual ICollection<PlayerMatchRecord> PlayerRecords { get; set; }
     }

@@ -29,7 +29,14 @@ namespace BL.API.Core.Domain.Player
 
         public ICollection<PlayerMMR> PlayerMMRs { get; set; }
 
-        [NotMapped]
-        public PlayerMMR PlayerMMR { get => PlayerMMRs.FirstOrDefault(m => m.Season?.OnGoing ?? false) ?? null; }
+        public PlayerMMR GetPlayerMMR (string shortName)
+        {
+            return PlayerMMRs.Where(pm => pm.Season.OnGoing && pm.Region.ShortName == shortName).FirstOrDefault();
+        }
+
+        public PlayerMMR GetPlayerMMR(Guid regionId)
+        {
+            return PlayerMMRs.Where(pm => pm.Season.OnGoing && pm.RegionId == regionId).FirstOrDefault();
+        }
     }
 }

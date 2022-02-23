@@ -7,6 +7,7 @@ namespace BL.API.Services.Matches.Commands
 {
     public class UploadMatchRequest
     {
+        public string RegionShortName { get; set; }
         [Required]
         public string ScreenshotLink { get; set; }
         [Required]

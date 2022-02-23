@@ -5,7 +5,6 @@ using BL.API.Core.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -52,14 +51,11 @@ namespace BL.API.Services.Players.Commands
             private readonly IRepository<Player> _repository;
             private readonly ILogger<AddPlayerCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
-            private readonly IMediator _mediator;
 
             public AddPlayerCommandHandler(IRepository<Player> repository,
                 ISeasonResolverService seasonService,
-                IMediator mediator,
                 ILogger<AddPlayerCommandHandler> logger)
             {
-                _mediator = mediator;
                 _repository = repository;
                 _seasonService = seasonService;
                 _logger = logger;
@@ -80,13 +76,6 @@ namespace BL.API.Services.Players.Commands
 
                 var player = request.ToPlayer();
 
-                var playerMMRs = player.PlayerMMRs ?? new List<PlayerMMR>();
-
-                var mmr = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = player.Id, SeasonId = currentSeason.Id });
-                playerMMRs.Add(mmr);
-
-                player.PlayerMMRs = playerMMRs;
-                    
                 await _repository.CreateAsync(player);
 
                 _logger?.LogInformation($"Player created {JsonSerializer.Serialize(player, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");

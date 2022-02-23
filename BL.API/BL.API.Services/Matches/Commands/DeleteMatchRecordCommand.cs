@@ -34,18 +34,21 @@ namespace BL.API.Services.Matches.Commands
                 var record = await _matchRecords.GetByIdAsync(request.RecordId, false, r => r.Match, r => r.Player);
                 var match = record.Match;
                 var player = record.Player;
+                var regionId = match.RegionId.Value;
+                var playerMMR = player.GetPlayerMMR(match.RegionId.Value);
 
                 if (record.PlayerId.HasValue
                     && record.MMRChange.HasValue
                     && record.CalibrationIndex.HasValue)
                 {
-                    player.PlayerMMR.MMR = player.PlayerMMR.MMR - record.MMRChange.Value;
+                    playerMMR.MMR = playerMMR.MMR - record.MMRChange.Value;
 
                     if (record.CalibrationIndex > 0)
                     {
                         var calibrationRecords = (await _matchRecords
                         .GetWhereAsync(pr =>
                             pr.MatchId != match.Id
+                            && pr.Match.RegionId == regionId
                             && pr.Match.SeasonId == match.SeasonId
                             && pr.PlayerId == record.PlayerId, false, pr => pr.Match, pr => pr.Player))
                         .OrderByDescending(pr => pr.CalibrationIndex)
@@ -59,7 +62,7 @@ namespace BL.API.Services.Matches.Commands
                         {
                             rec.CalibrationIndex = calibrationIndex;
                             var newMMRChange = await _mmrService.CalculateMMRChangeAsync(rec);
-                            player.PlayerMMR.MMR = player.PlayerMMR.MMR - rec.MMRChange.Value + newMMRChange;
+                            playerMMR.MMR = playerMMR.MMR - rec.MMRChange.Value + newMMRChange;
                             rec.MMRChange = newMMRChange;
                             calibrationIndex--;
                         }

@@ -1,7 +1,9 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Domain.Settings;
 using BL.API.Services.Players.Commands;
+using BL.API.Services.Regions.Queries;
 using MediatR;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -15,6 +17,8 @@ namespace BL.API.Services.Seasons.Commands
     {
         [Required]
         public string SeasonName { get; set; }
+        [Required]
+        public string RegionShortName { get; set; }
 
         public class StartNewSeasonCommandHandler : IRequestHandler<StartNewSeasonCommand, Guid>
         {
@@ -34,6 +38,7 @@ namespace BL.API.Services.Seasons.Commands
             public async Task<Guid> Handle(StartNewSeasonCommand request, CancellationToken cancellationToken)
             {
                 var currentSeason = await _seasons.GetFirstWhereAsync(s => s.OnGoing && !s.IsTestingSeason, false);
+                var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
 
                 currentSeason.OnGoing = false;
                 currentSeason.Finished = DateTime.UtcNow;
@@ -43,7 +48,8 @@ namespace BL.API.Services.Seasons.Commands
                     Title = request.SeasonName,
                     OnGoing = true,
                     IsTestingSeason = false,
-                    Started = DateTime.UtcNow
+                    Started = DateTime.UtcNow,
+                    RegionId = region.Id
                 };
 
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))

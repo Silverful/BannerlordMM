@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/{regionShortName}/[controller]")]
     public class StatsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -21,9 +21,9 @@ namespace BL.API.WebHost.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AllStatsResponse>> GetAllStats()
+        public async Task<ActionResult<AllStatsResponse>> GetAllStats(string regionShortName)
         {
-            return Ok(await _mediator.Send(new GetAllStatsQuery.Query()));
+            return Ok(await _mediator.Send(new GetAllStatsQuery.Query(regionShortName)));
         }
     }
 }

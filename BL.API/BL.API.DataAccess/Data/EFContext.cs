@@ -10,10 +10,7 @@ namespace BL.API.DataAccess.Data
     //dotnet ef database update -s..\BL.API.WebHost\BL.API.WebHost.csproj
     public class EFContext : DbContext
     {
-        public EFContext(DbContextOptions options) : base(options) 
-        {
-        }
-
+        public EFContext(DbContextOptions options) : base(options) {}
         public virtual DbSet<Player> Players { get; protected set; }
         public virtual DbSet<Match> Matches { get; protected set; }
         public virtual DbSet<PlayerMatchRecord> PlayerMatchRecords { get; protected set; }
@@ -34,6 +31,10 @@ namespace BL.API.DataAccess.Data
             modelBuilder.Entity<Configuration>()
                 .Property(l => l.Created)
                 .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<Configuration>()
+                .Navigation(c => c.Region)
+                .AutoInclude();
 
             modelBuilder.Entity<NLog>()
                 .Property(l => l.ID)

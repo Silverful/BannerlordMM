@@ -18,7 +18,7 @@ namespace BL.API.Core.Domain.Player
         [ForeignKey("PlayerId")]
         public virtual Player Player {get;set;}
 
-        public Guid RegionId { get; set; }
+        public Guid? RegionId { get; set; }
         [ForeignKey("RegionId")]
         public virtual Region Region { get; set; }
         

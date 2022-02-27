@@ -49,7 +49,7 @@ namespace BL.API.Services.Players.Queries
                 var season = await _seasonResolver.GetCurrentSeasonAsync();
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
 
-                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id && m.Match.SeasonId == season.Id, false, mr => mr.Match);
+                var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id && m.Match.SeasonId == season.Id && m.Match.RegionId == region.Id, false, mr => mr.Match);
 
                 var records =
                     from record in matchRecords
@@ -60,7 +60,7 @@ namespace BL.API.Services.Players.Queries
                 var stats = PlayerStatItemResponse.FromMatchRecordGrouping(player, records.FirstOrDefault(), rankTable, region.Id);
 
                 var pos = (await _mmrs.GetAllAsync())
-                    .Where(m => m.Season.OnGoing)
+                    .Where(m => m.Season.OnGoing && m.RegionId == region.Id)
                     .OrderByDescending(m => m.MMR)
                     .Select((m, i) => new { m.PlayerId, i })
                     .Where(mi => mi.PlayerId == player.Id)

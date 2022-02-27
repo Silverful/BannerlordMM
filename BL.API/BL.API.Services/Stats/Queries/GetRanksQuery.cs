@@ -37,7 +37,7 @@ namespace BL.API.Services.Players.Queries
             {
                 var season = await _seasonResolver.GetCurrentSeasonAsync();
 
-                var players = request.Players ?? ((await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords))
+                var players = request.Players ?? ((await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.RegionId == request.regionId, true, m => m.PlayerRecords))
                     .Select(x => x.PlayerRecords)
                     .SelectMany(x => x)
                     .GroupBy(x => x.PlayerId)

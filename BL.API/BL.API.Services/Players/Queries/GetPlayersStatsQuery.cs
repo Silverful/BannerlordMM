@@ -36,8 +36,8 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var season = await _seasonResolver.GetCurrentSeasonAsync();
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+                var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
 
                 var players = request.Players ?? await _players.GetAllAsync();
                 var matchRecords = request.MatchRecords ?? (await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.RegionId == region.Id, true, m => m.PlayerRecords))

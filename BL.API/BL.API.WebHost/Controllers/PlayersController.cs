@@ -98,8 +98,9 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Post([FromBody] AddPlayerCommand request)
+        public async Task<IActionResult> Post(string regionShortName, [FromBody] AddPlayerCommand request)
         {
+            request.RegionShortName = regionShortName;
             var playerId = await _mediator.Send(request);
             return CreatedAtAction("Post", new { id = playerId }, playerId);
         }

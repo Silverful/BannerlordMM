@@ -35,11 +35,12 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<IDictionary<string, double>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var season = await _seasonResolver.GetCurrentSeasonAsync();
+                var season = await _seasonResolver.GetCurrentSeasonAsync(request.regionId);
 
                 var players = request.Players ?? ((await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.RegionId == request.regionId, true, m => m.PlayerRecords))
                     .Select(x => x.PlayerRecords)
                     .SelectMany(x => x)
+                    .Where(x => x.PlayerId != null) 
                     .GroupBy(x => x.PlayerId)
                     .Where(x => x.Count() >= 10)
                     .Select(x => x.First()?.Player));

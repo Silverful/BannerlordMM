@@ -27,7 +27,7 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<double> Handle(Query request, CancellationToken cancellationToken)
             {
-                var currentSeason = await _seasonResolver.GetCurrentSeasonAsync();
+                var currentSeason = await _seasonResolver.GetCurrentSeasonAsync(request.RegionId);
 
                 var records = (request.Records ?? await _repository.GetWhereAsync(x => 
                     x.PlayerId == request.PlayerId 

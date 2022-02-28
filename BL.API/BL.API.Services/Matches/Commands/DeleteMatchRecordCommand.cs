@@ -35,12 +35,12 @@ namespace BL.API.Services.Matches.Commands
                 var match = record.Match;
                 var player = record.Player;
                 var regionId = match.RegionId.Value;
-                var playerMMR = player.GetPlayerMMR(match.RegionId.Value);
 
                 if (record.PlayerId.HasValue
                     && record.MMRChange.HasValue
                     && record.CalibrationIndex.HasValue)
                 {
+                    var playerMMR = player.GetPlayerMMR(match.RegionId.Value);
                     playerMMR.MMR = playerMMR.MMR - record.MMRChange.Value;
 
                     if (record.CalibrationIndex > 0)

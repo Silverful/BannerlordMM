@@ -38,8 +38,8 @@ namespace BL.API.Services.Players.Queries
             public async Task<PlayerStatItemResponse> Handle(Query request, CancellationToken cancellationToken)
             {
                 var player = await _players.GetFirstWhereAsync(p => p.DiscordId == request.discordId);
-                var season = await _seasonResolver.GetCurrentSeasonAsync();
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+                var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
 
                 if (player == null) throw new NotFoundException();
 

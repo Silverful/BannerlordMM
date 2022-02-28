@@ -44,24 +44,24 @@ namespace BL.API.Services.Seasons
             }
         }
 
-        public async Task<Season> GetCurrentSeasonAsync()
+        public async Task<Season> GetCurrentSeasonAsync(Guid regionId)
         {
             if (_seasons == null)
             {
                 _seasons = await _seasonRep.GetAllAsync();
             };
 
-            return _seasons.Where(s => s.OnGoing == true).FirstOrDefault();
+            return _seasons.Where(s => s.OnGoing == true && s.RegionId == regionId).FirstOrDefault();
         }
 
-        public async Task<Season> GetSeasonOnDateAsync(DateTime date)
+        public async Task<Season> GetSeasonOnDateAsync(DateTime date, Guid regionId)
         {
             if (_seasons == null)
             {
                 _seasons = await _seasonRep.GetAllAsync();
             };
 
-            return _seasons.Where(s => s.Started <= date && s.Finished >= date).FirstOrDefault() ?? _seasons.Where(s => s.OnGoing == true).FirstOrDefault();
+            return _seasons.Where(s => s.Started <= date && s.Finished >= date && s.RegionId == regionId).FirstOrDefault() ?? _seasons.Where(s => s.OnGoing == true && s.RegionId == regionId).FirstOrDefault();
         }
     }
 }

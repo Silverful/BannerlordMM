@@ -23,25 +23,19 @@ namespace BL.API.Services.Seasons.Commands
         public class StartNewSeasonCommandHandler : IRequestHandler<StartNewSeasonCommand, Guid>
         {
             private readonly IRepository<Season> _seasons;
-            private readonly IRepository<PlayerMMR> _mmrs;
             private readonly IMediator _mediator;
 
             public StartNewSeasonCommandHandler(IRepository<Season> seasons,
-                IMediator mediator,
-                IRepository<PlayerMMR> mmrs)
+                IMediator mediator)
             {
                 _mediator = mediator;
                 _seasons = seasons;
-                _mmrs = mmrs;
             }
 
             public async Task<Guid> Handle(StartNewSeasonCommand request, CancellationToken cancellationToken)
             {
-                var currentSeason = await _seasons.GetFirstWhereAsync(s => s.OnGoing && !s.IsTestingSeason, false);
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
-
-                currentSeason.OnGoing = false;
-                currentSeason.Finished = DateTime.UtcNow;
+                var currentSeason = await _seasons.GetFirstWhereAsync(s => s.RegionId == region.Id && s.OnGoing && !s.IsTestingSeason, false);
 
                 var newSeason = new Season
                 {
@@ -54,17 +48,14 @@ namespace BL.API.Services.Seasons.Commands
 
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    await _seasons.UpdateAsync(currentSeason);
-                    await _seasons.CreateAsync(newSeason);
-
-                    var mmrs = await _mmrs.GetWhereAsync(m => m.SeasonId == currentSeason.Id);
-
-                    foreach (var mmr in mmrs)
+                    if (currentSeason != null)
                     {
-                        var newMMR = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = mmr.PlayerId, SeasonId = newSeason.Id });
-
-                        await _mmrs.CreateAsync(newMMR);
+                        currentSeason.OnGoing = false;
+                        currentSeason.Finished = DateTime.UtcNow;
+                        await _seasons.UpdateAsync(currentSeason);
                     }
+
+                    await _seasons.CreateAsync(newSeason);
 
                     scope.Complete();
                 }

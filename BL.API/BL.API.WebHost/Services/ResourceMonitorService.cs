@@ -57,17 +57,23 @@ namespace BL.API.WebHost.Services
 
         private void InitializeCPUCounter()
         {
-            _cpuCounter = new PerformanceCounter(
+            if (OperatingSystem.IsWindows())
+            {
+                _cpuCounter = new PerformanceCounter(
             "Processor",
             "% Processor Time",
             "_Total",
             true
             );
+            }
         }
 
         private void InitializeRAMCounter()
         {
-            _ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
+            if (OperatingSystem.IsWindows())
+            {
+                _ramCounter = new PerformanceCounter("Memory", "Available MBytes", true);
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

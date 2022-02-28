@@ -39,8 +39,8 @@ namespace BL.API.Services.Matches.Commands
 
             public async Task<Guid> Handle(UploadMatchCommand request, CancellationToken cancellationToken)
             {
-                var season = await _seasonService.GetCurrentSeasonAsync();
                 var region = await _regionRepository.GetFirstWhereAsync(r => r.ShortName == request.RegionShortName);
+                var season = await _seasonService.GetCurrentSeasonAsync(region.Id);
 
                 if (region == null)
                 {

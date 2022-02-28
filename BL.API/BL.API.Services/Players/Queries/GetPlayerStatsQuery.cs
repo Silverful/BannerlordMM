@@ -46,8 +46,8 @@ namespace BL.API.Services.Players.Queries
 
                 if (player == null) throw new NotFoundException();
 
-                var season = await _seasonResolver.GetCurrentSeasonAsync();
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+                var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
 
                 var matchRecords = await _matchRecords.GetWhereAsync(m => m.PlayerId == id && m.Match.SeasonId == season.Id && m.Match.RegionId == region.Id, false, mr => mr.Match);
 

@@ -42,7 +42,7 @@ namespace BL.API.Services.Matches.Commands
 
                 if (match == null) throw new NotFoundException();
 
-                var matchSeason = await _seasonService.GetSeasonOnDateAsync(match.MatchDate);
+                var matchSeason = await _seasonService.GetSeasonOnDateAsync(match.MatchDate, match.RegionId.Value);
 
                 match.ScreenshotLink = request.ScreenshotLink;
                 match.MatchDate = request.MatchDate;

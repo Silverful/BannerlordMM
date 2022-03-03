@@ -2,10 +2,10 @@
 using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Exceptions;
+using BL.API.Services.Regions.Queries;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -29,6 +29,7 @@ namespace BL.API.Services.Players.Commands
         public string SecondaryClass { get; set; }
         public long? DiscordId { get; set; }
         public bool IGL { get; set; }
+        public string RegionShortName { get; set; }
 
         public Player ToPlayer()
         {
@@ -59,8 +60,8 @@ namespace BL.API.Services.Players.Commands
                 IMediator mediator,
                 ILogger<AddPlayerCommandHandler> logger)
             {
-                _mediator = mediator;
                 _repository = repository;
+                _mediator = mediator;
                 _seasonService = seasonService;
                 _logger = logger;
             }
@@ -76,17 +77,11 @@ namespace BL.API.Services.Players.Commands
                     if (await _repository.GetFirstWhereAsync(p => p.Nickname == request.Nickname) != null) throw new AlreadyExistsException();
                 }
 
-                var currentSeason = await _seasonService.GetCurrentSeasonAsync();
+                var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+                var currentSeason = await _seasonService.GetCurrentSeasonAsync(region.Id);
 
                 var player = request.ToPlayer();
 
-                var playerMMRs = player.PlayerMMRs ?? new List<PlayerMMR>();
-
-                var mmr = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = player.Id, SeasonId = currentSeason.Id });
-                playerMMRs.Add(mmr);
-
-                player.PlayerMMRs = playerMMRs;
-                    
                 await _repository.CreateAsync(player);
 
                 _logger?.LogInformation($"Player created {JsonSerializer.Serialize(player, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");

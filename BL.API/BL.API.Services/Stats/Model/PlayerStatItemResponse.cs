@@ -38,7 +38,7 @@ namespace BL.API.Services.Stats.Model
         public double? MVPR { get; set; }
         public long? DiscordId { get; set; }
 
-        public static PlayerStatItemResponse FromMatchRecordGrouping(Player player, IGrouping<Guid, PlayerMatchRecord> record, IDictionary<string, double> RankTable)
+        public static PlayerStatItemResponse FromMatchRecordGrouping(Player player, IGrouping<Guid, PlayerMatchRecord> record, IDictionary<string, double> RankTable, Guid regionId)
         {
             return new PlayerStatItemResponse
             {
@@ -50,8 +50,8 @@ namespace BL.API.Services.Stats.Model
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
                 DiscordId = player.DiscordId,
-                Rank = (record?.Count() ?? 0) < 10 ? "Unranked" : RankTable.Where(x => x.Value <= player.PlayerMMR.MMR).First().Key ?? "Copper",
-                MMR = (int)player.PlayerMMR.MMR,
+                Rank = (record?.Count() ?? 0) < 10 ? "Unranked" : RankTable.Where(x => x.Value <= player.GetPlayerMMR(regionId).MMR).First().Key ?? "Copper",
+                MMR =  record?.Count() > 0 ? (int)player.GetPlayerMMR(regionId).MMR : 2000,
                 Played = record?.Count() ?? 0,
                 Wins = record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() ?? 0,
                 WR = record == null ? 0 : record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() == 0 ? 0 : (double)record?.Where(x => x.TeamIndex == x.Match.TeamWon).Count() / record?.Count(),

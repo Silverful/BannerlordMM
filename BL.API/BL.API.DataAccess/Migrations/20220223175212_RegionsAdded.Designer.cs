@@ -4,14 +4,16 @@ using BL.API.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BL.API.DataAccess.Migrations
 {
     [DbContext(typeof(EFContext))]
-    partial class EFContextModelSnapshot : ModelSnapshot
+    [Migration("20220223175212_RegionsAdded")]
+    partial class RegionsAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,7 +266,7 @@ namespace BL.API.DataAccess.Migrations
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RegionId")
+                    b.Property<Guid>("RegionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SeasonId")
@@ -296,15 +298,10 @@ namespace BL.API.DataAccess.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("getdate()");
 
-                    b.Property<Guid?>("RegionId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RegionId");
 
                     b.ToTable("Configurations");
                 });
@@ -316,9 +313,7 @@ namespace BL.API.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("getdate()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -386,7 +381,9 @@ namespace BL.API.DataAccess.Migrations
 
                     b.HasOne("BL.API.Core.Domain.Settings.Region", "Region")
                         .WithMany()
-                        .HasForeignKey("RegionId");
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BL.API.Core.Domain.Match.Season", "Season")
                         .WithMany()
@@ -399,15 +396,6 @@ namespace BL.API.DataAccess.Migrations
                     b.Navigation("Region");
 
                     b.Navigation("Season");
-                });
-
-            modelBuilder.Entity("BL.API.Core.Domain.Settings.Configuration", b =>
-                {
-                    b.HasOne("BL.API.Core.Domain.Settings.Region", "Region")
-                        .WithMany()
-                        .HasForeignKey("RegionId");
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("BL.API.Core.Domain.Match.Match", b =>

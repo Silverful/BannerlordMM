@@ -4,13 +4,12 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/{regionShortName}/[controller]")]
     public class MatchesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -20,31 +19,31 @@ namespace BL.API.WebHost.Controllers
             _mediator = mediator;
         }
 
+        //[HttpGet]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<ActionResult<IEnumerable<MatchResponse>>> Get()
+        //{
+        //    var matchRecords = await _mediator.Send(new GetMatchesQuery.Query());
+        //    return Ok(matchRecords);
+        //}
 
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<MatchResponse>>> Get()
-        {
-            var matchRecords = await _mediator.Send(new GetMatchesQuery.Query());
-            return Ok(matchRecords);
-        }
-
-        [HttpGet("{matchId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<MatchResponse>> GetById(Guid matchId)
-        {
-            var matchRecords = await _mediator.Send(new GetMatchByIdQuery.Query(matchId));
-            return Ok(matchRecords);
-        }
+        //[HttpGet("{matchId}")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<ActionResult<MatchResponse>> GetById(Guid matchId)
+        //{
+        //    var matchRecords = await _mediator.Send(new GetMatchByIdQuery.Query(matchId));
+        //    return Ok(matchRecords);
+        //}
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult<Guid>> Post([FromBody] UploadMatchCommand request)
+        public async Task<ActionResult<Guid>> Post(string regionShortName, [FromBody] UploadMatchCommand request)
         {
+            request.RegionShortName = regionShortName;
             var matchId = await _mediator.Send(request);
             return CreatedAtAction("Post", new { id = matchId }, matchId);
         }
@@ -53,12 +52,14 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Put(Guid matchId, [FromBody] UpdateMatchCommand request)
+        public async Task<IActionResult> Put(string regionShortName, Guid matchId, [FromBody] UpdateMatchCommand request)
         {
             if (request.MatchId != matchId)
             {
                 return BadRequest();
             }
+
+            request.RegionShortName = regionShortName;
 
             await _mediator.Send(request);
             return Ok();

@@ -12,7 +12,7 @@ namespace BL.API.Services.Players.Commands
     {
         public Guid SeasonId { get; set; }
         public Guid PlayerId { get; set; }
-
+        public Guid RegionId { get; set; }
 
         public class StartNewSeasonCommandHandler : IRequestHandler<CreateNewPlayerMMRCommand, PlayerMMR>
         {
@@ -31,7 +31,8 @@ namespace BL.API.Services.Players.Commands
                 {
                     MMR = StartMMR,
                     SeasonId = request.SeasonId,
-                    PlayerId = request.PlayerId
+                    PlayerId = request.PlayerId,
+                    RegionId = request.RegionId
                 };
 
                 return Task.FromResult(newMMR);

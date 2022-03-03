@@ -40,6 +40,7 @@ namespace BL.API.Services.Matches.Commands
             {
                 var redoRecord = request.record;
                 var redoMatch = request.record.Match;
+                var recordRegionId = request.record.Match.RegionId.Value;
 
                 if (!redoRecord.PlayerId.HasValue || redoRecord.Match == null)
                 {
@@ -49,6 +50,7 @@ namespace BL.API.Services.Matches.Commands
                 var precedingRecord = (await _playerRecords
                     .GetWhereAsync(pr =>
                         pr.MatchId != redoMatch.Id
+                        && pr.Match.RegionId == recordRegionId
                         && pr.Match.SeasonId == redoMatch.SeasonId
                         && pr.PlayerId == redoRecord.PlayerId
                         && pr.Match.MatchDate <= redoMatch.MatchDate, true, pr => pr.Player, pr => pr.Match))
@@ -63,14 +65,19 @@ namespace BL.API.Services.Matches.Commands
                 var mmrChange = await _mmrCalculation.CalculateMMRChangeAsync(redoRecord);
 
                 var updatedPlayer = await _players.GetFirstWhereAsync(p => p.Id == redoRecord.PlayerId, false);
+                var updatedPlayerMMR = updatedPlayer.GetPlayerMMR(recordRegionId);
 
-                if (updatedPlayer != null && updatedPlayer.PlayerMMR == null)
+                if (updatedPlayer != null && updatedPlayerMMR == null)
                 {
-                    var mmr = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = updatedPlayer.Id, SeasonId = redoMatch.SeasonId.Value });
+                    var mmr = await _mediator.Send(new CreateNewPlayerMMRCommand() { PlayerId = updatedPlayer.Id, SeasonId = redoMatch.SeasonId.Value, RegionId = recordRegionId });
                     updatedPlayer.PlayerMMRs.Add(mmr);
+                    await _players.UpdateAsync(updatedPlayer);
+                    updatedPlayer = await _players.GetFirstWhereAsync(p => p.Id == redoRecord.PlayerId, false);
+
+                    updatedPlayerMMR = updatedPlayer.GetPlayerMMR(recordRegionId);
                 }
 
-                updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (redoRecord.MMRChange ?? 0) + mmrChange;
+                updatedPlayerMMR.MMR = updatedPlayerMMR.MMR - (redoRecord.MMRChange ?? 0) + mmrChange;
                 redoRecord.MMRChange = mmrChange;
 
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -83,6 +90,7 @@ namespace BL.API.Services.Matches.Commands
                         .GetWhereAsync(pr =>
                             //pr.MatchId != redoMatch.Id &&
                             pr.Match.SeasonId == redoMatch.SeasonId &&
+                            pr.Match.RegionId == recordRegionId &&
                             pr.PlayerId == redoRecord.PlayerId &&
                             pr.CalibrationIndex.HasValue &&
                             pr.CalibrationIndex.Value > 0, false, pr => pr.Match, pr => pr.Player))
@@ -104,7 +112,7 @@ namespace BL.API.Services.Matches.Commands
                                 }
 
                                 var sMMRChange = await _mmrCalculation.CalculateMMRChangeAsync(sucRec);
-                                updatedPlayer.PlayerMMR.MMR = updatedPlayer.PlayerMMR.MMR - (sucRec.MMRChange ?? 0) + sMMRChange;
+                                updatedPlayerMMR.MMR = updatedPlayerMMR.MMR - (sucRec.MMRChange ?? 0) + sMMRChange;
                                 sucRec.MMRChange = sMMRChange;
                                 calibrationIndex--;
                             }

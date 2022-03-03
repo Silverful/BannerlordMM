@@ -3,6 +3,7 @@ using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Services.Extensions;
+using BL.API.Services.Regions.Queries;
 using BL.API.Services.Stats.Model;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -15,14 +16,14 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetAllStatsQuery
     {
-        public record Query() : IRequest<AllStatsResponse>;
+        public record Query(string RegionShortName) : IRequest<AllStatsResponse>;
 
         public class GetAllStatsQueryHandler : IRequestHandler<Query, AllStatsResponse>
         {
             private readonly IRepository<Player> _players;
             private readonly StatsProps _statsProps;
             private readonly IRepository<Match> _matches;
-            private readonly ISeasonResolverService seasonResolver;
+            private readonly ISeasonResolverService _seasonResolver;
             private readonly IMediator _mediator;
 
             public GetAllStatsQueryHandler(IRepository<Player> players,
@@ -34,7 +35,7 @@ namespace BL.API.Services.Players.Queries
             {
                 _players = players;
                 _matches = matches;
-                this.seasonResolver = seasonResolver;
+                _seasonResolver = seasonResolver;
                 _statsProps = statsProps.Value;
                 _mediator = mediator;
             }
@@ -43,15 +44,17 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<AllStatsResponse> Handle(Query request, CancellationToken cancellationToken)
             {
-                var season = await seasonResolver.GetCurrentSeasonAsync();
                 var players = await _players.GetAllAsync();
-                var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords);
+                var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+                var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
+                var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.Region.Id == region.Id, true, m => m.PlayerRecords);
                 var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
 
                 var calibratedPlayers = matchRecords.GroupBy(x => x.PlayerId).Where(x => x.Count() >= 10).Select(x => x.First()?.Player);
-                var rankTable = await _mediator.Send(new GetRanksQuery.Query(calibratedPlayers));
+                var rankTable = await _mediator.Send(new GetRanksQuery.Query(calibratedPlayers, region.Id));
 
-                var playerStats = await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable));
+                var playerStats = (await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable, region.ShortName)))
+                    .Where(ps => ps.Played > 1);
 
                 var iglStats = (from mr in matchRecords
                                 where mr.PlayerId.HasValue

@@ -6,7 +6,7 @@ namespace BL.API.Core.Abstractions.Services
 {
     public interface ISeasonResolverService
     {
-        Task<Season> GetCurrentSeasonAsync();
-        Task<Season> GetSeasonOnDateAsync(DateTime date);
+        Task<Season> GetCurrentSeasonAsync(Guid regionId);
+        Task<Season> GetSeasonOnDateAsync(DateTime date, Guid regionId);
     }
 }

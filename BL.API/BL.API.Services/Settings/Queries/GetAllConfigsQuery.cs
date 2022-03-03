@@ -10,7 +10,7 @@ namespace BL.API.Services.Settings
 {
     public static class GetAllConfigsQuery
     {
-        public record Query() : IRequest<IEnumerable<ConfigurationResponse>>;
+        public record Query(string RegionShortName) : IRequest<IEnumerable<ConfigurationResponse>>;
 
         public class GetAllConfigsQueryHandler : IRequestHandler<Query, IEnumerable<ConfigurationResponse>>
         {
@@ -23,7 +23,9 @@ namespace BL.API.Services.Settings
 
             public async Task<IEnumerable<ConfigurationResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
-                return (await _repository.GetAllAsync()).Select(c => new ConfigurationResponse { ConfigName = c.ConfigName, Value = c.Value }).ToList();
+                return (await _repository.GetWhereAsync(s => s.Region.ShortName == request.RegionShortName))
+                    .Select(c => new ConfigurationResponse { ConfigName = c.ConfigName, Value = c.Value })
+                    .ToList();
             }
         }
 

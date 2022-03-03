@@ -7,6 +7,7 @@ using BL.API.Services.MMR;
 using BL.API.Services.Stats.Utility;
 using MediatR;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetRanksQuery
     {
-        public record Query(IEnumerable<Player> Players) : IRequest<IDictionary<string, double>>;
+        public record Query(IEnumerable<Player> Players, Guid regionId) : IRequest<IDictionary<string, double>>;
 
         public class GetRanksQueryHandler : IRequestHandler<Query, IDictionary<string, double>>
         {
@@ -34,17 +35,18 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<IDictionary<string, double>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var season = await _seasonResolver.GetCurrentSeasonAsync();
+                var season = await _seasonResolver.GetCurrentSeasonAsync(request.regionId);
 
-                var players = request.Players ?? ((await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords))
+                var players = request.Players ?? ((await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.RegionId == request.regionId, true, m => m.PlayerRecords))
                     .Select(x => x.PlayerRecords)
                     .SelectMany(x => x)
+                    .Where(x => x.PlayerId != null) 
                     .GroupBy(x => x.PlayerId)
                     .Where(x => x.Count() >= 10)
                     .Select(x => x.First()?.Player));
 
-                var maxRating = players.Count() > 0 ? players.Max(x => x.PlayerMMR.MMR) : _startingMMR;
-                var minRating = players.Count() > 0 ? players.Min(x => x.PlayerMMR.MMR) : _startingMMR;
+                var maxRating = players.Count() > 0 ? players.Max(x => x.GetPlayerMMR(request.regionId).MMR) : _startingMMR;
+                var minRating = players.Count() > 0 ? players.Min(x => x.GetPlayerMMR(request.regionId).MMR) : _startingMMR;
 
                 var rankTable = StatsQueryHelper.RankMultipliers;
 

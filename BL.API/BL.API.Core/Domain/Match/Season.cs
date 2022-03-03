@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BL.API.Core.Domain.Settings;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BL.API.Core.Domain.Match
 {
@@ -10,5 +12,8 @@ namespace BL.API.Core.Domain.Match
         public bool IsTestingSeason { get; set; }
         public DateTime? Started { get; set; }
         public DateTime? Finished { get; set; }
+        public Guid? RegionId { get; set; }
+        [ForeignKey("RegionId")]
+        public virtual Region Region { get; set; }
     }
 }

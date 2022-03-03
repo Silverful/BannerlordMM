@@ -23,7 +23,7 @@ namespace BL.API.Services.MMR
          
         public async Task<double> CalculateMMRChangeAsync(PlayerMatchRecord record)
         {
-            var currentSeason = await _seasonResolverService.GetCurrentSeasonAsync();
+            var currentSeason = await _seasonResolverService.GetCurrentSeasonAsync(record.Match.RegionId.Value);
 
             var strategy = _mmrBuilder.BuildMMRStrategy(currentSeason, _mmrProps);
 

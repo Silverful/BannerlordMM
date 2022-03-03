@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Domain.Match;
+using BL.API.Core.Domain.Settings;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,5 +17,10 @@ namespace BL.API.Core.Domain.Player
 
         [ForeignKey("PlayerId")]
         public virtual Player Player {get;set;}
+
+        public Guid? RegionId { get; set; }
+        [ForeignKey("RegionId")]
+        public virtual Region Region { get; set; }
+        
     }
 }

@@ -8,7 +8,7 @@ namespace BL.API.Services.Settings
 {
     public static class GetConfigQuery
     {
-        public record Query(string configName) : IRequest<string>;
+        public record Query(string RegionShortName, string ConfigName) : IRequest<string>;
 
         public class GetConfigQueryHandler : IRequestHandler<Query, string>
         {
@@ -21,7 +21,7 @@ namespace BL.API.Services.Settings
 
             public async Task<string> Handle(Query request, CancellationToken cancellationToken)
             {
-                var config = await _repository.GetFirstWhereAsync(c => c.ConfigName == request.configName);
+                var config = await _repository.GetFirstWhereAsync(c => c.ConfigName == request.ConfigName && c.Region.ShortName == request.RegionShortName);
                 return config.Value;
             }
         }

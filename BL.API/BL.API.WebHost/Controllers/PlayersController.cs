@@ -3,8 +3,6 @@ using BL.API.Services.Players.Commands;
 using BL.API.Services.Players.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -14,7 +12,7 @@ using BL.API.Services.Stats.Model;
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/{regionShortName}/[controller]")]
     public class PlayersController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -61,9 +59,9 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStats([FromRoute]string playerId)
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStats(string regionShortName, [FromRoute]string playerId)
         {
-            var player = await _mediator.Send(new GetPlayerStatsQuery.Query(playerId));
+            var player = await _mediator.Send(new GetPlayerStatsQuery.Query(playerId, regionShortName));
 
             return Ok(player);
         }
@@ -77,17 +75,17 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStatsByDiscordId([FromRoute]long discordId)
+        public async Task<ActionResult<PlayerStatItemResponse>> GetPlayerStatsByDiscordId(string regionShortName, [FromRoute]long discordId)
         {
-            var player = await _mediator.Send(new GetPlayerStatsByDiscordIdQuery.Query(discordId));
+            var player = await _mediator.Send(new GetPlayerStatsByDiscordIdQuery.Query(discordId, regionShortName));
 
             return Ok(player);
         }
 
         [HttpGet("stats")]
-        public async Task<ActionResult<IEnumerable<PlayerStatItemResponse>>> GetPlayersStats()
+        public async Task<ActionResult<IEnumerable<PlayerStatItemResponse>>> GetPlayersStats(string regionShortName)
         {
-            return Ok(await _mediator.Send(new GetPlayersStatsQuery.Query(null, null, null)));
+            return Ok(await _mediator.Send(new GetPlayersStatsQuery.Query(null, null, null, regionShortName)));
         }
 
         [HttpGet("nicknames")]
@@ -100,8 +98,9 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
-        public async Task<IActionResult> Post([FromBody] AddPlayerCommand request)
+        public async Task<IActionResult> Post(string regionShortName, [FromBody] AddPlayerCommand request)
         {
+            request.RegionShortName = regionShortName;
             var playerId = await _mediator.Send(request);
             return CreatedAtAction("Post", new { id = playerId }, playerId);
         }

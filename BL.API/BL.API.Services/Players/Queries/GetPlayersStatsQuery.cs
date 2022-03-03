@@ -2,6 +2,7 @@
 using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Services.Regions.Queries;
 using BL.API.Services.Stats.Model;
 using MediatR;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace BL.API.Services.Players.Queries
 {
     public static class GetPlayersStatsQuery
     {
-        public record Query(IEnumerable<Player> Players, IEnumerable<PlayerMatchRecord> MatchRecords, IDictionary<string, double> RankTable) : IRequest<IEnumerable<PlayerStatItemResponse>>;
+        public record Query(IEnumerable<Player> Players, IEnumerable<PlayerMatchRecord> MatchRecords, IDictionary<string, double> RankTable, string RegionShortName) : IRequest<IEnumerable<PlayerStatItemResponse>>;
 
         public class GetPlayersStatsHandler : IRequestHandler<Query, IEnumerable<PlayerStatItemResponse>>
         {
@@ -35,11 +36,14 @@ namespace BL.API.Services.Players.Queries
 
             public async Task<IEnumerable<PlayerStatItemResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var season = await _seasonResolver.GetCurrentSeasonAsync();
+                var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+                var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
 
                 var players = request.Players ?? await _players.GetAllAsync();
-                var matchRecords = request.MatchRecords ?? (await _matches.GetWhereAsync(m => m.SeasonId == season.Id, true, m => m.PlayerRecords)).Select(x => x.PlayerRecords).SelectMany(x => x);
-                var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(null));
+                var matchRecords = request.MatchRecords ?? (await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.RegionId == region.Id, true, m => m.PlayerRecords))
+                    .Select(x => x.PlayerRecords)
+                    .SelectMany(x => x);
+                var rankTable = request.RankTable ?? await _mediator.Send(new GetRanksQuery.Query(null, region.Id));
 
                 var groupedMatchRecords = from record in matchRecords
                                           where record.PlayerId.HasValue
@@ -49,7 +53,7 @@ namespace BL.API.Services.Players.Queries
                 var stats = from p in players
                             join gmr in groupedMatchRecords on p.Id equals gmr.Key into jgmr
                             from gmr in jgmr.DefaultIfEmpty()
-                            select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr, rankTable);
+                            select PlayerStatItemResponse.FromMatchRecordGrouping(p, gmr, rankTable, region.Id);
 
                 var response = stats
                     .OrderByDescending(s => s.Played >= 10 ? 1 : 0)

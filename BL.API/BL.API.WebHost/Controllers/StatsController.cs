@@ -1,12 +1,14 @@
 ﻿using BL.API.Services.Players.Queries;
 using BL.API.Services.Stats.Model;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class StatsController : ControllerBase

@@ -1,11 +1,13 @@
 ﻿using BL.API.Services.Seasons.Commands;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class SeasonsController : ControllerBase
@@ -18,6 +20,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPost("StartNewSeason")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
@@ -28,6 +31,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpDelete("DeleteCurrentSeason")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]

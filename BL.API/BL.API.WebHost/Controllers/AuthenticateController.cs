@@ -1,118 +1,58 @@
-﻿using BL.API.Core.Domain.User;
-using BL.API.WebHost.Model;
-using Microsoft.AspNetCore.Identity;
+﻿using BL.API.Services.Authorization.Commands;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/{regionShortName}/[controller]")]
     public class AuthenticateController : ControllerBase
     {
-        //private readonly UserManager<User> userManager;
-        //private readonly RoleManager<UserRole> roleManager;
-        //private readonly IConfiguration _configuration;
-        //public AuthenticateController(UserManager<User> userManager, RoleManager<UserRole> roleManager, IConfiguration configuration)
-        //{
-        //    this.userManager = userManager;
-        //    this.roleManager = roleManager;
-        //    _configuration = configuration;
-        //}
+        private readonly IMediator _mediator;
 
-        //[HttpPost]
-        //[Route("register")]
-        //public async Task<IActionResult> Register([FromBody] RegisterRequest request)
-        //{
-        //    var userExists = await userManager.FindByNameAsync(request.UserName);
-        //    if (userExists != null)
-        //        return BadRequest("User already exists");
+        public AuthenticateController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
 
-        //    User user = new User()
-        //    {
-        //        Email = request.Email,
-        //        UserName = request.UserName
-        //    };
-        //    var result = await userManager.CreateAsync(user, request.Password);
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterCommand request)
+        {
+            await _mediator.Send(request);
 
-        //    if (!result.Succeeded)
-        //        return BadRequest("User creation failed");
-            
-        //    return Ok();
-        //}
+            return Ok();
+        }
 
-        //[HttpPost]
-        //[Route("registeradmin")]
-        //public async Task<IActionResult> RegisterAdmin([FromBody] RegisterRequest request)
-        //{
-        //    var userExists = await userManager.FindByNameAsync(request.UserName);
-        //    if (userExists != null)
-        //        return BadRequest("User already exists");
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Route("registeradmin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterAdminCommand request)
+        {
+            await _mediator.Send(request);
 
-        //    User user = new User()
-        //    {
-        //        Email = request.Email,
-        //        UserName = request.UserName
-        //    };
-        //    var result = await userManager.CreateAsync(user, request.Password);
-        //    if (!result.Succeeded)
-        //        return BadRequest("User creation failed");
+            return Ok();
+        }
 
-        //    (!await roleManager.RoleExistsAsync(UserRoles.Admin))
-        //        await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-        //    if (!await roleManager.RoleExistsAsync(UserRoles.User))
-        //        await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-        //    if (await roleManager.RoleExistsAsync(UserRoles.Admin))
-        //    {
-        //        await userManager.AddToRoleAsync(user, UserRoles.Admin);
-        //    }
-        //    return Ok();
-        //}
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginCommand request)
+        {
+            var response = await _mediator.Send(request);
 
+            return Ok(response);
+        }
 
-        //[HttpPost]
-        //[Route("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginRequest request)
-        //{
-        //    var user = await userManager.FindByNameAsync(request.UserName);
-        //    if (user != null && await userManager.CheckPasswordAsync(user, request.Password))
-        //    {
-        //        var userRoles = await userManager.GetRolesAsync(user);
-        //        var authClaims = new List<Claim>
-        //        {
-        //            new Claim(ClaimTypes.Name, user.UserName),
-        //            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        //        };
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [Route("addrole")]
+        public async Task<IActionResult> AddRoleToUser([FromBody] AddRoleToUserCommand request)
+        {
+            var response = await _mediator.Send(request);
 
-        //        foreach (var userRole in userRoles)
-        //        {
-        //            authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-        //        }
-
-        //        var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Jwt:SecretKey")));
-        //        var token = new JwtSecurityToken(
-        //        issuer: _configuration["JWT: ValidIssuer"],
-        //        audience: _configuration["JWT: ValidAudience"],
-        //        expires: DateTime.Now.AddHours(6),
-        //        claims: authClaims,
-        //        signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        //        );
-
-        //        return Ok(new
-        //        {
-        //            token = new JwtSecurityTokenHandler().WriteToken(token),
-        //            expiration = token.ValidTo
-        //        });
-        //    }
-
-        //    return Unauthorized();
-        //}
+            return Ok(response);
+        }
     }
 }

@@ -50,6 +50,9 @@ namespace BL.API.WebHost.Middleware
                     case NotFoundException:
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
+                    case NotAuthorized:
+                        response.StatusCode = (int)HttpStatusCode.Forbidden;
+                        break;
                     default:
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;

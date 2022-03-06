@@ -28,6 +28,8 @@ namespace BL.API.DataAccess.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.HasDefaultSchema("dbo");
 
             modelBuilder.Entity<Configuration>()

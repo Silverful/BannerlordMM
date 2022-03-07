@@ -26,6 +26,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using BL.API.Core.Abstractions.Services;
+using BL.API.Services.Authorization;
 
 namespace BL.API.WebHost
 {
@@ -60,6 +61,7 @@ namespace BL.API.WebHost
             services.AddScoped(typeof(IMMRCalculationBuilder), typeof(MMRCalculationBuilder));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
             services.AddScoped(typeof(ISeasonResolverService), typeof(SeasonResolverService)); //temporary - must be changed to cache
+            services.AddScoped<AuthSeeder>();
 
             services.AddHostedService<ResourceMonitorService>();
 
@@ -135,7 +137,7 @@ namespace BL.API.WebHost
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AuthSeeder authSeeder)
         {
             app.Use(async (context, next) => {
                 context.Request.EnableBuffering();
@@ -162,6 +164,8 @@ namespace BL.API.WebHost
             {
                 endpoints.MapControllers();
             });
+
+            authSeeder.Seed().Wait();
         }
     }
 }

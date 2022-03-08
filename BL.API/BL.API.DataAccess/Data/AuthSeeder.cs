@@ -8,10 +8,10 @@ namespace BL.API.Services.Authorization
     public class AuthSeeder
     {
         private UserManager<User> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
+        private RoleManager<Role> _roleManager;
         private IConfiguration _configuration;
 
-        public AuthSeeder(UserManager<User> userManager, RoleManager<IdentityRole> roleManager,
+        public AuthSeeder(UserManager<User> userManager, RoleManager<Role> roleManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
@@ -29,22 +29,22 @@ namespace BL.API.Services.Authorization
         {
             if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                await _roleManager.CreateAsync(new Role(UserRoles.Admin));
             }
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.MatchMaker))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.MatchMaker));
+                await _roleManager.CreateAsync(new Role(UserRoles.MatchMaker));
             }
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.Moderator))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Moderator));
+                await _roleManager.CreateAsync(new Role(UserRoles.Moderator));
             }
 
             if (!await _roleManager.RoleExistsAsync(UserRoles.User))
             {
-                await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                await _roleManager.CreateAsync(new Role(UserRoles.User));
             }
         }
 

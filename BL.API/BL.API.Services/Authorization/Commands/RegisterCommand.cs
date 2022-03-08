@@ -14,9 +14,9 @@ namespace BL.API.Services.Authorization.Commands
         public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Task>
         {
             private readonly UserManager<User> _userManager;
-            private readonly RoleManager<IdentityRole> _roleManager;
+            private readonly RoleManager<Role> _roleManager;
 
-            public RegisterCommandHandler(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+            public RegisterCommandHandler(UserManager<User> userManager, RoleManager<Role> roleManager)
             {
                 _userManager = userManager;
                 _roleManager = roleManager;
@@ -42,7 +42,7 @@ namespace BL.API.Services.Authorization.Commands
                     throw new Exception("Something went wrong");
 
                 if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                    await _roleManager.CreateAsync(new Role(UserRoles.User));
 
                 if (await _roleManager.RoleExistsAsync(UserRoles.User))
                 {

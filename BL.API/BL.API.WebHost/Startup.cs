@@ -111,7 +111,7 @@ namespace BL.API.WebHost
 
             services.AddMediatR(typeof(AddPlayerCommand.AddPlayerCommandHandler).Assembly);
 
-            services.AddIdentity<User, IdentityRole>()
+            services.AddIdentity<User, Role>()
                  .AddEntityFrameworkStores<EFContext>()
                  .AddDefaultTokenProviders();
 

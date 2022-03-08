@@ -16,9 +16,9 @@ namespace BL.API.Services.Authorization.Commands
         public class AddRoleToUserCommandHandler : IRequestHandler<AddRoleToUserCommand, Task>
         {
             private readonly UserManager<User> _userManager;
-            private readonly RoleManager<IdentityRole> _roleManager;
+            private readonly RoleManager<Role> _roleManager;
 
-            public AddRoleToUserCommandHandler(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+            public AddRoleToUserCommandHandler(UserManager<User> userManager, RoleManager<Role> roleManager)
             {
                 _userManager = userManager;
                 _roleManager = roleManager;
@@ -40,7 +40,7 @@ namespace BL.API.Services.Authorization.Commands
                 }
 
                 if (!await _roleManager.RoleExistsAsync(role))
-                    await _roleManager.CreateAsync(new IdentityRole(role));
+                    await _roleManager.CreateAsync(new Role(role));
 
                 if (await _roleManager.RoleExistsAsync(role))
                 {

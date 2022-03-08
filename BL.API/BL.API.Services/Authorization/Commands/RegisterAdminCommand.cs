@@ -15,9 +15,9 @@ namespace BL.API.Services.Authorization.Commands
         public class RegisterAdminCommandHadler : IRequestHandler<RegisterAdminCommand, Task>
         {
             private readonly UserManager<User> _userManager;
-            private readonly RoleManager<IdentityRole> _roleManager;
+            private readonly RoleManager<Role> _roleManager;
 
-            public RegisterAdminCommandHadler(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+            public RegisterAdminCommandHadler(UserManager<User> userManager, RoleManager<Role> roleManager)
             {
                 _userManager = userManager;
                 _roleManager = roleManager;
@@ -39,10 +39,10 @@ namespace BL.API.Services.Authorization.Commands
                     throw new Exception(string.Join('/', result.Errors.Select(x => x.Description)));
 
                 if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+                    await _roleManager.CreateAsync(new Role(UserRoles.Admin));
 
                 if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                    await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+                    await _roleManager.CreateAsync(new Role(UserRoles.User));
 
                 if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
                 {

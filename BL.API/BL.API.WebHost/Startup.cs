@@ -27,6 +27,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using BL.API.Core.Abstractions.Services;
 using BL.API.Services.Authorization;
+using BL.API.Services.Authorization.Model;
 
 namespace BL.API.WebHost
 {
@@ -45,6 +46,7 @@ namespace BL.API.WebHost
 
             services.Configure<BasicMMRCalculationProperties>(options => Configuration.GetSection("MMRProps").Bind(options));
             services.Configure<StatsProps>(options => Configuration.GetSection("StatsProps").Bind(options));
+            services.Configure<JWTConfiguration>(options => Configuration.GetSection("JWT").Bind(options));
 
             services.AddDbContext<EFContext>(option =>
             {
@@ -61,6 +63,8 @@ namespace BL.API.WebHost
             services.AddScoped(typeof(IMMRCalculationBuilder), typeof(MMRCalculationBuilder));
             services.AddScoped(typeof(IMMRCalculationService), typeof(MMRCalculationService));
             services.AddScoped(typeof(ISeasonResolverService), typeof(SeasonResolverService)); //temporary - must be changed to cache
+            services.AddScoped<JWTService>();
+            services.AddScoped<JWTSignInManager>();
             services.AddScoped<AuthSeeder>();
 
             services.AddHostedService<ResourceMonitorService>();
@@ -124,14 +128,17 @@ namespace BL.API.WebHost
             .AddJwtBearer(options =>
             {
                 options.SaveToken = true;
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters();
+                options.RequireHttpsMetadata = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
+                    ValidIssuer = Configuration["JWT:ValidIssuer"],
                     ValidateAudience = true,
                     ValidAudience = Configuration["JWT:ValidAudience"],
-                    ValidIssuer = Configuration["JWT:ValidIssuer"],
+                    ValidateIssuerSigningKey = true,
+                    RequireExpirationTime = false,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidateLifetime = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:SecretKey"]))
                 };
             });

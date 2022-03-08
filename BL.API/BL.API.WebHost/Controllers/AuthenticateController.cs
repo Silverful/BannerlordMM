@@ -38,7 +38,16 @@ namespace BL.API.WebHost.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginCommand request)
+        public async Task<ActionResult<API.Services.Authorization.Model.SignInResult>> Login([FromBody] LoginCommand request)
+        {
+            var response = await _mediator.Send(request);
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("refresh-token")]
+        public async Task<ActionResult<API.Services.Authorization.Model.SignInResult>> RefreshToken([FromBody] RefreshTokenCommand request)
         {
             var response = await _mediator.Send(request);
 

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class StatsController : ControllerBase

@@ -94,10 +94,12 @@ namespace BL.API.Services.Authorization
 
         private Claim[] BuildClaims(User user)
         {
+            var role = _userManager.GetRolesAsync(user).Result.First();
             var claims = new[]
             {
                 new Claim("id", user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Email)
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, role)
             };
 
             return claims;

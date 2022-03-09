@@ -36,7 +36,7 @@ namespace BL.API.Core.Domain.Player
 
         public PlayerMMR GetPlayerMMR(Guid regionId)
         {
-            return PlayerMMRs.Where(pm => pm.Season.OnGoing && pm.RegionId == regionId).FirstOrDefault();
+            return PlayerMMRs.Where(pm => pm != null && pm.Season.OnGoing && pm.RegionId == regionId).FirstOrDefault();
         }
     }
 }

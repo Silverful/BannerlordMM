@@ -42,11 +42,11 @@ namespace BL.API.Services.Players.Queries
                     .SelectMany(x => x)
                     .Where(x => x.PlayerId != null) 
                     .GroupBy(x => x.PlayerId)
-                    .Where(x => x.Count() >= 10)
-                    .Select(x => x.First()?.Player));
+                    .Select(x => x.First()?.Player))
+                    .Where(x => x.PlayerMMRs != null && x.PlayerMMRs.Count > 0);
 
-                var maxRating = players.Count() > 0 ? players.Max(x => x.GetPlayerMMR(request.regionId).MMR) : _startingMMR;
-                var minRating = players.Count() > 0 ? players.Min(x => x.GetPlayerMMR(request.regionId).MMR) : _startingMMR;
+                var maxRating = players != null && players.Count() > 0 ? players.Max(x => x?.GetPlayerMMR(request.regionId)?.MMR) ?? _startingMMR : _startingMMR;
+                var minRating = players != null && players.Count() > 0 ? players.Min(x => x?.GetPlayerMMR(request.regionId)?.MMR) ?? _startingMMR : _startingMMR;
 
                 var rankTable = StatsQueryHelper.RankMultipliers;
 

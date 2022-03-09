@@ -2,6 +2,7 @@
 using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Exceptions;
 using BL.API.Services.Extensions;
 using BL.API.Services.Regions.Queries;
 using BL.API.Services.Stats.Model;
@@ -46,6 +47,9 @@ namespace BL.API.Services.Players.Queries
             {
                 var players = await _players.GetAllAsync();
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));
+
+                if (region == null) throw new NotFoundException();
+
                 var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
                 var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.Region.Id == region.Id, true, m => m.PlayerRecords);
                 var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);

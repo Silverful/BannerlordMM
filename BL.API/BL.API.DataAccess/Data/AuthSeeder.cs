@@ -51,12 +51,12 @@ namespace BL.API.Services.Authorization
         private async Task SeedSuperAdminAsync()
         {
             var email = _configuration["Auth:SAEmail"];
+            var password = _configuration["Auth:SAPassword"];
 
             var user = await _userManager.FindByNameAsync(email);
 
             if (user == null)
             {
-                var password = _configuration["Auth:SAPassword"];
                 var admin = new User
                 {
                     UserName = email,
@@ -66,7 +66,7 @@ namespace BL.API.Services.Authorization
 
                 await _userManager.CreateAsync(admin, password);
 
-                await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+                await _userManager.AddToRoleAsync(admin, UserRoles.Admin);
             }
         }
     }

@@ -74,7 +74,8 @@ namespace BL.API.Services.Players.Commands
                 }
                 else
                 {
-                    if (await _repository.GetFirstWhereAsync(p => p.Nickname == request.Nickname) != null) throw new AlreadyExistsException();
+                    var normalizedNickname = request.Nickname.ToUpperInvariant();
+                    if (await _repository.GetFirstWhereAsync(p => p.Nickname.ToUpperInvariant() == normalizedNickname) != null) throw new AlreadyExistsException();
                 }
 
                 var region = await _mediator.Send(new GetRegionByShortName.Query(request.RegionShortName));

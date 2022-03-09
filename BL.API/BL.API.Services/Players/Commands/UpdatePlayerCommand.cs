@@ -65,6 +65,18 @@ namespace BL.API.Services.Players.Commands
 
                 if (currentPlayer == null) throw new NotFoundException();
 
+                if (currentPlayer.DiscordId != request.DiscordId
+                    && await _repository.GetFirstWhereAsync(p => p.DiscordId == request.DiscordId) != null)
+                {
+                    throw new AlreadyExistsException();
+                }
+
+                if (currentPlayer.Nickname.ToUpperInvariant() != request.Nickname.ToUpperInvariant() 
+                    && await _repository.GetFirstWhereAsync(p => p.Nickname.ToUpperInvariant() == request.Nickname.ToUpperInvariant()) != null)
+                {
+                    throw new AlreadyExistsException();
+                }
+
                 var player = request.ToPlayer(currentPlayer);
 
                 await _repository.UpdateAsync(player);

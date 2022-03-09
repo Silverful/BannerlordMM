@@ -1,6 +1,6 @@
 ﻿using BL.API.Services.Matches.Commands;
-using BL.API.Services.Matches.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class MatchesController : ControllerBase
@@ -38,6 +39,7 @@ namespace BL.API.WebHost.Controllers
         //}
 
         [HttpPost]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
@@ -49,6 +51,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPut("{matchId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
@@ -66,6 +69,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpDelete("{matchId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(Guid matchId)

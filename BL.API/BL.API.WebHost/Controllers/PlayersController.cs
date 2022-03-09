@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using System.Collections.Generic;
 using BL.API.Services.Stats.Model;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BL.API.WebHost.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class PlayersController : ControllerBase
@@ -95,6 +97,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
@@ -106,6 +109,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPut("{playerId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -121,6 +125,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpDelete("{playerId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -137,6 +142,7 @@ namespace BL.API.WebHost.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPatch("{playerId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -1,11 +1,13 @@
 ﻿using BL.API.Services.Regions.Commands;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class RegionsController : ControllerBase
@@ -18,6 +20,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]

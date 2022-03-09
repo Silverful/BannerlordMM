@@ -1,6 +1,7 @@
 ﻿using BL.API.Services.Settings;
 using BL.API.Services.Settings.Commands;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class SettingsController : ControllerBase
@@ -20,6 +22,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<IEnumerable<GetAllConfigsQuery.ConfigurationResponse>>> Get(string regionShortName)
@@ -28,6 +31,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpGet("{configName}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<string>> GetConfig(string regionShortName, string configName)
@@ -36,6 +40,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
@@ -47,6 +52,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPut("{configName}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

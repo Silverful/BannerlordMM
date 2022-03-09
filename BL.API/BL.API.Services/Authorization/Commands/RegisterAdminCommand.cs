@@ -32,7 +32,8 @@ namespace BL.API.Services.Authorization.Commands
                 User user = new User()
                 {
                     Email = request.Email,
-                    UserName = request.Username
+                    UserName = request.Username,
+                    EmailConfirmed = true
                 };
                 var result = await _userManager.CreateAsync(user, request.Password);
                 if (!result.Succeeded)
@@ -40,9 +41,6 @@ namespace BL.API.Services.Authorization.Commands
 
                 if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
                     await _roleManager.CreateAsync(new Role(UserRoles.Admin));
-
-                if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                    await _roleManager.CreateAsync(new Role(UserRoles.User));
 
                 if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
                 {

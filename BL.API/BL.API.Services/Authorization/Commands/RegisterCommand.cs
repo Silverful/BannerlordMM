@@ -33,21 +33,14 @@ namespace BL.API.Services.Authorization.Commands
                 {
                     Email = request.Email,
                     SecurityStamp = Guid.NewGuid().ToString(),
-                    UserName = request.Username
+                    UserName = request.Username,
+                    EmailConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(user, request.Password);
 
                 if (!result.Succeeded)
                     throw new Exception("Something went wrong");
-
-                if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-                    await _roleManager.CreateAsync(new Role(UserRoles.User));
-
-                if (await _roleManager.RoleExistsAsync(UserRoles.User))
-                {
-                    await _userManager.AddToRoleAsync(user, UserRoles.User);
-                }
 
                 return Task.CompletedTask;
             }

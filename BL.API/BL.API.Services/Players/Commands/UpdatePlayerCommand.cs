@@ -71,8 +71,8 @@ namespace BL.API.Services.Players.Commands
                     throw new AlreadyExistsException();
                 }
 
-                if (currentPlayer.Nickname.ToUpperInvariant() != request.Nickname.ToUpperInvariant() 
-                    && await _repository.GetFirstWhereAsync(p => p.Nickname.ToUpperInvariant() == request.Nickname.ToUpperInvariant()) != null)
+                if (currentPlayer.Nickname.ToUpper() != request.Nickname.ToUpper() 
+                    && await _repository.GetFirstWhereAsync(p => p.Nickname.ToUpper() == request.Nickname.ToUpper()) != null)
                 {
                     throw new AlreadyExistsException();
                 }

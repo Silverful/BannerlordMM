@@ -33,7 +33,7 @@ namespace BL.API.WebHost.Services
             return Task.CompletedTask;
         }
 
-        private void LogResources(object? state)
+        private void LogResources(object state)
         {
             using (var proc = Process.GetCurrentProcess())
             {

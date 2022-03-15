@@ -1,6 +1,8 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Exceptions;
+using BL.API.Services.Utility;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -21,11 +23,16 @@ namespace BL.API.Services.Matches.Commands
             private readonly IRepository<Match> _matches;
             private readonly IMediator _mediator;
             private readonly ILogger<DeleteMatchCommandHandler> _logger;
+            private readonly ICacheProvider _cacheProvider;
 
-            public DeleteMatchCommandHandler(IRepository<Match> matches, IMediator mediator, ILogger<DeleteMatchCommandHandler> logger)
+            public DeleteMatchCommandHandler(IRepository<Match> matches, 
+                IMediator mediator,
+                ICacheProvider cacheProvider,
+                ILogger<DeleteMatchCommandHandler> logger)
             {
                 _matches = matches;
                 _mediator = mediator;
+                _cacheProvider = cacheProvider;
                 _logger = logger;
             }
 
@@ -46,6 +53,8 @@ namespace BL.API.Services.Matches.Commands
                 scope.Complete();
 
                 _logger.LogInformation($"Match deleted: {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
+
+                _cacheProvider.TryRemoveValue(CacheKeys.Stats + match.Region.ShortName);
 
                 return Task.CompletedTask;
             }

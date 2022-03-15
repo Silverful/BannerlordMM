@@ -3,6 +3,7 @@ using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Settings;
 using BL.API.Core.Exceptions;
+using BL.API.Services.Utility;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -23,17 +24,20 @@ namespace BL.API.Services.Matches.Commands
             private readonly ILogger<UploadMatchCommandHandler> _logger;
             private readonly ISeasonResolverService _seasonService;
             private readonly IMediator _mediator;
+            private readonly ICacheProvider _cacheProvider;
 
             public UploadMatchCommandHandler(IRepository<Match> matchRepository,
                 IRepository<Region> regionRepository,
                 ISeasonResolverService seasonService,
                 IMediator mediator,
+                ICacheProvider cacheProvider,
                 ILogger<UploadMatchCommandHandler> logger)
             {
                 _matchRepository = matchRepository;
                 _regionRepository = regionRepository;
                 _seasonService = seasonService;
                 _mediator = mediator;
+                _cacheProvider = cacheProvider;
                 _logger = logger;
             }
 
@@ -76,6 +80,8 @@ namespace BL.API.Services.Matches.Commands
                 }
 
                 _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
+
+                _cacheProvider.TryRemoveValue(CacheKeys.Stats + region.ShortName);
 
                 return match.Id;
             }

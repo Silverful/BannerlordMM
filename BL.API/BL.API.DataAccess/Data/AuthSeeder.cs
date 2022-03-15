@@ -1,28 +1,41 @@
 ﻿using BL.API.Core.Domain.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace BL.API.Services.Authorization
 {
     public class AuthSeeder
     {
-        private UserManager<User> _userManager;
-        private RoleManager<Role> _roleManager;
-        private IConfiguration _configuration;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthSeeder> _logger;
 
-        public AuthSeeder(UserManager<User> userManager, RoleManager<Role> roleManager,
-            IConfiguration configuration)
+        public AuthSeeder(UserManager<User> userManager, 
+            RoleManager<Role> roleManager,
+            IConfiguration configuration,
+            ILogger<AuthSeeder> logger)
         {
             _userManager = userManager;
             _configuration = configuration;
             _roleManager = roleManager;
+            _logger = logger;
         }
 
         public async Task Seed()
         {
-            await SeedRoles();
-            await SeedSuperAdminAsync();
+            try
+            {
+                await SeedRoles();
+                await SeedSuperAdminAsync();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Seeding went wrong");
+            }
         }
 
         private async Task SeedRoles()

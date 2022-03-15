@@ -142,6 +142,9 @@ namespace BL.API.WebHost
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:SecretKey"]))
                 };
             });
+
+            services.AddMemoryCache();
+            services.AddScoped(typeof(ICacheProvider), typeof(CacheProvider));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AuthSeeder authSeeder)

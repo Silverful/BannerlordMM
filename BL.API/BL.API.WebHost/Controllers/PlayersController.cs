@@ -55,6 +55,7 @@ namespace BL.API.WebHost.Controllers
         /// <summary>
         /// Get players stats by GUID
         /// </summary>
+        /// <param name="regionShortName"></param>
         /// <param name="playerId"></param>
         /// <returns></returns>
         [HttpGet("{playerId}/stats")]
@@ -71,6 +72,7 @@ namespace BL.API.WebHost.Controllers
         /// <summary>
         /// Gets players stats by DiscordId
         /// </summary>
+        /// <param name="regionShortName"></param>
         /// <param name="discordId"></param>
         /// <returns></returns>
         [HttpGet("discord/{discordId}/stats")]

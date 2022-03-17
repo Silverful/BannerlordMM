@@ -1,5 +1,6 @@
 ﻿using BL.API.Core.Domain.Player;
 using System;
+using System.Collections.Generic;
 
 namespace BL.API.UnitTests.Builders
 {
@@ -9,10 +10,11 @@ namespace BL.API.UnitTests.Builders
         private string _nickname;
         private string _country;
         private string _clan;
+        private bool _isIGL;
         private PlayerClass _mainClass;
         private PlayerClass _secondaryClass;
-        private int _discordId;
-        private int _playerMMR;
+        private long _discordId;
+        private ICollection<PlayerMMR> _playerMMRs;
 
         public PlayerBuilder WithId(Guid? id)
         {
@@ -50,15 +52,21 @@ namespace BL.API.UnitTests.Builders
             return this;
         }
 
-        public PlayerBuilder WithDiscordId(int discordId)
+        public PlayerBuilder WithDiscordId(long discordId)
         {
             _discordId = discordId;
             return this;
         }
 
-        public PlayerBuilder WithMainClass(int mmr)
+        public PlayerBuilder WithMMRs(ICollection<PlayerMMR> mmrs)
         {
-            _playerMMR = mmr;
+            _playerMMRs = mmrs;
+            return this;
+        }
+
+        public PlayerBuilder WitIsIGL(bool isIGL)
+        {
+            _isIGL = isIGL;
             return this;
         }
 
@@ -73,6 +81,8 @@ namespace BL.API.UnitTests.Builders
                 MainClass = _mainClass,
                 SecondaryClass = _secondaryClass,
                 DiscordId = _discordId,
+                PlayerMMRs = _playerMMRs,
+                IsIGL = _isIGL
                 //PlayerMMR = _playerMMR
             };
         }

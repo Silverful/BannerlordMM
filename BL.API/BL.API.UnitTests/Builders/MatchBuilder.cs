@@ -1,4 +1,5 @@
 ﻿using BL.API.Core.Domain.Match;
+using BL.API.Core.Domain.Settings;
 using System;
 using System.Collections.Generic;
 
@@ -11,6 +12,8 @@ namespace BL.API.UnitTests.Builders
         private DateTime _matchDate;
         private byte _roundsPlayed;
         private byte _teamWon;
+        private Season _season;
+        private Region _region;
         private ICollection<PlayerMatchRecord> _playerRecords;
 
         public MatchBuilder WithId(Guid? id)
@@ -49,6 +52,18 @@ namespace BL.API.UnitTests.Builders
             return this;
         }
 
+        public MatchBuilder WithSeason(Season season)
+        {
+            _season = season;
+            return this;
+        }
+
+        public MatchBuilder WithRegion(Region region)
+        {
+            _region = region;
+            return this;
+        }
+
         public Match Build()
         {
             return new Match
@@ -58,7 +73,11 @@ namespace BL.API.UnitTests.Builders
                 RoundsPlayed = _roundsPlayed,
                 TeamWon = _teamWon,
                 ScreenshotLink = _screenshotLink,
-                PlayerRecords = _playerRecords
+                PlayerRecords = _playerRecords,
+                Season = _season,
+                SeasonId = _season.Id,
+                Region = _region,
+                RegionId = _region.Id
             };
         }
     }

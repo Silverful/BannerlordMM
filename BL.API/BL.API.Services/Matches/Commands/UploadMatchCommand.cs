@@ -81,7 +81,7 @@ namespace BL.API.Services.Matches.Commands
 
                 _logger?.LogInformation($"Match created {JsonSerializer.Serialize(match, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.Preserve })}");
 
-                _cacheProvider.TryRemoveValue(CacheKeys.Stats + region.ShortName);
+                _cacheProvider?.TryRemoveValue(CacheKeys.Stats + region.ShortName);
 
                 return match.Id;
             }

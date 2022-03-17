@@ -1,10 +1,15 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using AutoFixture.Xunit2;
 using BL.API.Core.Abstractions.Repositories;
+using BL.API.Core.Abstractions.Services;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
+using BL.API.Core.Domain.Settings;
 using BL.API.Services.Matches.Commands;
 using BL.API.Services.MMR;
+using BL.API.UnitTests.Builders;
+using BL.API.UnitTests.Utility;
 using BL.API.WebHost.Controllers;
 using Bogus;
 using FluentAssertions;
@@ -16,133 +21,122 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using static BL.API.Services.Matches.Commands.LoadPlayersRecordCommand;
 using static BL.API.Services.Matches.Commands.UploadMatchCommand;
+using Match = BL.API.Core.Domain.Match.Match;
 
 namespace BL.API.UnitTests.WebHost.Matches.Commands
 {
     public class UploadMatchAsyncTests
     {
-        //private readonly Mock<IRepository<Player>> _playersMoq;
-        //private readonly Mock<IRepository<PlayerMatchRecord>> _matchRecords;
-        //private readonly Mock<IRepository<Core.Domain.Match.Match>> _matchMoq;
-        //private readonly Mock<IMediator> _mediatr;
-        //private readonly MMRCalculationService _mmrCalcService;
+        private readonly IOptions<BasicMMRCalculationProperties> _options;
+        private readonly Region _region;
+        private readonly Season _season;
+        private readonly ISeasonResolverService _seasonResolver;
+        private readonly IRepository<Region> _regionRepository;
 
-        //public UploadMatchAsyncTests()
-        //{
-        //    var fixture = new Fixture().Customize(new AutoMoqCustomization());
-        //    _playersMoq = fixture.Freeze<Mock<IRepository<Player>>>();
-        //    _matchRecords = fixture.Freeze<Mock<IRepository<PlayerMatchRecord>>>();
-        //    _matchMoq = fixture.Freeze<Mock<IRepository<Core.Domain.Match.Match>>>();
-        //    _mediatr = new Mock<IMediator>();
+        public UploadMatchAsyncTests()
+        {
+            _options = Options.Create(new BasicMMRCalculationProperties
+            {
+                DefaultChange = 25,
+                AdditionalBank = 0,
+                CalibrationIndexFactor = 4,
+                AvgCavScore = 213,
+                CavPositiveExp = 1.5,
+                CavNegativExp = 1.5,
+                AvgInfScore = 170,
+                InfPositiveExp = 1.4,
+                InfNegativeExp = 1.6,
+                AvgArcherScore = 208,
+                ArchPositiveExp = 1.5,
+                ArcherNegativeExp = 1.5,
+                Factor = 0.1
+            });
 
-        //    var options = Options.Create(new BasicMMRCalculationProperties
-        //    {
-        //        DefaultChange = 20,
-        //        AdditionalBank = 40
-        //    });
+            _region = new RegionBuilder()
+                .WithId(null)
+                .WithShortName("eu")
+                .WithName("Europe")
+                .Build();
 
-        //    _mmrCalcService = new MMRCalculationService(options);
-        //}
+            _season = new SeasonBuilder()
+                .WithId(null)
+                .WithRegion(_region)
+                .WithTitle("Test")
+                .WithOnGoing(true)
+                .Build();
 
-        //public IEnumerable<Player> CreatePlayers(int number)
-        //{
-        //    var players = new Faker<Player>()
-        //        .RuleFor(p => p.Id, (f) => Guid.NewGuid())
-        //        .RuleFor(p => p.Nickname, (f) => f.Internet.UserName())
-        //        .RuleFor(p => p.Country, (f) => f.Address.Country())
-        //        .RuleFor(p => p.DiscordId, (f) => f.Random.Int())
-        //        .RuleFor(p => p.Clan, (f) => f.Company.CompanyName())
-        //        .RuleFor(p => p.MainClass, (f) => (PlayerClass)f.Random.Int(1, 3))
-        //        .RuleFor(p => p.SecondaryClass, (f) => (PlayerClass)f.Random.Int(1, 3))
-        //        .RuleFor(p => p.PlayerMMR, (f) => f.Random.Int(0, 1000))
-        //        .Generate(number)
-        //        .ToList();
+            var options = Options.Create(new BasicMMRCalculationProperties
+            {
+                DefaultChange = 20,
+                AdditionalBank = 40
+            });
 
-        //    return players;
-        //}
+            var seasonResolverMock = new Mock<ISeasonResolverService>();
+            seasonResolverMock
+                .Setup(r => r.GetCurrentSeasonAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(_season);
+            seasonResolverMock
+                .Setup(r => r.GetSeasonOnDateAsync(It.IsAny<DateTime>(), It.IsAny<Guid>()))
+                .ReturnsAsync(_season);
 
-        //public UploadMatchCommand CreateMatchCommand(IList<Player> players = null)
-        //{
-        //    var rnd = new Random();
+            _seasonResolver = seasonResolverMock.Object;
 
-        //    byte roundsWon = (byte)rnd.Next(3, 5);
-        //    byte roundsLost = (byte)rnd.Next(0, roundsWon - 1);
-        //    var faction1 = (Faction)rnd.Next(1, 6);
-        //    var faction2 = (Faction)rnd.Next(1, 6);
+            var regionMock = new Mock<IRepository<Region>>();
+            regionMock
+                .Setup(r => r.GetFirstWhereAsync(It.IsAny<Expression<Func<Region, bool>>>(), It.IsAny<bool>(), It.IsAny<Expression<Func<Region, object>>>()))
+                .ReturnsAsync(_region);
 
-        //    var faker = new Faker<MatchRecord>()
-        //        .RuleFor(p => p.Kills, f => f.Random.SByte(-2, 20))
-        //        .RuleFor(p => p.Assists, f => f.Random.SByte(-2, 20))
-        //        .RuleFor(p => p.Score, f => f.Random.Int(-100, 2000))
-        //        .RuleFor(p => p.MVPs, f => f.Random.Byte(0, 5));
-
-        //    var team1 = faker.Generate(6);
-
-        //    int i = 0;
-        //    team1.ForEach(r => 
-        //    {
-        //        if (players != null)
-        //        {
-        //            r.PlayerId = players[i].Id;
-        //        }
-        //        r.RoundsWon = roundsWon;
-        //        r.Faction = faction1.ToString();
-        //        i++;
-        //    });
-
-        //    var team2 = faker.Generate(6);
-
-        //    team2.ForEach(r =>
-        //    {
-        //        if (players != null)
-        //        {
-        //            r.PlayerId = players[i].Id;
-        //        }
-        //        r.Faction = faction2.ToString();
-        //        r.RoundsWon = roundsLost;
-        //        i++;
-        //    });
-
-        //    return new Faker<UploadMatchCommand>()
-        //        .RuleFor(p => p.ScreenshotLink, f => f.Internet.Url())
-        //        .RuleFor(p => p.MatchDate, f => f.Date.Recent())
-        //        .RuleFor(p => p.RoundsPlayed, f => (byte)5)
-        //        .RuleFor(p => p.Team1Records, f => team1)
-        //        .RuleFor(p => p.Team2Records, f => team2)
-        //        .Generate();
-        //}
+            _regionRepository = regionMock.Object;
+        }
 
 
-        //[Fact]
-        //public async Task UploadMatch_CorrectMatch_ReturnsOk()
-        //{
-        //    //Arrange
-        //    var players = CreatePlayers(12).ToList();
-        //    var matchCommand = CreateMatchCommand(players);
+        [Fact]
+        public async Task UploadMatch_CorrectMatch_ReturnsOk()
+        {
+            ////Arrange
+            //var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            //var loggerMock = fixture.Freeze<Mock<ILogger<UploadMatchCommandHandler>>>();
+            //var cacheMock = fixture.Freeze<Mock<ICacheProvider>>();
 
-        //    _playersMoq.Setup(repo => repo.GetAllAsync())
-        //        .ReturnsAsync(players);
+            //var players = MatchUtility.CreatePlayers(12, _season, _region).ToList();
+            //var matchCommand = MatchUtility.CreateMatchCommand(_region);
 
-        //    Core.Domain.Match.Match nullObj = null;
+            //var playersMock = new Mock<IRepository<Player>>();
+            //playersMock.Setup(repo => repo.GetAllAsync(It.IsAny<bool>(), It.IsAny<Expression<Func<Player, object>>>()))
+            //    .ReturnsAsync(players);
 
-        //    _matchMoq.Setup(repo => repo.GetFirstWhereAsync(m => m.ScreenshotLink == matchCommand.ScreenshotLink))
-        //        .ReturnsAsync(nullObj);
+            //Core.Domain.Match.Match nullObj = null;
 
-        //    _matchMoq.Setup(repo => repo.CreateAsync(It.IsAny<Core.Domain.Match.Match>()))
-        //        .ReturnsAsync(It.Is<Guid>(g => g != Guid.Empty));
+            //var matchMock = new Mock<IRepository<Match>>();
+            //matchMock.Setup(repo => repo.GetFirstWhereAsync(m => m.ScreenshotLink == matchCommand.ScreenshotLink, 
+            //    It.IsAny<bool>(), 
+            //    It.IsAny<Expression<Func<Match, object>>>()))
+            //    .ReturnsAsync(nullObj);
 
-        //    var handler = new UploadMatchCommandHandler(_matchMoq.Object, _matchRecords.Object, _playersMoq.Object, _mmrCalcService, null);
+            //matchMock.Setup(repo => repo.CreateAsync(It.IsAny<Match>()))
+            //    .ReturnsAsync(It.Is<Guid>(g => g != Guid.Empty));
 
-        //    //Act
-        //    var result = await handler.Handle(matchCommand, new System.Threading.CancellationToken());
+            //var mock
 
-        //    //Assert
-        //    result.Should().BeEmpty();
-        //}
+            //var reloadHandler = new LoadPlayersRecordCommandHandler()
+
+            //var mediator = new Mock<IMediator>();
+            //mediator.Setup
+
+            //var handler = new UploadMatchCommandHandler(matchMock.Object, _regionRepository, _seasonResolver, null, cacheMock.Object, loggerMock.Object);
+
+            ////Act
+            //var result = await handler.Handle(matchCommand, new System.Threading.CancellationToken());
+
+            ////Assert
+            //result.Should().BeEmpty();
+        }
 
         //[Fact]
         //public async Task UploadMatch_NoPlayerIds_ReturnsOk()

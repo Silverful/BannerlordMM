@@ -388,6 +388,9 @@ namespace BL.API.UnitTests.Services.MMR
             //Assert
             testMMRChange1200.Should().BeGreaterThan(0);
             testMMRChange10000.Should().BeGreaterThan(0);
+            testMMRChange1200.Should().NotBe(0);
+            testMMRChange10000.Should().NotBe(0);
+
             Assert.Equal(testMMRChange1200, testMMRChange10000);
         }
     }

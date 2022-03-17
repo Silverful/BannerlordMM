@@ -14,16 +14,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
+
 namespace BL.API.UnitTests.Services.MMR
 {
-    public class BetaMMRCalculationAsyncTests
+    public class BasicMMRCalculationAsyncTests
     {
         private readonly IOptions<BasicMMRCalculationProperties> _options;
         private readonly Region _region;
         private readonly Season _season;
         private readonly ISeasonResolverService _seasonResolver;
 
-        public BetaMMRCalculationAsyncTests()
+        public BasicMMRCalculationAsyncTests()
         {
             _options = Options.Create(new BasicMMRCalculationProperties
             {
@@ -41,7 +42,7 @@ namespace BL.API.UnitTests.Services.MMR
             _season = new SeasonBuilder()
                 .WithId(null)
                 .WithRegion(_region)
-                .WithTitle("Beta")
+                .WithTitle("Basic")
                 .WithOnGoing(true)
                 .Build();
 
@@ -61,12 +62,12 @@ namespace BL.API.UnitTests.Services.MMR
         }
 
         [Fact]
-        public async Task CorrectMMRCalculation_RealExamplesNoCalibration_ArraysIdentical()
+        public async Task CorrectMMRCalculation_NoCalibration_ArraysIdentical()
         {
             //Arrange
             var builderMock = new Mock<IMMRCalculationBuilder>();
             builderMock.Setup(b => b.BuildMMRStrategy(It.IsAny<Season>(), It.IsAny<BasicMMRCalculationProperties>()))
-                .Returns(new BetaSeasonStrategy(_options.Value));
+                .Returns(new BasicStrategy(_options.Value));
 
             var mmrService = new MMRCalculationService(_options, _seasonResolver, builderMock.Object);
 
@@ -77,70 +78,6 @@ namespace BL.API.UnitTests.Services.MMR
             };
 
             var realMMRChange = new List<double>
-            {
-                28, 27, 27, 26, 26, 23,
-                -21, -22, -25, -27, -29, -30
-            };
-
-            var testMatch = MatchUtility.CreateBaseMatch(1, 5, testScores, _season, _region);
-
-            //Act
-            var testMMRChange = (await Task.WhenAll(testMatch.PlayerRecords.Select(pr => mmrService.CalculateMMRChangeAsync(pr)))).ToList();
-
-            //Assert
-            int i = 0;
-            testMMRChange.ForEach(t => Assert.Equal(realMMRChange[i++], t));
-        }
-        
-        [Fact]
-        public async Task CorrectMMRCalculation_RealExamplesWithCalibration_ArraysIdentical()
-        {
-            //Arrange
-            var builderMock = new Mock<IMMRCalculationBuilder>();
-            builderMock.Setup(b => b.BuildMMRStrategy(It.IsAny<Season>(), It.IsAny<BasicMMRCalculationProperties>()))
-                .Returns(new BetaSeasonStrategy(_options.Value));
-
-            var mmrService = new MMRCalculationService(_options, _seasonResolver, builderMock.Object);
-
-            var testScores = new List<(byte, int, byte)>
-            {
-                (1, 1715, 0), (1, 1488, 0), (1, 1227, 0), (1, 980, 5), (1, 895, 1), (1, 680, 0),
-                (0, 1964, 0), (0, 1205, 0), (0, 1193, 0), (0, 941, 0), (0, 726, 0), (0, 554, 7)
-            };
-
-            var realMMRChange = new List<int>
-            {
-                29, 28, 27, 100, 100, 23,
-                -21, -25, -25, -27, -28, 0
-            };
-
-            var testMatch = MatchUtility.CreateBaseMatch(1, 5, testScores, _season, _region);
-
-            //Act
-            var testMMRChange = (await Task.WhenAll(testMatch.PlayerRecords.Select(pr => mmrService.CalculateMMRChangeAsync(pr)))).ToList();
-
-            //Assert
-            int i = 0;
-            testMMRChange.ForEach(t => Assert.Equal(realMMRChange[i++], t));
-        }
-
-        [Fact]
-        public async Task CorrectMMRCalculation_ZeroScoreUpload_ArraysReturnDefaultChange()
-        {
-            //Arrange
-            var builderMock = new Mock<IMMRCalculationBuilder>();
-            builderMock.Setup(b => b.BuildMMRStrategy(It.IsAny<Season>(), It.IsAny<BasicMMRCalculationProperties>()))
-                .Returns(new BetaSeasonStrategy(_options.Value));
-
-            var mmrService = new MMRCalculationService(_options, _seasonResolver, builderMock.Object);
-
-            var testScores = new List<(byte, int, byte)>
-            {
-                (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0), (1, 0, 0),
-                (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)
-            };
-
-            var realMMRChange = new List<int>
             {
                 20, 20, 20, 20, 20, 20,
                 -20, -20, -20, -20, -20, -20
@@ -157,25 +94,25 @@ namespace BL.API.UnitTests.Services.MMR
         }
 
         [Fact]
-        public async Task CorrectMMRCalculation_RealExamplesWithCalibration2_ArraysIdentical()
+        public async Task CorrectMMRCalculation_WithCalibration_ArraysIdentical()
         {
             //Arrange
             var builderMock = new Mock<IMMRCalculationBuilder>();
             builderMock.Setup(b => b.BuildMMRStrategy(It.IsAny<Season>(), It.IsAny<BasicMMRCalculationProperties>()))
-                .Returns(new BetaSeasonStrategy(_options.Value));
+                .Returns(new BasicStrategy(_options.Value));
 
             var mmrService = new MMRCalculationService(_options, _seasonResolver, builderMock.Object);
 
             var testScores = new List<(byte, int, byte)>
             {
-                (0, 714, 0), (0, 707, 0), (0, 650, 3), (0, 573, 0), (0, 356, 0), (0, 135, 10),
-                (1, 1194, 0), (1, 1069, 10), (1, 801, 0), (1, 634, 5), (1, 614, 6), (1, 574, 8)
+                (1, 1502, 2), (1, 1383, 3), (1, 1357, 5), (1, 1287, 1), (1, 1197, 6), (1, 739, 6),
+                (0, 1775, 8), (0, 1653, 7), (0, 1239, 6), (0, 899, 1), (0, 496, 2), (0, 371, 3)
             };
 
-            var realMMRChange = new List<int>
+            var realMMRChange = new List<double>
             {
-                -23, -23, 0, -25, -28, 0,
-                29, 112, 26, 100, 100, 96
+                80, 80, 80, 80, 80, 80,
+                0, 0, 0, 0, 0, 0
             };
 
             var testMatch = MatchUtility.CreateBaseMatch(1, 5, testScores, _season, _region);
@@ -189,32 +126,25 @@ namespace BL.API.UnitTests.Services.MMR
         }
 
         [Fact]
-        public async Task CorrectMMRCalculation_ZeroAdditionalBank_ArraysIdentical()
+        public async Task CorrectMMRCalculation_WithAndWithoutCalibration_ArraysIdentical()
         {
-            var options = Options.Create(new BasicMMRCalculationProperties
-            {
-                DefaultChange = 27,
-                AdditionalBank = 0,
-                CalibrationIndexFactor = 4
-            });
-
+            //Arrange
             var builderMock = new Mock<IMMRCalculationBuilder>();
             builderMock.Setup(b => b.BuildMMRStrategy(It.IsAny<Season>(), It.IsAny<BasicMMRCalculationProperties>()))
-                .Returns(new BetaSeasonStrategy(options.Value));
+                .Returns(new BasicStrategy(_options.Value));
 
-            var mmrService = new MMRCalculationService(options, _seasonResolver, builderMock.Object);
+            var mmrService = new MMRCalculationService(_options, _seasonResolver, builderMock.Object);
 
-            //Arrange
             var testScores = new List<(byte, int, byte)>
             {
-                (0, 714, 0), (0, 707, 0), (0, 650, 0), (0, 573, 0), (0, 356, 0), (0, 135, 0),
-                (1, 1194, 10), (1, 1069, 0), (1, 801, 0), (1, 634, 0), (1, 614, 0), (1, 574, 0)
+                (1, 1502, 0), (1, 1383, 3), (1, 1357, 0), (1, 1287, 1), (1, 1197, 6), (1, 739, 6),
+                (0, 1775, 0), (0, 1653, 7), (0, 1239, 0), (0, 899, 1), (0, 496, 2), (0, 371, 3)
             };
 
-            var realMMRChange = new List<int>
+            var realMMRChange = new List<double>
             {
-                -27, -27, -27, -27, -27, -27,
-                108, 27, 27, 27, 27, 27
+                20, 80, 20, 80, 80, 80,
+                -20, 0, -20, 0, 0, 0
             };
 
             var testMatch = MatchUtility.CreateBaseMatch(1, 5, testScores, _season, _region);

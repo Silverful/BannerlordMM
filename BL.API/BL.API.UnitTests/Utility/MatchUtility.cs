@@ -50,6 +50,7 @@ namespace BL.API.UnitTests.Utility
                 .WithMatch(match)
                 .WithPlayer(players[i])
                 .WithTeamIndex(p.Item1)
+                .WithRoundsWon(p.Item1 == teamWon ? (byte)3 : (byte)(roundsPlayed - 3))
                 .WithScore(p.Item2)
                 .WithCalibrationIndex(p.Item3)
                 .Build())

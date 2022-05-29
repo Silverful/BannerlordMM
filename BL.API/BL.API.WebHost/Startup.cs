@@ -28,6 +28,7 @@ using System.Text.Json.Serialization;
 using BL.API.Core.Abstractions.Services;
 using BL.API.Services.Authorization;
 using BL.API.Services.Authorization.Model;
+using System.Linq;
 
 namespace BL.API.WebHost
 {
@@ -47,6 +48,9 @@ namespace BL.API.WebHost
             services.Configure<BasicMMRCalculationProperties>(options => Configuration.GetSection("MMRProps").Bind(options));
             services.Configure<StatsProps>(options => Configuration.GetSection("StatsProps").Bind(options));
             services.Configure<JWTConfiguration>(options => Configuration.GetSection("JWT").Bind(options));
+
+            var ranks = Configuration.GetSection("Ranks").Get<RankProperty[]>();
+            services.Configure<RanksConfig>(options => options.Ranks = ranks.ToList());
 
             services.AddDbContext<EFContext>(option =>
             {

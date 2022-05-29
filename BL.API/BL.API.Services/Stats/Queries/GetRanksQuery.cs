@@ -4,7 +4,6 @@ using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Services.Extensions;
 using BL.API.Services.MMR;
-using BL.API.Services.Stats.Utility;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System;
@@ -23,15 +22,17 @@ namespace BL.API.Services.Players.Queries
         {
             private readonly IRepository<Match> _matches;
             private readonly ISeasonResolverService _seasonResolver;
+            private readonly List<RankProperty> _ranks;
             private readonly double _startingMMR;
 
-            public GetRanksQueryHandler(IRepository<Match> matches, IOptions<BasicMMRCalculationProperties> options, ISeasonResolverService seasonResolver)
+            public GetRanksQueryHandler(IRepository<Match> matches, IOptions<BasicMMRCalculationProperties> options, ISeasonResolverService seasonResolver,
+                IOptions<RanksConfig> ranks)
             {
                 _matches = matches;
+                _ranks = ranks.Value.Ranks;
                 _seasonResolver = seasonResolver;
                 _startingMMR = options.Value.StartMMR;
             }
-
 
             public async Task<IDictionary<string, double>> Handle(Query request, CancellationToken cancellationToken)
             {
@@ -48,27 +49,27 @@ namespace BL.API.Services.Players.Queries
                 var maxRating = players != null && players.Count() > 0 ? players.Max(x => x?.GetPlayerMMR(request.regionId)?.MMR) ?? _startingMMR : _startingMMR;
                 var minRating = players != null && players.Count() > 0 ? players.Min(x => x?.GetPlayerMMR(request.regionId)?.MMR) ?? _startingMMR : _startingMMR;
 
-                var rankTable = StatsQueryHelper.RankMultipliers;
-
-                var ranks = rankTable
+                var ranks = _ranks
+                    .OrderBy(x => x.Position)
                     .Select(rm => 
                     {
-                        var rank = rm.Key;
+                        var rank = rm.Title;
                         double value = 0;
 
-                        switch (rank)
+                        if (rm.IsBottomRank && rm.Threshold != null)
                         {
-                            case "Copper":
-                                value = _startingMMR;
-                                break;
-                            case "Wood":
-                                var woodValue = minRating + rm.Value;
-                                value = woodValue >= _startingMMR ? _startingMMR - 1 : woodValue;
-                                break;
-                            default:
-                                value = (maxRating - _startingMMR)  * rm.Value + _startingMMR;
-                                break;
+                            var bottomValue = minRating + rm.Threshold.Value;
+                            value = bottomValue >= _startingMMR ? _startingMMR - 1 : bottomValue;
                         }
+                        else if (rm.Threshold != null)
+                        {
+                            value = rm.Threshold.Value;
+                        }
+                        else
+                        {
+                            value = (maxRating - _startingMMR) * rm.Percentile.Value + _startingMMR;
+                        }
+
                         return new KeyValuePair<string, double>(rank, value);
                     })
                     .ToDictionary();

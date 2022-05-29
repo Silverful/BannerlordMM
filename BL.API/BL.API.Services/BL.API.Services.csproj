@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.23" />
@@ -15,6 +16,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BL.API.Core\BL.API.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Stats\Utility\" />
   </ItemGroup>
 
 </Project>

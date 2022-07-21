@@ -55,7 +55,6 @@ namespace BL.API.Services.Players.Queries
 
                 if (region == null) throw new NotFoundException();
 
-                Func<Task<object>> getStatsFunc = async () => {
                     var season = await _seasonResolver.GetCurrentSeasonAsync(region.Id);
                     var matches = await _matches.GetWhereAsync(m => m.SeasonId == season.Id && m.Region.Id == region.Id, true, m => m.PlayerRecords);
                     var matchRecords = matches.Select(x => x.PlayerRecords).SelectMany(x => x);
@@ -64,7 +63,7 @@ namespace BL.API.Services.Players.Queries
                     var rankTable = await _mediator.Send(new GetRanksQuery.Query(calibratedPlayers, region.Id));
 
                     var playerStats = (await _mediator.Send(new GetPlayersStatsQuery.Query(players, matchRecords, rankTable, region.ShortName)))
-                        .Where(ps => ps.Played > 1);
+                        .Where(ps => ps.Played > 0);
 
                     var iglStats = (from mr in matchRecords
                                     where mr.PlayerId.HasValue
@@ -145,11 +144,7 @@ namespace BL.API.Services.Players.Queries
                             Cavalry = cavStats.ToDictionary()
                         }
                     };
-                };
 
-                var response = _cacheProvider.GetCachedResponse(CacheKeys.Stats + region.ShortName, getStatsFunc);
-
-                return (AllStatsResponse)response;
             }
         }
     }

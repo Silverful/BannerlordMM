@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  bl.api.webhost:
+    image: ${DOCKER_REGISTRY-}blapiwebhost
+    build:
+      context: .
+      dockerfile: BL.API.WebHost/Dockerfile
+    ports:
+    - "5000:5000"
+    environment:
+    - "DefaultConnectionString:"
+

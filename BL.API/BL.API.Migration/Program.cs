@@ -22,12 +22,15 @@ namespace BL.API.Migration
         private static RestClient _httpClient;
         private static readonly string _spreadsheetId = "1Z3GBcvfprEquNRHRa2ceiA0U1qBSslrFyBLbqbjV8hU";
         private static readonly string _oldSpreadsheetId = "1pHS_4OCTB5deOWygl9YOV2KLtZsJJVkT7SdkatIbXRk";
+        private static readonly string _testSpreadsheetId = "1fOsewSdJJiY3gOEaVhusc2CbF8Pmr9nQPuML_pm0RYo";
         private static SheetsService _service;
 
         static async Task Main(string[] args)
         {
+            try
+            {
             //_httpClient = new RestClient("https://bannerlordmm.com/api");
-            _httpClient = new RestClient("https://localhost:5001/api");
+            _httpClient = new RestClient("https://localhost:5001/api/na");
 
             string[] Scopes = { SheetsService.Scope.Spreadsheets };
             string ApplicationName = "MM Migration Script";
@@ -47,11 +50,17 @@ namespace BL.API.Migration
 
             await LoadPlayers(_spreadsheetId);
             Console.WriteLine("Players Finished");
-            await LoadMatches(_oldSpreadsheetId, "Screens!A2:M"); //old
+            await LoadMatches(_testSpreadsheetId, "Screens!A2:M"); //old
             Console.WriteLine("Old screens Finished");
             //await LoadMatches(_spreadsheetId, "Screens!A2:M"); //new
             Console.WriteLine("Finished");
             Console.Read();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.Read();
+            }
         }
 
         private static async Task LoadPlayers(string spreadsheetId)
@@ -92,7 +101,6 @@ namespace BL.API.Migration
         private static async Task LoadMatches(string sheetId, string range)
         {
             var players = (await GetData<IEnumerable<Player>>("Players")).ToList();
-
             var values = GetSpreadsheetResponse(sheetId, range);
 
             if (values != null && values.Count > 0)
@@ -107,7 +115,7 @@ namespace BL.API.Migration
                             CreateNewMatch(match, row);
                         }
 
-                        if (match.ScreenshotLink == row[11].ToString())
+                        if (match.ScreenshotLink == row[11].ToString() + "2")
                         {
                             AddNewRecord(match, row, players);
                         }
@@ -130,7 +138,7 @@ namespace BL.API.Migration
 
         private static void CreateNewMatch(UploadMatchCommand match, IList<object> row)
         {
-            match.ScreenshotLink = row[11].ToString();
+            match.ScreenshotLink = row[11].ToString() + "2";
             match.MatchDate = Convert.ToDateTime(row[0]);
             match.RoundsPlayed = Convert.ToByte(row[4]);
             match.Team1Records = new List<UploadMatchCommand.MatchRecord>();

@@ -20,6 +20,8 @@ namespace BL.API.Services.MMR
                 "Beta" => new BetaSeasonStrategy(props),
                 "Test" => new EnhancedCalibrationStrategy(props, _mediator),
                 "The Path of Redemption" => new EnhancedCalibrationStrategy(props, _mediator),
+                string value when value.Contains("NA") => new EnhancedCalibrationStrategy(props, _mediator),
+                "Season2NA" => new EnhancedCalibrationStrategy(props, _mediator),
                 _ => new BasicStrategy(props),
             };
 

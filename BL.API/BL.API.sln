@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31911.196
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.WebHost", "BL.API.WebHost\BL.API.WebHost.csproj", "{A03A7B57-6A67-422C-BB80-20229A8BC9F6}"
 EndProject
@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.Services", "BL.API.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.UnitTests", "BL.API.UnitTests\BL.API.UnitTests.csproj", "{DE922B59-0B9D-440A-93C4-2C6B223A51A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BL.API.Migration", "BL.API.Migration\BL.API.Migration.csproj", "{C2AC732B-0DA3-4050-96FB-687A5002ADF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BL.API.Migration", "BL.API.Migration\BL.API.Migration.csproj", "{C2AC732B-0DA3-4050-96FB-687A5002ADF0}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{FAF0CD88-A0E1-411F-B7D1-311D2EE2F4B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2AC732B-0DA3-4050-96FB-687A5002ADF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAF0CD88-A0E1-411F-B7D1-311D2EE2F4B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAF0CD88-A0E1-411F-B7D1-311D2EE2F4B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAF0CD88-A0E1-411F-B7D1-311D2EE2F4B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAF0CD88-A0E1-411F-B7D1-311D2EE2F4B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

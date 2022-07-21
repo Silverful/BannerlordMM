@@ -10,6 +10,7 @@ namespace BL.API.Core.Domain.Match
         public string Title { get; set; }
         public bool OnGoing { get; set; }
         public bool IsTestingSeason { get; set; }
+        public MMRAlgorithm? MMRAlgorithm { get; set; } 
         public DateTime? Started { get; set; }
         public DateTime? Finished { get; set; }
         public Guid? RegionId { get; set; }

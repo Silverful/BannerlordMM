@@ -12,17 +12,16 @@ namespace BL.API.Services.MMR
             _mediator = mediator;
         }
 
-
         public ICalculateMMRStrategy BuildMMRStrategy(Season season, BasicMMRCalculationProperties props)
         {
-            ICalculateMMRStrategy strategy = season.Title switch
+            var algo = season.MMRAlgorithm ?? MMRAlgorithm.Enhanced;
+
+            ICalculateMMRStrategy strategy = algo switch
             {
-                "Beta" => new BetaSeasonStrategy(props),
-                "Test" => new EnhancedCalibrationStrategy(props, _mediator),
-                "The Path of Redemption" => new EnhancedCalibrationStrategy(props, _mediator),
-                string value when value.Contains("NA") => new EnhancedCalibrationStrategy(props, _mediator),
-                "Season2NA" => new EnhancedCalibrationStrategy(props, _mediator),
-                _ => new BasicStrategy(props),
+                MMRAlgorithm.Beta => new BetaSeasonStrategy(props),
+                MMRAlgorithm.Basic => new BasicStrategy(props),
+                MMRAlgorithm.Enhanced => new EnhancedCalibrationStrategy(props, _mediator),
+                _ => new BasicStrategy(props)
             };
 
             return strategy;

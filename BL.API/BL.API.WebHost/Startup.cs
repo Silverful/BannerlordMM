@@ -158,6 +158,8 @@ namespace BL.API.WebHost
                 await next();
             });
 
+            app.UseMiddleware<ExceptionMiddleware>();
+
             app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BL.API.WebHost v1"));
@@ -169,8 +171,6 @@ namespace BL.API.WebHost
             app.UseRouting();
 
             //global error handler
-            app.UseMiddleware<ExceptionMiddleware>();
-
             app.UseAuthentication();
             app.UseAuthorization();
 

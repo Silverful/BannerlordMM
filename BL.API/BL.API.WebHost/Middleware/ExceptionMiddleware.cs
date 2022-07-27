@@ -23,16 +23,18 @@ namespace BL.API.WebHost.Middleware
 
         public async Task Invoke(HttpContext httpContext)
         {
+            httpContext.Request.Body.Seek(0, SeekOrigin.Begin);
+            using StreamReader reader = new StreamReader(httpContext.Request.Body, Encoding.UTF8);
+            var body = await reader.ReadToEndAsync();
+            httpContext.Request.Body.Seek(0, SeekOrigin.Begin);
             try
             {
+                var message = $"Request: {httpContext.Request.Path.Value}; Method: {httpContext.Request.Method}; Body: {body}";
+                _logger.LogInformation(message);
                 await _next(httpContext);
             }
             catch (Exception ex)
             {
-                httpContext.Request.Body.Seek(0, SeekOrigin.Begin);
-                using StreamReader reader = new StreamReader(httpContext.Request.Body, Encoding.UTF8);
-                var body = await reader.ReadToEndAsync();
-
                 var message = $"{httpContext.Request.Path.Value}/{body}";
                 _logger.LogError(ex, message);
 

@@ -42,6 +42,7 @@ namespace BL.API.Services.Seasons.Commands
                     Title = request.SeasonName,
                     OnGoing = true,
                     IsTestingSeason = false,
+                    MMRAlgorithm = MMRAlgorithm.Enhanced,
                     Started = DateTime.UtcNow,
                     RegionId = region.Id
                 };

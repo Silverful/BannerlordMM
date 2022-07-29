@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BL.API.Core.Domain.Clan
 {
-    internal class ClanInvite
+    internal class ClanInvite : BaseEntity
     {
     }
 }

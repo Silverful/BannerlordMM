@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 //https://docs.google.com/spreadsheets/d/1Z3GBcvfprEquNRHRa2ceiA0U1qBSslrFyBLbqbjV8hU/edit#gid=1879936255 - current
 //https://docs.google.com/spreadsheets/d/1pHS_4OCTB5deOWygl9YOV2KLtZsJJVkT7SdkatIbXRk/edit#gid=405046885 - old
+//https://docs.google.com/spreadsheets/d/1fOsewSdJJiY3gOEaVhusc2CbF8Pmr9nQPuML_pm0RYo/edit - copyold
 
 namespace BL.API.Migration
 {
@@ -30,7 +31,7 @@ namespace BL.API.Migration
             try
             {
             //_httpClient = new RestClient("https://bannerlordmm.com/api");
-            _httpClient = new RestClient("https://localhost:5001/api/na");
+            _httpClient = new RestClient("http://localhost:5000/api/eu");
 
             string[] Scopes = { SheetsService.Scope.Spreadsheets };
             string ApplicationName = "MM Migration Script";
@@ -81,7 +82,6 @@ namespace BL.API.Migration
                             Nickname = row[1].ToString(),
                             Country = row[2].ToString(),
                             IGL = string.IsNullOrEmpty(row[3].ToString()) ? false : true,
-                            Clan = row[4].ToString(),
                             MainClass = row[5].ToString(),
                             SecondaryClass = row[6].ToString(),
                             DiscordId = discordId

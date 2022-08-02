@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace BL.API.WebHost.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class PlayersController : ControllerBase
@@ -99,7 +99,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]

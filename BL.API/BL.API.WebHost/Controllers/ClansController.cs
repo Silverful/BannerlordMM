@@ -13,7 +13,7 @@ using static BL.API.Services.Clans.Queries.GetPendingRequests;
 
 namespace BL.API.WebHost.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class ClansController : ControllerBase
@@ -26,7 +26,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpGet("clansList")]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
@@ -38,7 +38,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpGet("{clanId}/pending")]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
@@ -50,7 +50,7 @@ namespace BL.API.WebHost.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]
@@ -61,8 +61,8 @@ namespace BL.API.WebHost.Controllers
             return CreatedAtAction("Post", new { id = clanId }, clanId.ToString());
         }
 
-        [HttpPut("{matchId}")]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        [HttpPut("{clanId}")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
@@ -77,18 +77,18 @@ namespace BL.API.WebHost.Controllers
             return Ok();
         }
 
-        [HttpDelete("{matchId}")]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        [HttpDelete("{clanId}")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Delete(Guid matchId)
+        public async Task<IActionResult> Delete(Guid clanId)
         {
-            await _mediator.Send(new DeleteClanCommand.Query(matchId));
+            await _mediator.Send(new DeleteClanCommand.Query(clanId));
             return Ok();
         }
 
-        [HttpPatch("{playerId}")]
-        [Authorize(Roles = "Admin,MatchMaker")]
+        [HttpPatch("{clanId}")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -110,6 +110,22 @@ namespace BL.API.WebHost.Controllers
             };
 
             return Ok(await _mediator.Send(updateCmd));
+        }
+
+        [HttpPost("{clanId}/join")]
+        //[Authorize(Roles = "Admin,MatchMaker")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<Guid>> SendJoinRequest(string regionShortName, Guid clanId, [FromBody] JoinRequestClanCommand request)
+        {
+            if (clanId != request.RequestToClan)
+            {
+                return BadRequest();
+            }
+
+            var req = await _mediator.Send(request);
+            return CreatedAtAction("Post", new { id = clanId }, clanId.ToString());
         }
     }
 }

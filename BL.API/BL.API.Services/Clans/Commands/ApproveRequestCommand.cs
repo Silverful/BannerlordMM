@@ -15,7 +15,7 @@ namespace BL.API.Services.Clans.Commands
     public class ApproveRequestCommand : IRequest<Task>
     {
         [Required]
-        public Guid ApprovedBy { get; set; }
+        public Guid ApprovedByPlayerId { get; set; }
         [Required]
         public Guid RequestId { get; set; }
 
@@ -41,7 +41,7 @@ namespace BL.API.Services.Clans.Commands
 
             public async Task<Task> Handle(ApproveRequestCommand request, CancellationToken cancellationToken)
             {
-                var approvingPlayer = await _players.GetByIdAsync(request.ApprovedBy);
+                var approvingPlayer = await _players.GetByIdAsync(request.ApprovedByPlayerId);
 
                 if (approvingPlayer == null)
                 {

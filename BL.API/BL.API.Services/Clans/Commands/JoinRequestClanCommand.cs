@@ -1,7 +1,6 @@
 ﻿using BL.API.Core.Abstractions.Repositories;
 using BL.API.Core.Domain.Clan;
 using BL.API.Core.Domain.Player;
-using BL.API.Core.Domain.Settings;
 using BL.API.Core.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -11,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace BL.API.Services.Clans.Commands
 {
-    public class JoinRequestClanCommand : IRequest<string>
+    public class JoinRequestClanCommand : IRequest<JoinRequestClanResponse>
     {
-        public Guid RequestFrom { get; set; }
-        public Guid RequestToClan { get; set; }
+        public Guid RequestFromPlayerId { get; set; }
+        public Guid RequestToClanId { get; set; }
 
-        public class JoinRequestClanCommandHandler : IRequestHandler<JoinRequestClanCommand, string>
+        public class JoinRequestClanCommandHandler : IRequestHandler<JoinRequestClanCommand, JoinRequestClanResponse>
         {
             private readonly IRepository<Clan> _repository;
             private readonly IRepository<Player> _players;
@@ -34,16 +33,16 @@ namespace BL.API.Services.Clans.Commands
                 _logger = logger;
             }
 
-            public async Task<string> Handle(JoinRequestClanCommand request, CancellationToken cancellationToken)
+            public async Task<JoinRequestClanResponse> Handle(JoinRequestClanCommand request, CancellationToken cancellationToken)
             {
-                var requestingPlayer = await _players.GetByIdAsync(request.RequestFrom);
+                var requestingPlayer = await _players.GetByIdAsync(request.RequestFromPlayerId, false);
 
                 if (requestingPlayer == null)
                 {
                     throw new NotFoundException();
                 }
 
-                var clan = await _repository.GetByIdAsync(request.RequestToClan);
+                var clan = await _repository.GetByIdAsync(request.RequestToClanId, false, c => c.ClanMembers);
 
                 if (clan == null)
                 {
@@ -51,10 +50,13 @@ namespace BL.API.Services.Clans.Commands
                 }
 
                 string message = "";
+                Guid? requestId = null;
 
                 if (requestingPlayer.ClanMember != null)
                 {
-                    return $"User {requestingPlayer.Nickname} ({requestingPlayer.Id.ToString()}) is already a member of a clan";
+                    message = $"User {requestingPlayer.Nickname} ({requestingPlayer.Id.ToString()}) is already a member of a clan";
+
+                    return new JoinRequestClanResponse { Message = message, RequestId = null };
                 }
 
                 if (clan.EnterType == ClanEnterType.Free)
@@ -67,6 +69,7 @@ namespace BL.API.Services.Clans.Commands
                     };
 
                     clan.ClanMembers.Add(requestingClanMember);
+                    await _repository.UpdateAsync(clan);
                     message = $"User {requestingPlayer.Nickname} ({requestingPlayer.Id.ToString()}) added to {clan.Name} ({clan.Id.ToString()})";
                 }
 
@@ -101,11 +104,13 @@ namespace BL.API.Services.Clans.Commands
                     };
 
                     await _joinRequests.CreateAsync(joinRequest);
+
+                    requestId = joinRequest.Id;
                     message = $"User {requestingPlayer.Nickname} ({requestingPlayer.Id.ToString()}) wants to join {clan.Name} ({clan.Id.ToString()}).";
                 }
 
                 _logger?.LogInformation(message);
-                return message;
+                return new JoinRequestClanResponse { Message = message, RequestId = requestId }; 
             }
         }
     }

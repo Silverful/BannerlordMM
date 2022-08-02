@@ -17,7 +17,7 @@ namespace BL.API.Services.Clans.Commands
     public class UpdateClanCommand : IRequest<Task>
     {
         [Required]
-        public Guid Id { get; set; }
+        public Guid ClanId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Color { get; set; }
@@ -48,7 +48,7 @@ namespace BL.API.Services.Clans.Commands
 
                 if (clanLeader == null) throw new NotFoundException();
 
-                var clan = await _repository.GetByIdAsync(request.Id, false, c => c.ClanMembers);
+                var clan = await _repository.GetByIdAsync(request.ClanId, false, c => c.ClanMembers);
 
                 if (clan == null) throw new NotFoundException();
 

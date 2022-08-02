@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BL.API.WebHost.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/{regionShortName}/[controller]")]
     public class MatchesController : ControllerBase
@@ -39,7 +39,7 @@ namespace BL.API.WebHost.Controllers
         //}
 
         [HttpPost]
-        //[Authorize(Roles = "Admin,MatchMaker")]
+        [Authorize(Roles = "Admin,MatchMaker")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesDefaultResponseType]

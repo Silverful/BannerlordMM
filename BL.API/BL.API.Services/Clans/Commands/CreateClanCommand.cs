@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,10 +61,15 @@ namespace BL.API.Services.Clans.Commands
                     throw new NotFoundException();
                 }
 
-                if (await _repository.GetFirstWhereAsync(c => c.GetLeader().PlayerId == request.LeaderId || c.Name == request.Name) != null)
+                if (await _repository.GetFirstWhereAsync(c => c.ClanMembers.FirstOrDefault(cm => cm.MemberType == ClanMemberType.Leader).PlayerId == request.LeaderId || c.Name == request.Name) != null)
                 {
                     throw new AlreadyExistsException();
                 }
+
+                //if (await _repository.GetFirstWhereAsync(c => c.GetLeader().PlayerId == request.LeaderId || c.Name == request.Name) != null)
+                //{
+                //    throw new AlreadyExistsException();
+                //}
 
                 //TODO ADD NAME UNIQUE CHECK
 

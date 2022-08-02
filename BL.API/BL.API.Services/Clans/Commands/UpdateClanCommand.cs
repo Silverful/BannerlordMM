@@ -48,7 +48,7 @@ namespace BL.API.Services.Clans.Commands
 
                 if (clanLeader == null) throw new NotFoundException();
 
-                var clan = await _repository.GetByIdAsync(request.Id, false);
+                var clan = await _repository.GetByIdAsync(request.Id, false, c => c.ClanMembers);
 
                 if (clan == null) throw new NotFoundException();
 
@@ -57,19 +57,19 @@ namespace BL.API.Services.Clans.Commands
                 ClanMember clanLeaderMember;
 
                 clanLeaderMember = members.FirstOrDefault(m => m.MemberType == ClanMemberType.Leader);
-                if (clanLeaderMember != null)
+
+                if (clanLeaderMember.Id != request.LeaderId)
                 {
                     members.Remove(clanLeaderMember);
+                    clanLeaderMember = new ClanMember
+                    {
+                        PlayerId = request.LeaderId,
+                        ClanId = clan.Id,
+                        MemberType = ClanMemberType.Leader
+                    };
+
+                    members.Add(clanLeaderMember);
                 }
-
-                clanLeaderMember = new ClanMember
-                {
-                    PlayerId = request.LeaderId,
-                    MemberType = ClanMemberType.Leader
-                };
-
-                members.Add(clanLeaderMember);
-
 
                 clan.Name = request.Name;
                 clan.Description = request.Description;

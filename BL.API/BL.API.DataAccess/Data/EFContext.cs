@@ -1,4 +1,5 @@
-﻿using BL.API.Core.Domain.Logs;
+﻿using BL.API.Core.Domain.Clan;
+using BL.API.Core.Domain.Logs;
 using BL.API.Core.Domain.Match;
 using BL.API.Core.Domain.Player;
 using BL.API.Core.Domain.Settings;
@@ -22,7 +23,11 @@ namespace BL.API.DataAccess.Data
         public virtual DbSet<Configuration> Configurations { get; protected set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; protected set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public virtual DbSet<Clan> Clans { get; protected set; }
+        public virtual DbSet<ClanMember> ClanMembers { get; protected set; }
+        public virtual DbSet<ClanJoinRequest> ClanJoinReques { get; protected set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 #if DEBUG
             optionsBuilder.EnableSensitiveDataLogging();
@@ -127,6 +132,39 @@ namespace BL.API.DataAccess.Data
 
             modelBuilder.Entity<PlayerMatchRecord>()
                 .Navigation(p => p.Player)
+                .AutoInclude();
+
+
+            modelBuilder.Entity<Clan>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<Clan>()
+                .Navigation(p => p.Region)
+                .AutoInclude();
+
+            modelBuilder.Entity<ClanMember>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<ClanMember>()
+                .Navigation(p => p.Player)
+                .AutoInclude();
+
+            modelBuilder.Entity<ClanMember>()
+                .Navigation(p => p.Clan)
+                .AutoInclude();
+
+            modelBuilder.Entity<ClanJoinRequest>()
+                .Property(p => p.Created)
+                .HasDefaultValueSql("getdate()");
+
+            modelBuilder.Entity<ClanJoinRequest>()
+                .Navigation(p => p.FromPlayer)
+                .AutoInclude();
+
+            modelBuilder.Entity<ClanJoinRequest>()
+                .Navigation(p => p.ToClan)
                 .AutoInclude();
         }
     }

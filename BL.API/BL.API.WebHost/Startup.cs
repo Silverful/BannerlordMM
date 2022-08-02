@@ -171,8 +171,11 @@ namespace BL.API.WebHost
             app.UseRouting();
 
             //global error handler
-            app.UseAuthentication();
-            app.UseAuthorization();
+            if (env.EnvironmentName != "Development")
+            {
+                app.UseAuthentication();
+                app.UseAuthorization();
+            }
 
             app.UseEndpoints(endpoints =>
             {

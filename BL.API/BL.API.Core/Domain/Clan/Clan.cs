@@ -12,12 +12,12 @@ namespace BL.API.Core.Domain.Clan
         public string Description { get; set; }
         public string Color { get; set; }
         public string AvatarURL { get; set; }
-        public virtual List<ClanMember> ClanMembers { get; set; }
+        public virtual ICollection<ClanMember>? ClanMembers { get; set; }
         public ClanEnterType EnterType { get; set; }
         public Guid? RegionId { get; set; }
         [ForeignKey("RegionId")]
         public virtual Region Region { get; set; }
 
-        public ClanMember GetLeader() => ClanMembers?.FirstOrDefault(cm => cm.MemberType == ClanMemberType.Leader);
+        public ClanMember GetLeader() => ClanMembers?.ToArray().FirstOrDefault(cm => cm.MemberType == ClanMemberType.Leader);
     }
 }

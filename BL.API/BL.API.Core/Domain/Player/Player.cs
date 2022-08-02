@@ -17,8 +17,7 @@ namespace BL.API.Core.Domain.Player
         [MaxLength(32)]
         public string Country { get; set; }
 
-        public Guid ClanMemberId { get; set; }
-        [ForeignKey("ClanMemberId")]
+        public Guid? ClanMemberId { get; set; }
         public ClanMember ClanMember { get; set; }
 
         public bool IsIGL { get; set; }

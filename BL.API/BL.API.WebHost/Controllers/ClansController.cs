@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using static BL.API.Services.Clans.Queries.GetClansList;
 using static BL.API.Services.Clans.Queries.GetPendingRequests;
@@ -42,7 +43,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult<PendingRequestsResponseItem>> GetPendingRequests(string regionShortName, string clanId)
+        public async Task<ActionResult<IEnumerable<PendingRequestsResponseItem>>> GetPendingRequests(string regionShortName, string clanId)
         {
             var requests = await _mediator.Send(new GetPendingRequests.Query(regionShortName, clanId));
 

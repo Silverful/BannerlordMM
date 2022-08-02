@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BL.API.Core.Domain.Clan;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,9 +17,9 @@ namespace BL.API.Core.Domain.Player
         [MaxLength(32)]
         public string Country { get; set; }
 
-        public Guid ClanId { get; set; }
-        [ForeignKey("ClanId")]
-        public Clan.Clan Clan { get; set; }
+        public Guid ClanMemberId { get; set; }
+        [ForeignKey("ClanMemberId")]
+        public ClanMember ClanMember { get; set; }
 
         public bool IsIGL { get; set; }
 

@@ -21,8 +21,6 @@ namespace BL.API.Services.Players.Commands
         public string Nickname { get; set; }
         [StringLength(32)]
         public string Country { get; set; }
-        [StringLength(32)]
-        public string Clan { get; set; }
         [StringLength(8)]
         public string MainClass { get; set; }
         [StringLength(8)]
@@ -40,7 +38,6 @@ namespace BL.API.Services.Players.Commands
             {
                 Nickname = this.Nickname,
                 Country = this.Country,
-                Clan = this.Clan,
                 IsIGL = this.IGL,
                 MainClass = mainClass,
                 SecondaryClass = secondaryClass,

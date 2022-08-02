@@ -1,4 +1,8 @@
-﻿using PlayerMM = BL.API.Core.Domain.Player.Player;
+﻿using BL.API.Core.Domain.Settings;
+using System;
+using System.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace BL.API.Core.Domain.Clan
 {
@@ -8,10 +12,12 @@ namespace BL.API.Core.Domain.Clan
         public string Description { get; set; }
         public string Color { get; set; }
         public string AvatarURL { get; set; }
-        public PlayerMM Leader { get; set; }  
-
-        public PlayerMM[] Officers { get; set; }
-        public PlayerMM[] Soldiers { get; set; }
+        public virtual List<ClanMember> ClanMembers { get; set; }
         public ClanEnterType EnterType { get; set; }
+        public Guid? RegionId { get; set; }
+        [ForeignKey("RegionId")]
+        public virtual Region Region { get; set; }
+
+        public ClanMember GetLeader() => ClanMembers?.FirstOrDefault(cm => cm.MemberType == ClanMemberType.Leader);
     }
 }

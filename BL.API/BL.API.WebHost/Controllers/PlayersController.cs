@@ -160,7 +160,6 @@ namespace BL.API.WebHost.Controllers
                 Nickname = player.Nickname,
                 IGL = player.IsIGL,
                 Country = player.Country,
-                Clan = player.Clan,
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
                 DiscordId = player.DiscordId

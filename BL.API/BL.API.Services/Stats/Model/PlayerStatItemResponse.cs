@@ -46,7 +46,7 @@ namespace BL.API.Services.Stats.Model
                 Nickname = player.Nickname,
                 Country = player.Country,
                 IGL = player.IsIGL ? "IGL" : "",
-                Clan = player.Clan,
+                Clan = player.ClanMember?.Clan?.Name ??  "",
                 MainClass = player.MainClass.ToString(),
                 SecondaryClass = player.SecondaryClass.ToString(),
                 DiscordId = player.DiscordId,

@@ -23,19 +23,16 @@ namespace BL.API.Services.Clans.Commands
 
         public class ApproveRequestCommandHandler : IRequestHandler<ApproveRequestCommand, Task>
         {
-            private readonly IRepository<Clan> _repository;
             private readonly IRepository<Player> _players;
             private readonly IRepository<Clan> _clans;
             private readonly IRepository<ClanJoinRequest> _requests;
             private readonly ILogger<ApproveRequestCommandHandler> _logger;
 
-            public ApproveRequestCommandHandler(IRepository<Clan> repository,
-                IRepository<Player> players,
+            public ApproveRequestCommandHandler(IRepository<Player> players,
                 IRepository<Clan> clans,
                 IRepository<ClanJoinRequest> requests,
                 ILogger<ApproveRequestCommandHandler> logger)
             {
-                _repository = repository;
                 _clans = clans;
                 _players = players;
                 _logger = logger;
@@ -96,7 +93,10 @@ namespace BL.API.Services.Clans.Commands
                     };
 
                     clan.ClanMembers.Add(newClanMember);
+
                 }
+
+                _logger?.LogInformation($"Player {joiningPlayer.Id} was {(request.IsApproved ? "approved" : "denied")}");
 
                 return Task.CompletedTask;
             }

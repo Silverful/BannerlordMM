@@ -48,27 +48,30 @@ namespace BL.API.Services.Clans.Commands
 
                 if (clanLeader == null) throw new NotFoundException();
 
+                if (clanLeader.ClanMember != null && clanLeader.ClanMember.ClanId != request.ClanId)
+                {
+                    throw new AlreadyExistsException();
+                }
+
                 var clan = await _repository.GetByIdAsync(request.ClanId, false, c => c.ClanMembers);
 
                 if (clan == null) throw new NotFoundException();
 
                 var members = (clan.ClanMembers ?? new List<ClanMember>()).ToList();
 
-                ClanMember clanLeaderMember;
-
-                clanLeaderMember = members.FirstOrDefault(m => m.MemberType == ClanMemberType.Leader);
+                var clanLeaderMember = members.FirstOrDefault(m => m.MemberType == ClanMemberType.Leader);
 
                 if (clanLeaderMember.Id != request.LeaderId)
                 {
-                    members.Remove(clanLeaderMember);
-                    clanLeaderMember = new ClanMember
+                    clanLeaderMember.MemberType = ClanMemberType.Soldier;
+                    var newLeader = new ClanMember
                     {
                         PlayerId = request.LeaderId,
                         ClanId = clan.Id,
                         MemberType = ClanMemberType.Leader
                     };
 
-                    members.Add(clanLeaderMember);
+                    members.Add(newLeader);
                 }
 
                 clan.Name = request.Name;

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace BL.API.Core.Domain.Player
@@ -17,8 +16,7 @@ namespace BL.API.Core.Domain.Player
         [MaxLength(32)]
         public string Country { get; set; }
 
-        public Guid? ClanMemberId { get; set; }
-        public ClanMember ClanMember { get; set; }
+        public virtual ClanMember ClanMember { get; set; }
 
         public bool IsIGL { get; set; }
 

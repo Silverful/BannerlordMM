@@ -24,7 +24,9 @@ namespace BL.API.Services.Clans.Commands
         public string Description { get; set; } 
         public string Color { get; set; }
         public string AvatarURL { get; set; }
+        [Required]
         public Guid LeaderId { get; set; }
+        [Required]
         public ClanEnterType EnterType { get; set; }
 
         public class CreateClanCommandHandler : IRequestHandler<CreateClanCommand, Guid>
@@ -61,7 +63,12 @@ namespace BL.API.Services.Clans.Commands
                     throw new NotFoundException();
                 }
 
-                if (await _repository.GetFirstWhereAsync(c => c.ClanMembers.FirstOrDefault(cm => cm.MemberType == ClanMemberType.Leader).PlayerId == request.LeaderId || c.Name == request.Name) != null)
+                if (clanLeader.ClanMember != null)
+                {
+                    throw new AlreadyExistsException();
+                }
+
+                if (await _repository.GetFirstWhereAsync(c => c.Name == request.Name) != null)
                 {
                     throw new AlreadyExistsException();
                 }

@@ -34,12 +34,13 @@ namespace BL.API.Services.Clans.Queries
 
                 var requests = await _repository.GetWhereAsync(r => r.ToClan.RegionId == region.Id && !r.IsApproved && !r.IsDismissed && r.ToClanId == id);
 
-                return requests.Select(r => new PendingRequestsResponseItem { PlayerId = r.FromPlayerId, Nickname = r.FromPlayer.Nickname, Created = r.Created });
+                return requests.Select(r => new PendingRequestsResponseItem { RequestId = r.Id, PlayerId = r.FromPlayerId, Nickname = r.FromPlayer.Nickname, Created = r.Created });
             }
         }
 
         public class PendingRequestsResponseItem
         {
+            public Guid RequestId { get; set; }
             public Guid PlayerId { get; set; }
             public string Nickname { get; set; }
             public DateTime Created { get; set; }

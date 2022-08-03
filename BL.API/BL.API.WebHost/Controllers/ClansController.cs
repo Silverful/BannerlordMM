@@ -144,5 +144,32 @@ namespace BL.API.WebHost.Controllers
             var req = await _mediator.Send(request);
             return Ok(req);
         }
+
+        [HttpDelete("{clanId}/members/{memberId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<JoinRequestClanResponse>> KickMember(string regionShortName, Guid clanId, Guid memberId)
+        {
+            await _mediator.Send(new KickMemberCommand.Query(clanId, memberId));
+            return Ok();
+        }
+
+        [HttpPut("{clanId}/members/{memberId}")]
+        [Authorize(Roles = "Admin,MatchMaker")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<JoinRequestClanResponse>> ChangeRole(string regionShortName, Guid clanId, Guid memberId, [FromBody] ChangeMemberRoleCommand request)
+        {
+            if (clanId != request.ClanId || memberId != request.MemberId)
+            {
+                return BadRequest();
+            }
+
+            await _mediator.Send(request);
+            return Ok();
+        }
     }
 }

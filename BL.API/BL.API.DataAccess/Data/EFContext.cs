@@ -104,6 +104,10 @@ namespace BL.API.DataAccess.Data
                 .Navigation(p => p.PlayerMMRs)
                 .AutoInclude();
 
+            modelBuilder.Entity<Player>()
+                .Navigation(p => p.ClanMember)
+                .AutoInclude();
+
 
             modelBuilder.Entity<Match>()
                 .Property(p => p.Created)

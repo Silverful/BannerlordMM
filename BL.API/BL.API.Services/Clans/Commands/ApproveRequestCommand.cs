@@ -18,6 +18,8 @@ namespace BL.API.Services.Clans.Commands
         public Guid ApprovedByPlayerId { get; set; }
         [Required]
         public Guid RequestId { get; set; }
+        [Required]
+        public bool IsApproved { get; set; }
 
         public class ApproveRequestCommandHandler : IRequestHandler<ApproveRequestCommand, Task>
         {
@@ -66,6 +68,11 @@ namespace BL.API.Services.Clans.Commands
                 }
 
                 var clan = await _clans.GetByIdAsync(joinRequest.ToClanId);
+
+                if (clan == null)
+                {
+                    throw new NotFoundException();
+                }
                 
                 if (clan.ClanMembers.Where(cm => cm.PlayerId == joinRequest.FromPlayerId).FirstOrDefault() != null)
                 {
@@ -75,17 +82,21 @@ namespace BL.API.Services.Clans.Commands
                 var joiningPlayer = await _players.GetByIdAsync(joinRequest.FromPlayerId);
 
                 joinRequest.ApprovedTimestamp = DateTime.UtcNow;
-                joinRequest.IsApproved = true;
+                joinRequest.IsApproved = request.IsApproved;
 
                 await _requests.UpdateAsync(joinRequest);
-                var newClanMember = new ClanMember
-                {
-                    ClanId = clan.Id,
-                    PlayerId = joiningPlayer.Id,
-                    MemberType = ClanMemberType.Soldier
-                };
 
-                clan.ClanMembers.Add(newClanMember);
+                if (request.IsApproved)
+                {
+                    var newClanMember = new ClanMember
+                    {
+                        ClanId = clan.Id,
+                        PlayerId = joiningPlayer.Id,
+                        MemberType = ClanMemberType.Soldier
+                    };
+
+                    clan.ClanMembers.Add(newClanMember);
+                }
 
                 return Task.CompletedTask;
             }

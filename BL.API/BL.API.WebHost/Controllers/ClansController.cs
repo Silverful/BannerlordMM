@@ -171,5 +171,16 @@ namespace BL.API.WebHost.Controllers
             await _mediator.Send(request);
             return Ok();
         }
+
+        [HttpGet("{clanId}/stats")]
+        [Authorize(Roles = "Admin,MatchMaker")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<JoinRequestClanResponse>> GetClanStats(string regionShortName, Guid clanId)
+        {
+            await _mediator.Send(new GetClanStats.Query(clanId));
+            return Ok();
+        }
     }
 }

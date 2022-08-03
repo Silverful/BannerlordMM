@@ -134,15 +134,15 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult<JoinRequestClanResponse>> ApproveRequest(string regionShortName, Guid clanId, Guid requestId, [FromBody] ApproveRequestCommand request)
+        public async Task<ActionResult> ApproveRequest(string regionShortName, Guid clanId, Guid requestId, [FromBody] ApproveRequestCommand request)
         {
             if (requestId != request.RequestId)
             {
                 return BadRequest();
             }
 
-            var req = await _mediator.Send(request);
-            return Ok(req);
+            await _mediator.Send(request);
+            return Ok();
         }
 
         [HttpDelete("{clanId}/members/{memberId}")]
@@ -150,7 +150,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult<JoinRequestClanResponse>> KickMember(string regionShortName, Guid clanId, Guid memberId)
+        public async Task<ActionResult> KickMember(string regionShortName, Guid clanId, Guid memberId)
         {
             await _mediator.Send(new KickMemberCommand.Query(clanId, memberId));
             return Ok();
@@ -161,7 +161,7 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult<JoinRequestClanResponse>> ChangeRole(string regionShortName, Guid clanId, Guid memberId, [FromBody] ChangeMemberRoleCommand request)
+        public async Task<ActionResult> ChangeRole(string regionShortName, Guid clanId, Guid memberId, [FromBody] ChangeMemberRoleCommand request)
         {
             if (clanId != request.ClanId || memberId != request.MemberId)
             {
@@ -177,9 +177,20 @@ namespace BL.API.WebHost.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesDefaultResponseType]
-        public async Task<ActionResult<JoinRequestClanResponse>> GetClanStats(string regionShortName, Guid clanId)
+        public async Task<ActionResult<ClanStatsItem>> GetClanStats(string regionShortName, Guid clanId)
         {
             await _mediator.Send(new GetClanStats.Query(clanId));
+            return Ok();
+        }
+
+        [HttpGet("stats")]
+        [Authorize(Roles = "Admin,MatchMaker")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesDefaultResponseType]
+        public async Task<ActionResult<IEnumerable<ClanStatsItem>>> GetClansStats(string regionShortName, Guid clanId)
+        {
+            await _mediator.Send(new GetClansStats.Query());
             return Ok();
         }
     }

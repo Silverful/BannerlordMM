@@ -43,6 +43,7 @@ namespace BL.API.Services.Clans.Queries
                         Role = cm.MemberType.ToString(),
                         MMR = cm.Player.GetPlayerMMR(clan.Region.ShortName).MMR
                     })
+                    .OrderByDescending(si => si.MMR)
                     .ToArray();
 
                 var clanStats = new ClanStatsItem
